@@ -38,7 +38,7 @@ When submitting code for matchup, please adhere to the following standards:
 - Use `shiftwidth=2` - no tabs!
 - Write readable code
   - Break lines for readability
-    - Line should not be longer than 80 columns
+    - Line should not be longer than 74 columns
   - Use comments:
     - For complex code that is difficult to understand
     - Simple code does not need comments

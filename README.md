@@ -1,33 +1,70 @@
 # matchup.vim
 
+:warning: warning :warning: this plugin is unfinished and under heavy
+active development. It is not ready for use yet!
+
+match-up is a replacement for the venerable vim plugin
+[matchit.vim](ftp://ftp.vim.org/pub/vim/runtime/macros/matchit.txt).
+match-up aims to replicate all of matchit's features, fix a number of its
+deficiencies and bugs, and add a few totally new features.  It also
+replaces the plugin matchparen, allowing matchit words to be highlighted.
+
 <img src='https://github.com/andymass/matchup.vim/wiki/images/teaser.jpg' width='300px' alt='and in this corner...'>
 
-match-up is a replacement for the venerable vim plugin matchit.vim.
-match-up aims to replicate all of matchit's features, fix a number of its
-deficiencies and bugs, and add a few totally new features.
+A major goal of this project is to keep a modern and modular code base.
+Contributions are welcome!
+
+## Table of contents
+
+  * [Overview](#overview)
+  * [Installation](#installation)
+  * [Features](#features)
+  * [Development](#development)
 
 ## Overview
 
-## Feature list
+This plugin
 
-| feature                          | __matchup__   | matchit       | matchparen    |
-| -------------------------------- | ------------- | ------------- | ------------- |
-| jump between matching constructs | :thumbsup:    | :thumbsup:    | :x:           |
-| jump to open, close              | :thumbsup:    | :question:    | :x:           |
-| jump inside                      | :thumbsup:    | :question:    | :x:           |
-| full set of text objects         | :thumbsup:    | :x:           | :x:           |
-| auto-insert open, close, and mid | :thumbsup:    | :x:           | :x:           |
-| auto-completion                  | :thumbsup:    | :x:           | :x:           |
-| parallel transmutations          | :thumbsup:    | :x:           | :x:           |
-| highlight ()[]{}                 | :thumbsup:    | :x:           | :thumbsup:    |
-| highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
-| modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
-| actively developed               | :thumbsup:    | :x:           | :x:           |
+- Extends vim's `%` motion to language words like `if`, `else`, `endif`.
+- Combines these motions into convenient text objects.
+- Highlights symbols and words under the cursor which `%` works on, as
+  well as matching symbols and words.  Now you can tell where `%` will
+  jump to.
+- Adds auto-completes for words and symbols- for example you can 
+  automatically insert corresponding a `)` or `endif`.
+
+## Installation
+
+If you use vim-plug, then add the following line to your vimrc file:
+
+    Plug 'andymass/matchup.vim'
+
+Or use some other plugin manager:
+
+  - vundle
+  - neobundle
+  - pathogen
+
+## Features
+
+|     feature                          | __match-up__  | matchit       | matchparen    |
+| ------------------------------------ | ------------- | ------------- | ------------- |
+| a.1 jump between matching constructs | :thumbsup:    | :thumbsup:    | :x:           |
+| a.2 jump to open, close              | :thumbsup:    | :question:    | :x:           |
+| a.3 jump inside                      | :thumbsup:    | :question:    | :x:           |
+| b.1 full set of text objects         | :thumbsup:    | :x:           | :x:           |
+| c.1 auto-insert open, close, and mid | :thumbsup:    | :x:           | :x:           |
+| c.2 auto-completion                  | :thumbsup:    | :x:           | :x:           |
+| c.3 parallel transmutations :star2:  | :thumbsup:    | :x:           | :x:           |
+| d.1 highlight ()[]{}                 | :thumbsup:    | :x:           | :thumbsup:    |
+| d.2 highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
+| e.1 modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
+| e.2 actively developed               | :thumbsup:    | :x:           | :x:           |
 
 Legend: :thumbsup: supported. :construction: TODO, planned, or in progress.
 :question: poorly implemented, broken, or uncertain.  :x: not possible.
 
-### Feature Documentation
+### Detailed feature documentation
 
 What do we mean by open, close, mid?  Here is an example:
 
@@ -47,13 +84,13 @@ constructs are `else` and `elseif`.  The `if`/`endif` pair is called an
 "open-to-close" block and the `if`/`else`, `else`/`elsif`, and
 `elseif`/`endif` are called "any" blocks.
 
-- jump between matching constructs
+a.1. jump between matching constructs
   - `%` forwards matching construct `[count]` times
   - `{count}%` forwards `{count}` times.  Requires
       `let g:matchup_override_Npercent = 1`
   - `g%` backwards matching construct `[count]` times
 
-- jump to open and close
+a.2 jump to open and close
   - `[%` go to `[count]` previous unmatched open construct
   - `]%` go to `[count]` next unmatched close construct
 
@@ -115,62 +152,59 @@ _Planned_: `g:matchup_auto_transmute`
 
 ### Options
 
-## Installation
-
-If you use vim-plug, then add the following line to your vimrc file:
-
-    Plug 'andymass/matchup'
-
-Or use some other plugin manager:
-
-  - vundle
-  - neobundle
-  - pathogen
 
 ## FAQ
 
-  - matchup doesn't work
+- match-up doesn't work
 
-The plugin requires a recent version of vim.  Please tell me your vim
-version and error messages.  Try updating vim and see if the problem
+The plugin requires a fairly recent version of vim.  Please tell me your
+vim version and error messages.  Try updating vim and see if the problem
 persists.
 
-  - why does jumping not work for construct X in language Y?
+- Why does jumping not work for construct X in language Y?
 
 Please open a new issue 
 
-  - highlighting is not correct for construct X
+- Highlighting is not correct for construct X
 
-matchup uses matchit's filetype data, which may not give enough
-information to create proper highlights.  To fix this, you may add a
-highlight quirk.
+match-up uses matchit's filetype-specific data, which may not give enough
+information to create proper highlights.  To fix this, you may need to add
+a highlight quirk.
 
 For help, please open a new issue and be a specific as possible.
 
-  - how can I contribute?
-  - I'm having performance problems
+- I'm having performance problems
 
-matchup aims to be as fast as possible.  If you see any performance
-issues, please open a new issue and report `g:matchup_times`.
+match-up aims to be as fast as possible.  If you see any performance
+issues, please open a new issue and report `g:matchup#perf#times`.
+
+- How can I contribute?
+
+Read the [contribution guidelines](CONTRIBUTING.md) and
+[issue template](ISSUE_TEMPLATE.md).  Be as precise and detailed
+as possible when submitting issues and pull requests.
 
 ## Interoperability
 
   - Conflicts with end-wise
   - matchit.vim should not be loaded.  If it is loaded, it must be loaded
-    before matchup.
+    before match-up.
+  - match-up loads matchparen if it is not already loaded.
 
-## acknowledgments 
+## Acknowledgments 
 
-### origin
+### Origins
 
-matchup was originally based on [@lervag](https://github.com/lervag/)'s
-[vimtex](github.com/lervag/vimtex).
+match-up was originally based on [@lervag](https://github.com/lervag)'s
+[vimtex](github.com/lervag/vimtex).  The concept and style of this plugin
+and its development are heavily influenced by vimtex.
 
-### inspiration
+### Other inspirations
 
-  * [matchit]().
-  * [matchparen]().
-  * [vim-endwise](https://github.com/tpope/vim-endwise).
+- [matchit](ftp://ftp.vim.org/pub/vim/runtime/macros/matchit.txt).
+- [matchparen](ftp://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt).
+- [vim-endwise](https://github.com/tpope/vim-endwise).
+- [auto-pairs](https://github.com/jiangmiao/auto-pairs).
 
 ## license
 
@@ -228,11 +262,10 @@ Features not in matchit:
   Jump into
     z[]% go to the center of the next group of matchwords
 
-Development
+## Development
 
-## TODO
+### TODO
 
-  - Screenshots
-
-
+- vim proper doc/
+- Add screenshots
 
