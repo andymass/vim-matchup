@@ -4,7 +4,7 @@
 active development. It is not ready for use yet!
 
 match-up is a replacement for the venerable vim plugin
-[matchit.vim](ftp://ftp.vim.org/pub/vim/runtime/macros/matchit.txt).
+[matchit.vim](http://ftp.vim.org/pub/vim/runtime/macros/matchit.txt).
 match-up aims to replicate all of matchit's features, fix a number of its
 deficiencies and bugs, and add a few totally new features.  It also
 replaces the plugin matchparen, allowing matchit words to be highlighted.
@@ -25,19 +25,21 @@ Contributions are welcome!
 
 This plugin
 
-- Extends vim's `%` motion to language words like `if`, `else`, `endif`.
-- Combines these motions into convenient text objects.
-- Highlights symbols and words under the cursor which `%` works on, as
-  well as matching symbols and words.  Now you can tell where `%` will
-  jump to.
-- Adds auto-completes for words and symbols- for example you can 
+- Extends vim's `%` motion to language-words like `if`, `else`, `endif`.
+- Combines these motions into convenient text objects `i%` and `a%`.
+- Highlights symbols and words under the cursor which `%` works on,
+  and highlights matching symbols and words.  Now you can tell where
+  `%` will jump to.
+- Adds auto-completion for words and symbols- for example you can 
   automatically insert corresponding a `)` or `endif`.
 
 ## Installation
 
 If you use vim-plug, then add the following line to your vimrc file:
 
-    Plug 'andymass/matchup.vim'
+```vim
+Plug 'andymass/matchup.vim'
+```
 
 Or use some other plugin manager:
 
@@ -47,19 +49,20 @@ Or use some other plugin manager:
 
 ## Features
 
-|     feature                          | __match-up__  | matchit       | matchparen    |
-| ------------------------------------ | ------------- | ------------- | ------------- |
-| a.1 jump between matching constructs | :thumbsup:    | :thumbsup:    | :x:           |
-| a.2 jump to open, close              | :thumbsup:    | :question:    | :x:           |
-| a.3 jump inside                      | :thumbsup:    | :question:    | :x:           |
-| b.1 full set of text objects         | :thumbsup:    | :x:           | :x:           |
-| c.1 auto-insert open, close, and mid | :thumbsup:    | :x:           | :x:           |
-| c.2 auto-completion                  | :thumbsup:    | :x:           | :x:           |
-| c.3 parallel transmutations :star2:  | :thumbsup:    | :x:           | :x:           |
-| d.1 highlight ()[]{}                 | :thumbsup:    | :x:           | :thumbsup:    |
-| d.2 highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
-| e.1 modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
-| e.2 actively developed               | :thumbsup:    | :x:           | :x:           |
+|       feature                          | __match-up__  | matchit       | matchparen    |
+| -------------------------------------- | ------------- | ------------- | ------------- |
+| (a.1) jump between matching constructs | :thumbsup:    | :thumbsup:    | :x:           |
+| (a.2) jump to open, close              | :thumbsup:    | :question:    | :x:           |
+| (a.3) jump inside                      | :thumbsup:    | :question:    | :x:           |
+| (b.1) full set of text objects         | :thumbsup:    | :x:           | :x:           |
+| (c.1) auto-insert open, close, and mid | :thumbsup:    | :x:           | :x:           |
+| (c.2) auto-completion                  | :thumbsup:    | :x:           | :x:           |
+| (c.3) parallel transmutations :star2:  | :thumbsup:    | :x:           | :x:           |
+| (c.4) split and join                   | :thumbsup:    | :x:           | :x:           |
+| (d.1) highlight ()[]{}                 | :thumbsup:    | :x:           | :thumbsup:    |
+| (d.2) highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
+| (e.1) modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
+| (e.2) actively developed               | :thumbsup:    | :x:           | :x:           |
 
 Legend: :thumbsup: supported. :construction: TODO, planned, or in progress.
 :question: poorly implemented, broken, or uncertain.  :x: not possible.
@@ -84,27 +87,27 @@ constructs are `else` and `elseif`.  The `if`/`endif` pair is called an
 "open-to-close" block and the `if`/`else`, `else`/`elsif`, and
 `elseif`/`endif` are called "any" blocks.
 
-a.1. jump between matching constructs
-  - `%` forwards matching construct `[count]` times
+- (a.1) jump between matching constructs
+  - `%` go forwards matching construct `[count]` times
   - `{count}%` forwards `{count}` times.  Requires
       `let g:matchup_override_Npercent = 1`
-  - `g%` backwards matching construct `[count]` times
+  - `g%` go backwards matching construct `[count]` times
 
-a.2 jump to open and close
+- (a.2) jump to open and close
   - `[%` go to `[count]` previous unmatched open construct
   - `]%` go to `[count]` next unmatched close construct
 
-- jump inside
-  - `z%` to inside nearest `[count]`th inner contained block.  
+- (a.3) jump inside
+  - `z%` go to inside nearest `[count]`th inner contained block.  
 
-- full set of text objects
-  `i%` the inside of an open to close block
-  `1i%` the inside of an any block
-  `{count}i%` If count is not 1, the inside open-to-close block
+- (b.1) full set of text objects
+  - `i%` the inside of an open to close block
+  - `1i%` the inside of an any block
+  - `{count}i%` If count is not 1, the inside open-to-close block
 
-  `a%` an open-to-close block.
-  `1a%` an any block.  Includes mids but does not include open and close.
-  `{count}a%` if `{count}` is greater than 1, the `{count}` surrounding open-to-close block.
+  - `a%` an open-to-close block.
+  - `1a%` an any block.  Includes mids but does not include open and close.
+  - `{count}a%` if `{count}` is greater than 1, the `{count}` surrounding open-to-close block.
 
   Note: by default objects involving `matchpairs` such as `(){}[]` are
 performed character-wise, while `matchwords` such as `if`/`endif` are
@@ -114,41 +117,55 @@ Let `g:matchup_all_charwise`.
 XXX inclusive, exclusive
 XXX need () characterwise, others linewise except QUIRKS.
 
-  - end-wise completion
-
-  Typing `CTRL-X <cr>` will insert the corresponding end construct.
+- (c.1) auto-insert open, close, and mid
+  - end-wise completion: typing `CTRL-X <cr>` will insert the 
+  corresponding end construct.
   
-  - automatic block insertion
-
+  - automatic block insertion:
   _Planned_. Typing `CTRL-X CTRL-B` to produce block skeletons.
 
-  - auto-completion
-  
+- (c.2) auto-completion
   _Planned_. Typing `CTRL-X %` to give a menu of possible constructs.
 
-  - parallel transmutations
+- (c.3) parallel transmutations
 
-  In insert mode, after changing a construct, typing `CTRL-G %` will 
-change any matching constructs in parallel.  As an example,
+  In insert mode, after changing text inside a construct, typing
+  `CTRL-G %` will change any matching constructs in parallel.
+  As an example,
 
-```latex
-\begin{equation}
-  x = 10
-\end{equation}
+```html
+<pre>
+  text
+</pre>
 ```
 
-Appending a `*` and typing `CTRL-G %` will produce:
+Changing `pre` to `div` and typing `CTRL-G %` will produce:
 
-```latex
-\begin{equation*}
-  x = 10
-\end{equation*}
+```html
+<div>
+  text
+</div>
 ```
 
 This must be done before leaving insert mode.  A corresponding normal mode
 command is planned.
 
 _Planned_: `g:matchup_auto_transmute` 
+
+- (c.4) split and join
+
+_Planned_.
+
+- (d.1) highlight ()[]{}
+- (d.2) highlight _all_ matches          
+
+  To disable match highlighting `let g:matchup_matchparen_enabled = 0`.
+  If this option is set before the plugin is loaded, it will not disable
+  the matchparen plugin (_Planned_).  To disable highlighting entirely
+  do not load matchparen.
+
+### Line-wise, exclusive, and inclusive motions
+
 
 ### Options
 
@@ -201,10 +218,11 @@ and its development are heavily influenced by vimtex.
 
 ### Other inspirations
 
-- [matchit](ftp://ftp.vim.org/pub/vim/runtime/macros/matchit.txt).
-- [matchparen](ftp://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt).
+- [matchit](http://ftp.vim.org/pub/vim/runtime/macros/matchit.txt).
+- [matchparen](http://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt).
 - [vim-endwise](https://github.com/tpope/vim-endwise).
 - [auto-pairs](https://github.com/jiangmiao/auto-pairs).
+- [splitjoin.vim](https://github.com/AndrewRadev/splitjoin.vim).
 
 ## license
 
