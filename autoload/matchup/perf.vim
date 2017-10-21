@@ -19,13 +19,15 @@ endfunction
 function! matchup#perf#toc(context, state)
   let l:elapsed = reltimefloat(reltime(s:time_start[a:context]))
 
-  if has_key(g:matchup#perf#times, a:state)
-    let g:matchup#perf#times[a:state].maximium = max([l:elapsed,
-          \ g:matchup#perf#times[a:state].maximium])
-    let g:matchup#perf#times[a:state].emavg = s:alpha*l:elapsed
-          \ + (1-s:alpha)*g:matchup#perf#times[a:state].ema
+  let l:key = a:context.'#'.a:state
+  if has_key(g:matchup#perf#times, l:key)
+    if l:elapsed > g:matchup#perf#times[l:key].maximum
+      let g:matchup#perf#times[l:key].maximum = l:elapsed
+    endif
+    let g:matchup#perf#times[l:key].emavg = s:alpha*l:elapsed
+          \ + (1-s:alpha)*g:matchup#perf#times[l:key].emavg
   else
-    let g:matchup#perf#times[a:state] = {
+    let g:matchup#perf#times[l:key] = {
           \ 'maximum' : l:elapsed,
           \ 'emavg'   : l:elapsed,
           \}

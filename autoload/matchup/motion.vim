@@ -26,6 +26,8 @@ function! matchup#motion#init_module() " {{{1
   xmap     <plug>(matchup-%) <sid>(matchup-%)
   onoremap <plug>(matchup-%)
     \ :execute "normal \<sid>(v)\<sid>(matchup-%)"<cr>
+  xnoremap <plug>(matchup-g%)
+    \ :<c-u>call matchup#motion#find_matching_pair(1, 1)<cr>
 
   nnoremap <plug>(matchup-]%)
     \ :<c-u>call matchup#motion#find_unmatched(0, 1)<cr>

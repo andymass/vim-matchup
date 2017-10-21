@@ -218,11 +218,13 @@ and its development are heavily influenced by vimtex.
 
 ### Other inspirations
 
-- [matchit](http://ftp.vim.org/pub/vim/runtime/macros/matchit.txt).
-- [matchparen](http://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt).
-- [vim-endwise](https://github.com/tpope/vim-endwise).
-- [auto-pairs](https://github.com/jiangmiao/auto-pairs).
-- [splitjoin.vim](https://github.com/AndrewRadev/splitjoin.vim).
+- [matchit](http://ftp.vim.org/pub/vim/runtime/macros/matchit.txt)
+- [matchparen](http://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt)
+- [vim-endwise](https://github.com/tpope/vim-endwise)
+- [auto-pairs](https://github.com/jiangmiao/auto-pairs)
+- [splitjoin.vim](https://github.com/AndrewRadev/splitjoin.vim)
+- [vim-surround](https://github.com/tpope/vim-surround)
+- [vim-sandwich](https://github.com/machakann/vim-sandwich)
 
 ## license
 

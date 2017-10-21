@@ -105,14 +105,15 @@ endfunction
 function! matchup#delim#get_matching(delim, ...) " {{{1
   if empty(a:delim) || !has_key(a:delim, 'lnum') | return {} | endif
 
-  "PP a:delim.regextwo
-
-  " get the matching position(s)
+  " get all the matching position(s)
+  " *important*: in the case of mid, we search up before searching down
+  " this gives us a context object which we use for the other side
   let l:matches = []
   for l:down in {'open': [1], 'close': [0], 'mid': [0,1]}[a:delim.side]
     let l:save_pos = matchup#pos#get_cursor()
     call matchup#pos#set_cursor(a:delim)
     if !empty(l:matches)
+      " [] refers to the current match
       call add(l:matches, [])
     endif
     call extend(l:matches, a:delim.get_matching(l:down))
@@ -126,7 +127,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     call add(l:matches, [])
   endif
 
-  " echo '$' l:matches
+  echo '$' l:matches
 
   " create the match result(s)
   let l:matching_list = []
@@ -163,6 +164,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
  
  " PP l:matching_list 
 
+  " set up links between matches
   for l:i in range(len(l:matching_list))
     let l:c = l:matching_list[l:i]
     if !has_key(l:c, 'links')
@@ -178,6 +180,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     return l:matching_list
   else
     " return a:delim.links.next
+    " XXX old syntax: open-close, close-open
     return a:delim.side ==# 'open' ? l:matching_list[-1]
        \ : l:matching_list[0]
   endif
@@ -313,10 +316,10 @@ function! s:get_delim(opts) " {{{1
 
   if l:lnum == 0
     let l:elapsed_time = 1000*reltimefloat(reltime(l:time_start)) 
-    echo 'X' l:elapsed_time
+    " echo 'X' l:elapsed_time
    " v:vim_did_enter
   endif
- 
+
   " nothing found, leave now
   if l:lnum == 0 | return {} | endif
 
@@ -325,9 +328,9 @@ function! s:get_delim(opts) " {{{1
 
   " result stub, to be filled by the parser when there is a match
   let l:result = {
-        \ 'type'     : '',
         \ 'lnum'     : l:lnum,
         \ 'cnum'     : l:cnum,
+        \ 'type'     : '',
         \ 'match'    : '',
         \ 'groups'   : '',
         \ 'side'     : '',
@@ -438,67 +441,112 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
     let l:sides = s:sidedict[a:opts.side]
     let l:rebrs = b:matchup_delim_lists[a:opts.type].regex_backref
 
-    " loop through all (index, side) pairs match pairs,
+    " loop through all (index, side) pairs,
     " finding the first match which the cursor is inside
     let l:ns = len(l:sides)
     let l:found = 0
     for l:i in range(len(l:rebrs)*l:ns)
       let l:side = l:sides[ l:i % l:ns ]
-      let l:re = l:rebrs[ l:i / l:ns ][l:side]
-      if empty(l:re) | continue | end
 
-      " prepend the column number and append 
-      " the cursor column to anchor match
-      " we don't use {start} for matchlist because there may 
-      " be zero-width look behinds
-      " XXX does \%<Nc work properly with tabs?
-      " let l:re = '\%'.l:cnum.'c\%(' . l:re .'\)'
-      "   \ . '\%>'.(col('.')).'c'   
-      let l:re2 = '\%'.a:cnum.'c\%(' . l:re .'\)'
-        \ . '\%>'.(l:cursorpos).'c'   
-      " xxx is this index right?
+      if l:side ==# 'mid'
+        let l:res = l:rebrs[l:i / l:ns].mid_list
+        if empty(l:res) | continue | end
+      else
+        let l:res = [ l:rebrs[l:i / l:ns][l:side] ]
+        if empty(l:res[0]) | continue | end
+      endif
 
-      " echo l:re | sleep 6
+      let l:mid_id = 0
+      for l:re in l:res
+        let l:mid_id += 1
 
-      let l:matches = matchlist(getline(a:lnum), l:re2)
+        " prepend the column number and append the cursor column 
+        " to anchor the match; we don't use {start} for matchlist
+        " because there may be zero-width look behinds
 
-      if empty(l:matches) | continue | endif
+        " XXX does \%<Nc work properly with tabs?
+        let l:re_anchored = '\%'.a:cnum.'c\%(' . l:re .'\)'
+          \ . '\%>'.(l:cursorpos).'c'   
 
-      let l:match = l:matches[0]
+        let l:matches = matchlist(getline(a:lnum), l:re_anchored)
+        if empty(l:matches) | continue | endif
 
-      " echo localtime() l:re l:matches 'lc' l:lnum l:cnum
-      "     \ l:cnum+strdisplaywidth(l:match) col('.') | sleep 1
+        let l:found = 1
+        break
+      endfor
 
-      let l:found = 1
+      if !l:found | continue | endif
+
       break
     endfor
 
-    let l:elapsed_time = 1000*reltimefloat(reltime(l:time_start)) 
-
-    if l:found 
-      let l:list = b:matchup_delim_lists[a:opts.type]
-      let l:result = {
-            \ 'type'         : 'delim',
-            \ 'match'        : l:match,
-            \ 'groups'       : l:matches,
-            \ 'side'         : l:side,
-            \ 'is_open'      : (l:side ==# 'open') ? 1 : 0,
-            \ 'get_matching' : function('s:get_matching_delims'),
-            \ 'regexone'     : l:list.regex[l:i / l:ns],
-            \ 'regextwo'     : l:list.regex_backref[l:i / l:ns],
-            \ 'rematch'      : l:re,
-            \}
-
-      "echo l:matches 'lc' a:lnum a:cnum l:elapsed_time
-    endif
-
     if !l:found
-        echo l:elapsed_time
         return {}
     endif
+
+    let l:match = l:matches[0]
+
+    let l:list = b:matchup_delim_lists[a:opts.type]
+    let l:thisre   = l:list.regex[l:i / l:ns]
+    let l:thisrebr = l:list.regex_backref[l:i / l:ns]
+
+    let l:augment = {}
+
+    " these are the capture groups indexed by their 'open' id
+    let l:groups = {}
+    let l:id = 0
+
+    if l:side ==# 'open'
+      for l:br in keys(l:thisrebr.need_grp)
+        let l:groups[l:br] = l:matches[l:br]
+      endfor
+    else
+      let l:id = (l:side ==# 'close')
+            \ ? len(l:thisrebr.mid_list)+1
+            \ : l:mid_id
+
+      for [l:br, l:to] in items(l:thisrebr.grp_renu[l:id])
+        let l:groups[l:to] = l:matches[l:br]
+      endfor
+
+      " echo l:groups l:thisrebr.grp_renu[l:id]
+      " echo l:thisrebr.aug_comp[l:id][0]
+
+      " fill in augment pattern
+      " TODO all the augment patterns should match, 
+      " but checking might be too slow
+      let l:aug = l:thisrebr.aug_comp[l:id][0]
+      let l:augment.str = substitute(l:aug.str,
+            \ s:notslash.'\\'.'\(\d\)',
+            \ '\=l:groups[submatch(1)]', 'g')
+      let l:augment.unresolved = deepcopy(l:aug.outputmap)
+    endif
+
+    " echo l:re l:groups 
+    " echo l:thisrebr.aug_comp[l:id]
+    " echo l:re l:augment l:groups l:thisrebr.need_grp
+
+    let l:result = {
+          \ 'type'         : 'delim',
+          \ 'match'        : l:match,
+          \ 'augment'      : l:augment,
+          \ 'groups'       : l:groups,
+          \ 'side'         : l:side,
+          \ 'match_id'     : l:id,
+          \ 'is_open'      : (l:side ==# 'open') ? 1 : 0,
+          \ 'get_matching' : function('s:get_matching_delims'),
+          \ 'regexone'     : l:thisre,
+          \ 'regextwo'     : l:thisrebr,
+          \ 'rematch'      : l:re,
+          \}
+
+    "echo l:matches 'lc' a:lnum a:cnum l:elapsed_time
+
+    return l:result
+
   endif
 
-  return l:result
+  return {} 
 endfunction
 " }}}1
 
@@ -610,32 +658,123 @@ endfunction
 " }}}1
 
 function! s:get_matching_delims(down) dict " {{{1
+  " called from:  a:delim.get_matching
+  "               matchup#delim#get_matching
+
+  call matchup#perf#tic('get_matching_delims')
+
+  " first, we figure out what the furthest match is, which will be
+  " either the open or close depending on the direction
   let [l:re, l:flags, l:stopline] = a:down
-      \ ? [self.regextwo.close,  'zW', line('.') + s:stopline]
-      \ : [self.regextwo.open,  'zbW', max([line('.') - s:stopline, 1])]
+      \ ? [self.regexone.close, 'zW', line('.') + s:stopline]
+      \ : [self.regexone.open, 'zbW', max([line('.') - s:stopline, 1])]
 
-  " echo self.side
+  let l:open = self.regextwo.open
+  let l:close = self.regextwo.close
 
-  " return [['', 0, 0]]
+  " if we're searching up, we anchor by the augment, if it exists
+  if !a:down && !empty(self.augment)
+    let l:open = self.augment.str
+  endif
 
-  " XXX
+  " turn \(\) into \%(\) for searchpairpos
+  let l:open  = s:remove_capture_groups(l:open)
+  let l:close = s:remove_capture_groups(l:close)
+
+  " fill in backreferences
+  let l:re = s:fill_backrefs(l:re, self.groups)
+  let l:close = s:fill_backrefs(l:close, self.groups)
+
+  " TODO: support match_skip
   let l:skip = 'matchup#util#in_comment() || matchup#util#in_string()'
 
-  " remove capture groups
-  " xxx spin off function
-  let l:sub_grp = '\(\\\@<!\(\\\\\)*\)\@<=\\('
-  let l:open = substitute(self.regextwo.open, l:sub_grp, '\\%(', 'g')
-  let l:close = substitute(self.regextwo.close, l:sub_grp, '\\%(', 'g')
-  let l:mids = substitute(self.regextwo.mid, l:sub_grp, '\\%(', 'g')
-
-  " insert captured groups
-  " XXX do this
-
-  " this is the corresponding of an open:close pair
+  " this is the corresponding part of an open:close pair
   let [l:lnum_corr, l:cnum_corr] = searchpairpos(l:open, '', l:close,
         \ 'n'.l:flags, l:skip, l:stopline)
 
-  let l:match = matchstr(getline(l:lnum_corr), '^' . l:re, l:cnum_corr-1)
+  call matchup#perf#toc('get_matching_delims', 'initial_pair')
+
+  " if nothing found, bail immediately
+  if l:lnum_corr == 0 | return [['', 0, 0]] | endif
+
+  " get the match and groups
+  let l:re_anchored = '\%'.l:cnum_corr.'c\%(' . l:re .'\)'
+  let l:matches = matchlist(getline(l:lnum_corr), l:re_anchored)
+  let l:match_corr = l:matches[0]
+
+  " echo a:down self.groups | sleep 1
+
+  " store these in these groups
+  if a:down
+    " let l:id = len(self.regextwo.mid_list)+1
+    " for [l:from, l:to] in items(self.regextwo.grp_renu[l:id])
+    "   let self.groups[l:to] = l:matches[l:from]
+    " endfor
+  else
+    for l:to in range(1,9)
+      if !has_key(self.groups, l:to) && !empty(l:matches[l:to])
+        let self.groups[l:to] = l:matches[l:to]
+      endif
+    endfor
+  endif
+
+  call matchup#perf#toc('get_matching_delims', 'get_matches')
+
+  " fill in additional groups
+  let l:mids = s:remove_capture_groups(self.regexone.mid)
+  let l:mids = s:fill_backrefs(l:mids, self.groups)
+
+  " echo a:down self.regexone self.groups
+  " echo a:down self.groups l:matches | sleep 1
+
+  " if there are no mids, we're done
+  if empty(l:mids)
+    return [[l:match_corr, l:lnum_corr, l:cnum_corr]]
+  endif
+
+  let l:re = l:mids 
+
+  " if !a:down
+  "   " echo l:re
+  " endif
+
+  " echo 'x' self.regexone self.regextwo
+  " echo 'x' l:re
+  " let l:match = matchstr(getline(l:lnum_corr), '^' . l:re, l:cnum_corr-1)
+
+  " echo self.groups | sleep 1
+
+  " XXX XXX!
+  " there may be backrefs that need to be filled out
+  " let l:re = s:fill_backrefs(l:re, self.groups)
+  " XXX
+
+  " echo self.side
+  " return [['', 0, 0]]
+
+  " if !a:down
+  "   echo self.regexone | sleep 1
+  " endif
+
+  " turn \(\) into \%(\)
+  " let l:open  = s:remove_capture_groups(self.regexone.open) 
+  " let l:close = s:remove_capture_groups(self.regexone.close) 
+
+  " " fill out backreferences
+  " let l:open  = s:fill_backrefs(l:open,  self.groups)
+  " let l:close = s:fill_backrefs(l:close, self.groups)
+
+  " XXX XXX XXX we need to distinguish between
+  " filled (resolved) and unfilled
+  " capture groups, interpolating without valid data won't work
+  " XXX also need to escape to form regex, or \V...\m
+  " if !a:down
+  "   " echo l:re '|' l:open '|' l:close | sleep 1
+  " endif
+
+  " xxx spin off function
+  " insert captured groups
+  " XXX do this
 
   " l:re might have back references
   " let l:match = l:matches[0]
@@ -643,13 +782,6 @@ function! s:get_matching_delims(down) dict " {{{1
   " echo self.regextwo
   " echo l:open l:close
   " echo a:down ? 'down' : 'up' l:lnum_corr l:cnum_corr l:match
-
-  if empty(l:mids)
-    return [[l:match, l:lnum_corr, l:cnum_corr]]
-  endif
-
-  let l:re .= '\|'.l:mids 
-
   " echo l:re
 
   let l:list = []
@@ -658,36 +790,57 @@ function! s:get_matching_delims(down) dict " {{{1
       \ l:flags, l:skip, l:lnum_corr)
     if l:lnum <= 0 | break | endif
 
-" echo l:lnum l:cnum | sleep 500m
-    if stridx(l:flags, 'b') >= 0
-      if l:lnum < l:lnum_corr && l:cnum < l:cnum_corr | break | endif
+    " echo '>' l:lnum l:cnum | sleep 500m
+
+    " if stridx(l:flags, 'b') >= 0
+
+    if a:down
+      if l:lnum >= l:lnum_corr && l:cnum >= l:cnum_corr | break | endif
     else
-      if l:lnum > l:lnum_corr && l:cnum > l:cnum_corr | break | endif
+      if l:lnum <= l:lnum_corr && l:cnum <= l:cnum_corr | break | endif
     endif
 
     " XXX check lnum cnum vs lnum_corr cnum_corr
 
-    let l:match = matchstr(getline(l:lnum), '^' . l:re, l:cnum-1)
+    " TODO: can this step be removed?
+    " XXX
+
+   let l:re_anchored = '\%'.l:cnum.'c\%(' . l:re .'\)'
+   let l:matches = matchlist(getline(l:lnum), l:re_anchored)
+   let l:match = l:matches[0]
+
+
+    " echo '%' a:down l:lnum l:matches l:re_anchored | sleep 600m
+    " echo '%' self.regexone.mid self.groups l:re_anchored
+
+    " let l:match = matchstr(getline(l:lnum), '^' . l:re, l:cnum-1)
     " echo l:lnum l:match | sleep 1
+
     call add(l:list, [l:match, l:lnum, l:cnum])
   endwhile
 
-  if empty(l:list) | return [['', 0, 0]] | endif
+  call add(l:list, [l:match_corr, l:lnum_corr, l:cnum_corr])
+
+ " if empty(l:list) | return [['', 0, 0]] | endif
 
   if !a:down
     call reverse(l:list)
   endif
 
+  " echo a:down l:list | sleep 1
+
   return l:list
 endfunction
 " }}}1
 
+" XXX defunct
 function! s:get_matching_delim() dict " {{{1
   let [re, flags, stopline] = self.is_open
         \ ? [self.re.close,  'nW', line('.') + s:stopline]
         \ : [self.re.open,  'bnW', max([line('.') - s:stopline, 1])]
 
   " xxx spin-off
+" function! s:remove_capture_groups(re) 
   let l:open =  substitute(self.re.open,
     \ '\(\\\@<!\(\\\\\)*\)\@<=\\(', '\\%(', 'g')
   let l:close =  substitute(self.re.close,
@@ -703,17 +856,24 @@ endfunction
 
 function! s:init_delim_lists() " {{{1
   let l:lists = { 'delim_tex': { 'name': [], 're': [], 
-    \ 'regex': [], 'regex_backref': [] } }
+        \ 'regex': [], 'regex_backref': [] } }
 
- " let b:match_words = '\(\(foo\)\(bar\)\):\3\2:end\1'
- " let b:match_words = '\(foo\)\(bar\):more\1:and\2:end\1\2' 
+  " very tricky examples:
+  " good: let b:match_words = '\(\(foo\)\(bar\)\):\3\2:end\1'
+  " bad:  let b:match_words = '\(foo\)\(bar\):more\1:and\2:end\1\2' 
+
+  " *subtlety*: there is a huge assumption in matchit:
+  "   ``It should be possible to resolve back references 
+  "     from any pattern in the group.''
+  " we don't explicitly check this, but the behavior might
+  " be unpredictable if such groups are encountered.. (ref-1)
 
   " parse matchpairs and b:match_words
   let l:mps = escape(&matchpairs, '[$^.*~\\/?]')
   let l:match_words = get(b:, 'match_words', '') . ','.l:mps
-  let s:notslash = '\\\@<!\%(\\\\\)*'
   let l:sets = split(l:match_words, s:notslash.',')
 
+  " do not duplicate whole groups of match words
   let l:seen = {}
   for l:s in l:sets
     if has_key(l:seen, l:s) | continue | endif
@@ -721,61 +881,302 @@ function! s:init_delim_lists() " {{{1
 
     let l:words = split(l:s, s:notslash.':')
 
-    " resolve backrefs to produce two sets of words,
-    " one with \(foo\)s and one with \1s
-    " XXX there is a counting problem: when substituting \(\) 
-    " must increment the capture groups-it is very subtle.
+    " we will resolve backrefs to produce two sets of words,
+    " one with \(foo\)s and one with \1s, along with a set of
+    " bookkeeping structures
     let l:words_backref = copy(l:words)
-    let l:capture_groups = []
 
-    for l:i in range(1, len(l:words)-1)
-      " find the groups like \(foo\) in the previous set of words
-      let l:cg = s:get_delim_capture_groups(l:words_backref[l:i-1])
+    " *subtlety*: backref numbers refer to the capture groups
+    " in the 'open' pattern so we have to carefully keep track
+    " of the group renumbering
+    let l:group_renumber = {}
+    let l:augment_comp = {}
+    let l:all_needed_groups = {}
 
-      " substitute \1 with the found groups
-      let l:words_backref[l:i] = substitute(l:words_backref[l:i],
-        \ s:notslash.'\\'.'\(\d\)',
-        \ '\=get(get(l:cg, submatch(1), {}), "str")', 'g')
+    " *subtlety*: when replacing things like \1 with \(...\)
+    " the insertion could possibly contain back references of
+    " its own; this poses a very difficult bookkeeping problem,
+    " so we just disallow it.. (ref-2)
 
-      call add(l:capture_groups, l:cg)
+    " get the groups like \(foo\) in the 'open' pattern
+    let l:cg = s:get_delim_capture_groups(l:words[0])
+
+    " if any of these contain \d raise a warning
+    " and substitute it out (ref-2)
+    for l:cg_i in keys(l:cg)
+      if l:cg[l:cg_i].str =~# s:notslash.'\\'.'\(\d\)'
+        echohl WarningMsg
+        echom 'match-up: capture group' l:cg[l:cg_i].str
+              \ 'should not contain backrefs (ref-2)'
+        echohl None
+        let l:cg[l:cg_i].str = substitute(l:cg[l:cg_i].str,
+              \ s:notslash.'\\'.'\(\d\)', '', 'g')
+      endif
     endfor
 
-    " now replace the original capture groups with equivalent \1
-    function! s:capture_group_sort(cg, a, b) dict
-      return a:cg[a:b].depth - a:cg[a:a].depth
-    endfunction
+    " for the 'open' pattern, create a series of replacements
+    " of the capture groups with \9, \8, ..., \1
+    " this must be done deepest to shallowest
+    let l:augments = {}
+    let l:order = reverse(sort(keys(l:cg), 'N'))
+    call sort(l:order, 's:capture_group_sort', l:cg)
 
-    for l:i in range(len(l:words)-1)
-      let l:cg = l:capture_groups[l:i]
-      if empty(l:cg) | continue | end
+    let l:curaug = l:words[0]
+    let l:augments[0] = l:curaug
+    for l:j in l:order
+      " these indexes are not invalid because we work backwards
+      let l:curaug = strpart(l:curaug, 0, l:cg[l:j].pos[0])
+            \ .('\'.l:j).strpart(l:curaug, l:cg[l:j].pos[1])
+      let l:augments[l:j] = l:curaug
+    endfor
 
-      " this must be done deepest to shallowest
-      let l:order = sort(keys(l:cg), 'n')
-      call sort(l:order, function('s:capture_group_sort', l:cg))
+    " now for the rest of the words...
+    for l:i in range(1, len(l:words)-1)
+
+      " first get rid of the capture groups in this pattern
+      let l:words_backref[l:i] = s:remove_capture_groups(
+            \ l:words_backref[l:i])
+
+      " get the necessary \1, \2, etc back-references
+      let l:needed_groups = []
+      call substitute(l:words_backref[l:i], s:notslash.'\\'.'\(\d\)', 
+            \ '\=len(add(l:needed_groups, submatch(1)))', 'g')
+      call filter(l:needed_groups,
+            \ 'index(l:needed_groups, v:val) == v:key')
+
+      " warn if the back-referenced groups don't actually exist
+      for l:ng in l:needed_groups
+        if has_key(l:cg, l:ng)
+          let l:all_needed_groups[l:ng] = 1
+        else
+          echohl WarningMsg
+          echom 'match-up: backref \' l:ng 'requested but no '
+                \ . 'matching capture group provided'
+          echohl None
+        endif
+      endfor
+
+      " substitute capture groups into the backrefs and keep 
+      " track of the mapping to the original backref number
+      let l:group_renumber[l:i] = {}
+
+      let l:cg2 = {}
+      for l:bref in l:needed_groups
+
+        " turn things like \1 into \(...\)
+        " replacement is guaranteed to exist and not contain \d
+        let l:words_backref[l:i] = substitute(l:words_backref[l:i],
+              \ s:notslash.'\\'.l:bref,
+              \ '\='''.l:cg[l:bref].str."'", '')    " not global!!
+
+        " echo '#'.l:i '%' '\'.l:bref l:words_backref[l:i] l:cg[l:bref]
+
+        let l:prev_max = max(keys(l:cg2))
+        let l:cg2 = s:get_delim_capture_groups(l:words_backref[l:i])
+
+        " echo l:i '%' l:bref l:words_backref[l:i] l:cg2
+
+        for l:cg2_i in sort(keys(l:cg2), 'N')
+          if l:cg2_i > l:prev_max
+            " maps capture groups to 'open' back reference numbers
+            let l:group_renumber[l:i][l:cg2_i] = l:bref
+                  \ + (l:cg2_i - 1 - l:prev_max)
+          endif
+        endfor
+
+        " if any backrefs remain, replace with re-numbered versions
+        let l:words_backref[l:i] = substitute(l:words_backref[l:i],
+              \ s:notslash.'\\'.l:bref,
+              \ '\\\=l:group_renumber[l:i][submatch(1)]', 'g')
+      endfor
+
+    " echo ' ->' l:words[l:i] l:words_backref[l:i] l:group_renumber[l:i]
+    " echo l:words[l:i] '->' l:words_backref[l:i]
+
+      if len(uniq(sort(values(l:group_renumber[l:i]))))
+            \ != len(l:group_renumber[l:i])
+          echohl ErrorMsg
+          echom 'match-up: duplicate bref in set ' l:s ':' l:i
+          echohl None
+      endif
+
+      " compile the augment list for this set of backrefs, going
+      " deepest first and combining as many steps as possible
+      let l:resolvable = {}
+      let l:dependency = {}
+
+      let l:instruct = []
       for l:j in l:order
-        let l:words[l:i] = strpart(l:words[l:i], 0, l:cg[l:j].pos[0])
-              \ .('\'.l:j).strpart(l:words[l:i], l:cg[l:j].pos[1])
+        " the in group is the local number from this word pattern
+        let l:in_grp = keys(filter(
+              \ deepcopy(l:group_renumber[l:i]), 'v:val == l:j'))
+
+        " echo '!' l:i l:in_grp l:group_renumber[l:i]
+
+        if empty(l:in_grp) | continue | endif
+        let l:in_grp = l:in_grp[0]
+
+        " if anything depends on this, flush out the current resolvable
+        if has_key(l:dependency, l:j)
+          call add(l:instruct, copy(l:resolvable))
+          let l:dependency = {}
+        endif
+
+        " walk up the tree marking any new dependency
+        let l:node = l:j
+        for l:dummy in range(11)
+          let l:node = l:cg[l:node].parent
+          if l:node == 0 | break | endif
+          let l:dependency[l:node] = 1
+        endfor
+
+        " mark l:j as resolvable
+        let l:resolvable[l:j] = l:in_grp
+      endfor
+
+      if !empty(l:resolvable)
+        call add(l:instruct, copy(l:resolvable))
+      endif
+
+      " echo l:augments
+      " echo '[' l:words[0] l:words_backref[l:i] l:instruct
+      " echo l:instruct
+
+      " *note*: recall that l:augments[2] is the result of augments
+      " up to and including 2
+
+      " this is a set of instructions of which brefs to resolve
+      let l:augment_comp[l:i] = []
+      for l:instr in l:instruct
+        " the smallest key is the greediest, due to l:order
+        let l:minkey = min(keys(l:instr))
+        call insert(l:augment_comp[l:i], { 
+              \ 'inputmap': {},
+              \ 'outputmap': {},
+              \ 'str': l:augments[l:minkey],
+              \})
+
+        let l:remaining_out = {} 
+        for l:out_grp in keys(l:cg)
+          let l:remaining_out[l:out_grp] = 1
+        endfor
+
+        " input map turns this word pattern numbers into 'open' numbers
+        for [l:out_grp, l:in_grp] in items(l:instr)
+          let l:augment_comp[l:i][0].inputmap[l:in_grp] = l:out_grp
+          if has_key(l:remaining_out, l:out_grp)
+            call remove(l:remaining_out, l:out_grp) 
+          endif
+        endfor
+
+        " echo l:words[l:i] l:instr l:augment_comp[l:i][0].inputmap
+        " echo l:words[l:i] l:words[0] l:remaining_out 
+
+        " output map turns remaining group numbers into 'open' numbers
+        let l:counter = 1
+        for l:out_grp in sort(keys(l:remaining_out), 'N')
+          let l:augment_comp[l:i][0].outputmap[l:counter] = l:out_grp
+          let l:counter += 1
+        endfor
+      endfor
+
+      " echo l:augment_comp
+      " echo l:order l:i l:words_backref[l:i]
+      " echo 'q' l:words[l:i] l:words_backref[l:i] l:augment_comp[l:i]
+
+        " echo l:instr
+      " echo ']' l:words[0] l:words_backref[l:i] l:augment_comp[l:i]
+      "       \ l:needed_groups
+      " echo l:instr l:augment_comp[l:i]
+
+      " if l:instruct was empty, there are no constraints
+      if empty(l:instruct) && !empty(l:augments)
+        let l:augment_comp[l:i] = [{
+              \ 'inputmap': {},
+              \ 'outputmap': {},
+              \ 'str': l:augments[0],
+              \}]
+        for l:cg_i in keys(l:cg)
+          let l:augment_comp[l:i][0].outputmap[l:cg_i] = l:cg_i
+        endfor
+      endif
+    endfor
+
+    " strip out unneeded groups in output maps
+    for l:i in keys(l:augment_comp)
+      for l:aug in l:augment_comp[l:i]
+        call filter(l:aug.outputmap,
+              \ 'has_key(l:all_needed_groups, v:key)')
       endfor
     endfor
 
+    " echo l:words
+    " echo l:augment_comp
+    " echo l:augment_comp
+    " echo l:order l:augment_comp[l:i]
+    " echo l:words[l:i] l:instruct l:augment_comp[l:i]
+
+      " for l:bref in sort(values(l:group_renumber[l:i]))
+      " let l:breakpoints = []
+        " let l:bref = l:augments[l:j]
+
+      " keys(l:group_renumber[l:i])[l:cg2_i] = l:bref
+      " let l:aug_comp = []
+
+      " xxx verify (ref-1)
+      " function! s:process_recapture(cg, sm)
+      "   return get(get(a:cg, a:sm, {}), "str")', 'g')
+      " endfunction
+
+      " let l:words_backref[l:i] = substitute(l:words_backref[l:i],
+      "       \ s:notslash.'\\'.'\(\d\)',
+      "       \ 's:process_recapture(l:cg, submatch(1)), 'g')
+
+        " \ '\=get(get(l:cg, submatch(1), {}), "str")', 'g')
+            
+      " for l:ng in l:needed_groups
+        " if has_key(l:seen_group, l:ng)
+          " let l:group_enforce[l:i] = 
+        " else
+          " let l:seen_group[l:ng] = 1
+        " endif
+      " endfor
+      " let l:group_renumber[l:i] = {}
+
+      " dragons: create the augmentation operators from the 
+      " open pattern- this is all super tricky!!
+      " for all the mentioned \2, \3, etc 
+      " call add(l:capture_groups, l:cg)
+    " now replace the original capture groups with equivalent \1
+    " for l:i in range(len(l:words)-1)
+    "   let l:cg = l:capture_groups[l:i]
+    "   if empty(l:cg) | continue | end
+    " endfor
+
+    " this is the original set of words plus the set of augments
+    " XXX this should probably be renamed
     call add(l:lists.delim_tex.regex, {
       \ 'open'     : l:words[0],
       \ 'close'    : l:words[-1],
       \ 'mid'      : join(l:words[1:-2], '\|'),
       \ 'mid_list' : l:words[1:-2],
+      \ 'augments' : l:augments,
       \})
 
+    " this list has \(groups\) and we also stuff recapture data
+    " XXX this should probably be renamed
     call add(l:lists.delim_tex.regex_backref, {
       \ 'open'     : l:words_backref[0],
       \ 'close'    : l:words_backref[-1],
       \ 'mid'      : join(l:words_backref[1:-2], '\|'),
       \ 'mid_list' : l:words_backref[1:-2],
-      \ 'capgrps'  : l:capture_groups,
+      \ 'need_grp' : l:all_needed_groups,
+      \ 'grp_renu' : l:group_renumber,
+      \ 'aug_comp' : l:augment_comp,
       \})
 
-    call add(l:lists.delim_tex.re, deepcopy(l:words)) " xxx deprecated
-
     " xxx deprecate
+    call add(l:lists.delim_tex.re, deepcopy(l:words)) " xxx deprecated
     call add(l:lists.delim_tex.name, 
       \ map(l:words, '"m_".substitute(v:val, ''\\'', "", "g")'))
   endfor
@@ -800,6 +1201,10 @@ function! s:init_delim_lists() " {{{1
   endfor
 
   return l:lists
+endfunction
+
+function! s:capture_group_sort(a, b) dict
+  return self[a:b].depth - self[a:a].depth
 endfunction
 
 " }}}1
@@ -894,7 +1299,9 @@ function! s:get_delim_capture_groups(str) " {{{1
       let l:counter += 1
       call add(l:stack, l:counter)
       let l:brefs[l:counter] = {
-        \ 'str': '', 'depth': len(l:stack),
+        \ 'str': '',
+        \ 'depth': len(l:stack),
+        \ 'parent': (len(l:stack) > 1 ? l:stack[-2] : 0),
         \ 'pos': [l:match[1], 0],
         \}
     else
@@ -919,24 +1326,34 @@ function! s:remove_capture_groups(re) "{{{
 endfunction
 
 "}}}
+function! s:fill_backrefs(re, groups) " {{{
+  return substitute(a:re, s:notslash.'\\'.'\(\d\)',
+        \ '\=get(a:groups, submatch(1), "")', 'g')
+endfunction
+
+"}}}
+
 function! s:mod(i, n) " {{{1
     return ((a:i % a:n) + a:n) % a:n
 endfunction
 " }}}1
 
 " initialize script variables
-let s:stopline = get(g:, 'matchup_delim_stopline', 500)
+let s:stopline = get(g:, 'matchup_delim_stopline', 300)
+
 let s:notslash = '\\\@<!\%(\\\\\)*'
 
-" xxx consider using instead
-let s:not_bslash =  '\v%(\\@<!%(\\\\)*)@<='
+" xxx consider using instead?
+let s:not_bslash =  '\v%(\\@<!%(\\\\)*)@<=\m'
+" xxx need to use this through code
+let s:backref = s:notslash.'\\'.'\(\d\)'
 
 let s:sidedict = {
       \ 'open'     : ['open'],
       \ 'mid'      : ['mid'],
       \ 'close'    : ['close'],
-      \ 'both'     : ['open', 'close'],
-      \ 'both_all' : ['open', 'close', 'mid'],
+      \ 'both'     : ['close', 'open'],
+      \ 'both_all' : ['close', 'mid', 'open'],
       \}
   
 let s:basetypes = {

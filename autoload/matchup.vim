@@ -7,9 +7,10 @@ endfunction
 
 function! s:init_options()
   call s:init_option('matchup_matchparen_enabled', 1)
+  call s:init_option('matchup_matchparen_status_offscreen', 1)
 
   call s:init_option('matchup_motion_enabled', 1)
-  call s:init_option('matchup_motion_close_end', 1)  " xxx to implement
+  call s:init_option('matchup_motion_cursor_end', 1)  " xxx to implement
 
   call s:init_option('matchup_text_obj_enabled', 1)
   call s:init_option('matchup_text_obj_linewise_operators', ['d', 'y'])
