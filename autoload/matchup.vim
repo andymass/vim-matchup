@@ -6,14 +6,27 @@ function! matchup#init()
 endfunction
 
 function! s:init_options()
-  call s:init_option('matchup_matchparen_enabled', 1)
+  call s:init_option('matchup_matchparen_enabled',
+    \ !(&t_Co < 8 && !has('gui_running')))
   call s:init_option('matchup_matchparen_status_offscreen', 1)
+  call s:init_option('matchup_matchparen_singleton', 0)
+
+  " TODO
+  call s:init_option('matchup_matchparen_timeout',
+    \ get(g:, 'matchparen_timeout', 300))
+  call s:init_option('matchup_matchparen_insert_timeout', 
+    \ get(g:, 'matchparen_insert_timeout', 60))
+
+  " see *cpo-M*
 
   call s:init_option('matchup_motion_enabled', 1)
   call s:init_option('matchup_motion_cursor_end', 1)  " xxx to implement
+  call s:init_option('matchup_motion_override_Npercent', 0)
 
   call s:init_option('matchup_text_obj_enabled', 1)
   call s:init_option('matchup_text_obj_linewise_operators', ['d', 'y'])
+
+  call s:init_option('matchup_transmute_enabled', 1)
 
   call s:init_option('matchup_imap_enabled', 1)
 endfunction
@@ -51,13 +64,17 @@ function! s:init_default_mappings()
 
   " these are forced in order to overwrite matchit mappings
   if get(g:, 'matchup_motion_enabled', 0)
-    call s:map('n', '%', '<plug>(matchup-%)', 1)
+    call s:map('n', '%',  '<plug>(matchup-%)',  1)
     call s:map('n', 'g%', '<plug>(matchup-g%)', 1)
     call s:map('n', ']%', '<plug>(matchup-]%)', 1)
     call s:map('n', '[%', '<plug>(matchup-[%)', 1)
 
-    call s:map('x', '%', '<plug>(matchup-%)', 1)
-    call s:map('o', '%', '<plug>(matchup-%)', 1)
+    call s:map('x', '%',  '<plug>(matchup-%)',  1)
+    call s:map('x', 'g%', '<plug>(matchup-g%)', 1)
+    call s:map('o', '%',  '<plug>(matchup-%)',  1)
+    call s:map('o', 'g%', '<plug>(matchup-g%)', 1)
+
+    call s:map('n', 'z%', '<plug>(matchup-z%)', 1)
   endif
 
   if get(g:, 'matchup_text_obj_enabled', 0)

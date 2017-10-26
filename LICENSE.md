@@ -1,6 +1,7 @@
 MIT license
 
 Copyright (c) 2017 Andy Massimino
+
 Copyright (c) 2016 Karl Yngve Lervåg
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of

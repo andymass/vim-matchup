@@ -222,9 +222,11 @@ and its development are heavily influenced by vimtex.
 - [matchparen](http://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt)
 - [vim-endwise](https://github.com/tpope/vim-endwise)
 - [auto-pairs](https://github.com/jiangmiao/auto-pairs)
+- [delimitMate](https://github.com/Raimondi/delimitMate)
 - [splitjoin.vim](https://github.com/AndrewRadev/splitjoin.vim)
 - [vim-surround](https://github.com/tpope/vim-surround)
 - [vim-sandwich](https://github.com/machakann/vim-sandwich)
+- [MatchTagAlways](https://github.com/Valloric/MatchTagAlways)
 
 ## license
 

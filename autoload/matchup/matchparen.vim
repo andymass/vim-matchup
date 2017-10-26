@@ -7,6 +7,7 @@
 function! matchup#matchparen#init_module() " {{{1
   if !g:matchup_matchparen_enabled | return | endif
 
+  "XXX make buffer?
   call matchup#matchparen#enable()
 endfunction
 
@@ -15,10 +16,29 @@ endfunction
 function! matchup#matchparen#enable() " {{{1
   augroup matchup_matchparen
     autocmd!
-    autocmd CursorMoved  * call s:matchparen.highlight()
-    autocmd CursorMovedI * call s:matchparen.highlight()
-    autocmd BufLeave * call s:matchparen.clear()
+    autocmd CursorMoved,CursorMovedI * call s:matchparen.highlight()
+    " autocmd WinEnter * call s:matchparen.highlight()
+    " autocmd TextChanged,TextChangedI * call s:matchparen.highlight()
+    autocmd WinLeave * call s:matchparen.clear()
+    " autocmd BufLeave * call s:matchparen.clear()
+    " autocmd InsertEnter,InsertLeave  * call s:matchparen.highlight()
   augroup END
+
+  let s:pi_paren_sid = 0
+  if get(g:, 'loaded_matchparen')
+    let l:pat = ','.expand('$VIM').'.\+matchparen\.vim,'
+    redir => l:lines
+      silent execute 'filter' l:pat 'scriptnames'
+    redir END
+    let s:pi_paren_sid = matchstr(l:lines, '\d\+\ze: ')
+    if !exists('*<SNR>'.s:pi_paren_sid.'_Highlight_Matching_Pair')
+      let s:pi_paren_sid = 0
+    endif
+  endif
+  if s:pi_paren_sid 
+    let s:pi_paren_fcn = function('<SNR>'.s:pi_paren_sid
+      \ .'_Highlight_Matching_Pair')
+  endif
 
   call s:matchparen.highlight()
 endfunction
@@ -60,22 +80,52 @@ endfunction
 function! s:matchparen.highlight() abort dict " {{{1
   if !g:matchup_matchparen_enabled | return | endif
 
+  if !get(b:, 'matchup_matchparen_enabled', 1)
+        \ && get(b:, 'matchup_matchparen_fallback', 1) && s:pi_paren_sid
+    return call(s:pi_paren_fcn, [])
+  endif
+
+  if !get(b:, 'matchup_matchparen_enabled', 1) | return | endif
+
+  if pumvisible() | return | endif
+
   call matchup#perf#tic('matchparen.highlight')
 
   let l:time_start = reltime()
 
   call self.clear()
 
-  if matchup#util#in_comment() || matchup#util#in_string()
+  " if matchup#util#in_comment() || matchup#util#in_string()
+  if matchup#delim#skip()
     return
   endif
 
   let l:current = matchup#delim#get_current('all', 'both_all')
+  call matchup#perf#toc('matchparen.highlight', 'get_current')
   if empty(l:current) | return | endif
 
+     " echo 'curent' l:current.match
   let l:corrlist = matchup#delim#get_matching(l:current, 1)
+  call matchup#perf#toc('matchparen.highlight', 'get_matching')
   if empty(l:corrlist) | return | endif
 
+     " echo l:corrlist
+  echo map(copy(l:corrlist), 'v:val.rematch')
+  " echo map(copy(l:corrlist), 'v:val.lnum.",".v:val.cnum')
+  " echo l:corrlist[0].class l:corrlist[1].class
+  "  \ l:corrlist[0].side l:corrlist[1].side
+
+  if len(l:corrlist) <= 1 && !g:matchup_matchparen_singleton
+    return
+  endif
+
+  " return
+
+  let w:matchparen_current = l:current
+  let w:matchparen_corrlist = l:corrlist
+
+
+  " echo l:corrlist
   " echo map(deepcopy(l:corrlist), 'v:val.lnum')
 
   " for l:c in l:corrlist
@@ -179,11 +229,13 @@ endfunction
 " }}}1
 function! matchup#matchparen#offscreen(current) " {{{ 1
   let l:offscreen = {}
-  if a:current.links.close.lnum > line('w$')
-    let l:offscreen = a:current.links.close
-  endif
+
+  " prefer to show close 
   if a:current.links.open.lnum < line('w0')
     let l:offscreen = a:current.links.open
+  endif
+  if a:current.links.close.lnum > line('w$')
+    let l:offscreen = a:current.links.close
   endif
 
   if empty(l:offscreen) | return | endif
