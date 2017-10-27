@@ -286,9 +286,11 @@ function! s:get_delim(opts) " {{{1
 
   let a:opts.cursorpos = l:cursorpos
 
-  " TODO XXX does this make any sense?
-  if a:opts.direction !=# 'prev'
-    let l:re .= '\%>'.(l:cursorpos).'c'   
+  " TODO XXX does this even make any sense?
+  "
+  " for current, we want to find matches that end after the cursor
+  if a:opts.direction ==# 'current'
+    let l:re .= '\%>'.(l:cursorpos).'c'
   endif
  
   " let l:re .= '\%>'.(col('.')).'c'   
@@ -311,19 +313,25 @@ function! s:get_delim(opts) " {{{1
           \   : searchpos(l:re, 'bcnW', line('.'))
     if l:lnum == 0 | break | endif
 
+  "  echo l:re l:lnum l:cnum | sleep 1
 " echo l:lnum l:cnum line('.')-s:stopline a:opts.direction | sleep 1
 "echo l:lnum l:re a:opts.direction ==# 'prev' | sleep 1
 "  echo l:lnum l:cnum | sleep 1
 
-    " if invalid match, move cursor and keep looking
-    " TODO this function should never be called 
-    "   in 'current' mode, but we should be more explicit
     " if matchup#util#in_comment(l:lnum, l:cnum)
     "     \ || matchup#util#in_string(l:lnum, l:cnum)
 
+  " XXX get rid of this..
+  call matchup#pos#set_cursor([l:lnum, l:cnum])
+
+    " note: this function should never be called 
+    " in 'current' mode, but be explicit
     if a:opts.direction !=# 'current'
           \ && matchup#delim#skip(l:lnum, l:cnum)
 
+      " echo 'rejct'
+
+      " if invalid match, move cursor and keep looking
       call matchup#pos#set_cursor(a:opts.direction ==# 'next'
             \ ? matchup#pos#next(l:lnum, l:cnum)
             \ : matchup#pos#prev(l:lnum, l:cnum))
@@ -728,7 +736,7 @@ function! s:get_matching_delims(down) dict " {{{1
     let l:open = self.augment.str
   endif
 
-"  echo 'op' l:open 'cl' l:close 're' l:re '|' self.groups 'a' self.augment
+  echo '% op' l:open 'cl' l:close 're' l:re '|' self.groups 'a' self.augment
 
   " turn \(\) into \%(\) for searchpairpos
   let l:open  = s:remove_capture_groups(l:open)
@@ -970,7 +978,7 @@ function! s:init_delim_lists() " {{{1
     " so we just disallow it.. (ref-2)
 
     " get the groups like \(foo\) in the 'open' pattern
-    let l:cg = s:get_delim_capture_groups(l:words[0])
+    let l:cg = matchup#delim#get_capture_groups(l:words[0])
 
     " if any of these contain \d raise a warning
     " and substitute it out (ref-2)
@@ -1045,13 +1053,14 @@ function! s:init_delim_lists() " {{{1
         " turn things like \1 into \(...\)
         " replacement is guaranteed to exist and not contain \d
         let l:words_backref[l:i] = substitute(l:words_backref[l:i],
-              \ s:notslash.'\\'.l:bref,
+              \ g:matchup#re#backref,
               \ '\='''.l:cg[l:bref].str."'", '')    " not global!!
+        " \ s:notslash.'\\'.l:bref,
 
         " echo '#'.l:i '%' '\'.l:bref l:words_backref[l:i] l:cg[l:bref]
 
         let l:prev_max = max(keys(l:cg2))
-        let l:cg2 = s:get_delim_capture_groups(l:words_backref[l:i])
+        let l:cg2 = matchup#delim#get_capture_groups(l:words_backref[l:i])
 
         " echo l:i '%' l:bref l:words_backref[l:i] l:cg2
 
@@ -1366,8 +1375,11 @@ function! s:init_delim_regexes_generator(list_name) " {{{1
 endfunction
 
 " }}}1
-function! s:get_delim_capture_groups(str) " {{{1
-  let l:pat = s:notslash.'\zs\(\\(\|\\)\)'
+
+function! matchup#delim#get_capture_groups(str, ...) " {{{1
+  let l:allow_percent = a:0 ? a:1 : 0
+  let l:pat = g:matchup#re#not_bslash . '\zs\('
+        \ . (l:allow_percent ? '\\%(\|' : '') . '\\(\|\\)\)'
 
   let l:start = 0
 
@@ -1379,7 +1391,7 @@ function! s:get_delim_capture_groups(str) " {{{1
     if l:match[1] < 0 | break | endif
     let l:start = l:match[2]
 
-    if l:match[0] ==# '\('
+    if l:match[0] ==# '\(' || l:match[0] ==# '\%('
       let l:counter += 1
       call add(l:stack, l:counter)
       let l:brefs[l:counter] = {
@@ -1412,12 +1424,12 @@ function! s:init_delim_skip() "{{{1
 	" S:foo becomes (current syntax item) !~ foo
 	" r:foo becomes (line before cursor) =~ foo
 	" R:foo becomes (line before cursor) !~ foo
-  let l:cursyn = "synIDattr(synID(line('.'),col('.'),1),'name')"
-  let l:preline = "strpart(getline('.'),0,col('.'))"
+  let l:cursyn = "synIDattr(synID(s:effline('.'),s:effcol('.'),1),'name')"
+  let l:preline = "strpart(s:geteffline('.'),0,s:effcol('.'))"
 
   if l:skip =~# '^[sSrR]:'
     let l:syn = strpart(l:skip, 2)
-   
+
     let l:skip = {
           \ 's': l:cursyn."=~?'".l:syn."'",
           \ 'S': l:cursyn."!~?'".l:syn."'",
@@ -1426,8 +1438,13 @@ function! s:init_delim_skip() "{{{1
           \}[l:skip[0]] 
   endif
 
-  let l:skip = substitute(l:skip, '\<col\ze(',
-        \ 's:effcol', 'g')
+  for [l:pat, l:str] in [
+        \ [ '\<col\ze(', 's:effcol'   ], 
+        \ [ '\<line\ze(', 's:effline' ],
+        \ [ '\<getline\ze(', 's:geteffline' ],
+        \]
+    let l:skip = substitute(l:skip, l:pat, l:str, 'g')
+  endfor
 
   return l:skip
 endfunction
@@ -1445,11 +1462,25 @@ function! matchup#delim#skip(...) " {{{1
         \ || matchup#util#in_string(l:lnum, l:cnum)
   endif
 
+  " call s:set_effective_curpos(l:lnum, l:cnum)
+  " call matchup#pos#set_cursor([l:lnum, l:cnum])
+
   execute 'return (' b:matchup_delim_skip ')'
+endfunction
+
+function! s:set_effective_curpos(lnum, cnum)
 endfunction
 
 function! s:effcol(expr)
   return col(a:expr)
+endfunction
+
+function! s:effline(expr)
+  return line(a:expr)
+endfunction
+
+function! s:geteffline(expr)
+  return getline(a:expr)
 endfunction
 
 " }}}1
@@ -1482,6 +1513,9 @@ let s:not_bslash =  '\v%(\\@<!%(\\\\)*)@<=\m'
 " xxx need to use this through code
 let s:backref = s:notslash.'\\'.'\(\d\)'
 
+" whether we're behaving like in insert mode
+let s:insertmode = 0
+
 let s:sidedict = {
       \ 'open'     : ['open'],
       \ 'mid'      : ['mid'],
@@ -1505,3 +1539,4 @@ let s:types = {
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
+

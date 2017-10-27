@@ -110,7 +110,7 @@ function! s:matchparen.highlight() abort dict " {{{1
   if empty(l:corrlist) | return | endif
 
      " echo l:corrlist
-  echo map(copy(l:corrlist), 'v:val.rematch')
+  "echo map(copy(l:corrlist), 'v:val.rematch')
   " echo map(copy(l:corrlist), 'v:val.lnum.",".v:val.cnum')
   " echo l:corrlist[0].class l:corrlist[1].class
   "  \ l:corrlist[0].side l:corrlist[1].side

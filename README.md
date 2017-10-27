@@ -3,11 +3,14 @@
 :warning: warning :warning: this plugin is unfinished and under heavy
 active development. It is not ready for use yet!
 
-match-up is a replacement for the venerable vim plugin
-[matchit.vim](http://ftp.vim.org/pub/vim/runtime/macros/matchit.txt).
+match-up is a replacement for the venerable vim plugin [matchit.vim]
 match-up aims to replicate all of matchit's features, fix a number of its
 deficiencies and bugs, and add a few totally new features.  It also
-replaces the plugin matchparen, allowing matchit words to be highlighted.
+replaces the standard plugin [matchparen], allowing all of matchit's words
+to be highlighted along with the `matchpairs` (`(){}[]`).
+
+[matchit.vim]: http://ftp.vim.org/pub/vim/runtime/macros/matchit.txt
+[matchparen]: http://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt
 
 <img src='https://github.com/andymass/matchup.vim/wiki/images/teaser.jpg' width='300px' alt='and in this corner...'>
 
@@ -19,6 +22,8 @@ Contributions are welcome!
   * [Overview](#overview)
   * [Installation](#installation)
   * [Features](#features)
+  * [FAQ](#faq)
+  * [Interoperability](#interoperability)
   * [Development](#development)
 
 ## Overview
@@ -49,20 +54,20 @@ Or use some other plugin manager:
 
 ## Features
 
-|       feature                          | __match-up__  | matchit       | matchparen    |
-| -------------------------------------- | ------------- | ------------- | ------------- |
-| (a.1) jump between matching constructs | :thumbsup:    | :thumbsup:    | :x:           |
-| (a.2) jump to open, close              | :thumbsup:    | :question:    | :x:           |
-| (a.3) jump inside                      | :thumbsup:    | :question:    | :x:           |
-| (b.1) full set of text objects         | :thumbsup:    | :x:           | :x:           |
-| (c.1) auto-insert open, close, and mid | :thumbsup:    | :x:           | :x:           |
-| (c.2) auto-completion                  | :thumbsup:    | :x:           | :x:           |
-| (c.3) parallel transmutations :star2:  | :thumbsup:    | :x:           | :x:           |
-| (c.4) split and join                   | :thumbsup:    | :x:           | :x:           |
-| (d.1) highlight ()[]{}                 | :thumbsup:    | :x:           | :thumbsup:    |
-| (d.2) highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
-| (e.1) modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
-| (e.2) actively developed               | :thumbsup:    | :x:           | :x:           |
+|       | feature                          | __match-up__  | matchit       | matchparen    |
+| ----- | -------------------------------- | ------------- | ------------- | ------------- |
+| (a.1) | jump between matching constructs | :thumbsup:    | :thumbsup:    | :x:           |
+| (a.2) | jump to open, close              | :thumbsup:    | :question:    | :x:           |
+| (a.3) | jump inside                      | :thumbsup:    | :question:    | :x:           |
+| (b.1) | full set of text objects         | :thumbsup:    | :x:           | :x:           |
+| (c.1) | auto-insert open, close, and mid | :thumbsup:    | :x:           | :x:           |
+| (c.2) | auto-completion                  | :thumbsup:    | :x:           | :x:           |
+| (c.3) | parallel transmutations :star2:  | :thumbsup:    | :x:           | :x:           |
+| (c.4) | split and join                   | :thumbsup:    | :x:           | :x:           |
+| (d.1) | highlight ()[]{}                 | :thumbsup:    | :x:           | :thumbsup:    |
+| (d.2) | highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
+| (e.1) | modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
+| (e.2) | actively developed               | :thumbsup:    | :x:           | :x:           |
 
 Legend: :thumbsup: supported. :construction: TODO, planned, or in progress.
 :question: poorly implemented, broken, or uncertain.  :x: not possible.
@@ -87,20 +92,20 @@ constructs are `else` and `elseif`.  The `if`/`endif` pair is called an
 "open-to-close" block and the `if`/`else`, `else`/`elsif`, and
 `elseif`/`endif` are called "any" blocks.
 
-- (a.1) jump between matching constructs
+#### (a.1) jump between matching constructs
   - `%` go forwards matching construct `[count]` times
   - `{count}%` forwards `{count}` times.  Requires
       `let g:matchup_override_Npercent = 1`
   - `g%` go backwards matching construct `[count]` times
 
-- (a.2) jump to open and close
+#### (a.2) jump to open and close
   - `[%` go to `[count]` previous unmatched open construct
   - `]%` go to `[count]` next unmatched close construct
 
-- (a.3) jump inside
+#### (a.3) jump inside
   - `z%` go to inside nearest `[count]`th inner contained block.  
 
-- (b.1) full set of text objects
+#### (b.1) full set of text objects
   - `i%` the inside of an open to close block
   - `1i%` the inside of an any block
   - `{count}i%` If count is not 1, the inside open-to-close block
@@ -203,9 +208,11 @@ as possible when submitting issues and pull requests.
 
 ## Interoperability
 
-  - Conflicts with end-wise
+  - match-up is not compatible with [vimtex](https://github.com/lervag/vimtex)
+  and will be disabled automatically when vimtex is detected.
+  - the end-completion maps conflict with [vim-endwise](https://github.com/tpope/vim-endwise).
   - matchit.vim should not be loaded.  If it is loaded, it must be loaded
-    before match-up.
+  before match-up (in this case, matchit is disabled).
   - match-up loads matchparen if it is not already loaded.
 
 ## Acknowledgments 

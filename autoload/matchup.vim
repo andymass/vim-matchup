@@ -20,7 +20,7 @@ function! s:init_options()
   " see *cpo-M*
 
   call s:init_option('matchup_motion_enabled', 1)
-  call s:init_option('matchup_motion_cursor_end', 1)  " xxx to implement
+  call s:init_option('matchup_motion_cursor_end', 1)
   call s:init_option('matchup_motion_override_Npercent', 0)
 
   call s:init_option('matchup_text_obj_enabled', 1)
@@ -29,6 +29,9 @@ function! s:init_options()
   call s:init_option('matchup_transmute_enabled', 1)
 
   call s:init_option('matchup_imap_enabled', 1)
+  
+  call s:init_option('matchup_complete_enabled', 1)
+
 endfunction
 
 function! s:init_option(option, default)

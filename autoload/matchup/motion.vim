@@ -17,10 +17,11 @@ function! matchup#motion#init_module() " {{{1
        " <silent> XXX
        " todo make % vi compatible wrt yank (:h quote_number)
 
+  " the basic motions % and g%
   nnoremap <silent> <plug>(matchup-%)
-    \ :<c-u>call matchup#motion#find_matching_pair(0, 1)<cr>
+        \ :<c-u>call matchup#motion#find_matching_pair(0, 1)<cr>
   nnoremap <silent> <plug>(matchup-g%)
-    \ :<c-u>call matchup#motion#find_matching_pair(0, 0)<cr>
+        \ :<c-u>call matchup#motion#find_matching_pair(0, 0)<cr>
 
   xnoremap  <sid>(matchup-%)
     \ :<c-u>call matchup#motion#find_matching_pair(1, 1)<cr>
