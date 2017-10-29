@@ -33,11 +33,15 @@ Contributions are welcome!
 This plugin
 
 - Extends vim's `%` motion to language-words like `if`, `else`, `endif`.
+- Adds motions `g%`, `[%`, `]%`, and `z%`.
 - Combines these motions into convenient text objects `i%` and `a%`.
-- Highlights symbols and words under the cursor which `%` works on,
-  and highlights matching symbols and words.  Now you can tell where
-  `%` will jump to.
-- Adds auto-completion for words and symbols- for example you can 
+- Highlights symbols and words under the cursor which `%` can work on,
+  and highlights matching symbols and words.  Now you can easily tell
+  where `%` will jump to.
+
+Planned features:
+
+- Adds auto-completion for words and symbols- for example you could 
   automatically insert corresponding a `)` or `endif`.
 
 ## Installation
@@ -64,6 +68,7 @@ Or use some other plugin manager:
 | ([b.1]) | full set of text objects         | :thumbsup:    | :question:    | :x:           |
 | ([c.1]) | highlight `()`, `[]`, & `{}`     | :thumbsup:    | :x:           | :thumbsup:    |
 | ([c.2]) | highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
+| ([c.3]) | display matches off-screen       | :thumbsup:    | :x:           | :x:           |
 | ([d.1]) | auto-insert open, close, & mid   | :construction:| :x:           | :x:           |
 | ([d.2]) | completion                       | :construction:| :x:           | :x:           |
 | ([d.3]) | parallel transmutation           | :thumbsup:    | :x:           | :x:           |
@@ -77,6 +82,7 @@ Or use some other plugin manager:
 [b.1]: #b1-full-set-of-text-objects
 [c.1]: #c1-highlight-
 [c.2]: #c2-highlight-all-matches
+[c.3]: #c3-display-matches-off-screen
 [d.1]: #d1-auto-insert-open-close-and-mid
 [d.2]: #d2-completion
 [d.3]: #d3-parallel-transmutation
@@ -84,6 +90,7 @@ Or use some other plugin manager:
 [e.1]: #e1-modern-modular-coding-style
 [e.2]: #e2-actively-developed
 [inclusive]: #inclusive-and-exclusive-motions
+[exclusive]: #inclusive-and-exclusive-motions
 
 Legend: :thumbsup: supported. :construction: TODO, planned, or in progress.
 :question: poorly implemented, broken, or uncertain.  :x: not possible.
@@ -146,30 +153,46 @@ Let `g:matchup_all_charwise`.
 XXX inclusive, exclusive
 XXX need () characterwise, others linewise except QUIRKS.
 
-#### (c.1) highlight ()[]{}
+#### (c.1) highlight `()`, `[]`, and `{}`
+
+match-up emulates vim's matchparen to highlight the symbols contained
+in the `matchpairs` setting.
 
 #### (c.2) highlight _all_ matches          
 
-  To disable match highlighting `let g:matchup_matchparen_enabled = 0`.
-  If this option is set before the plugin is loaded, it will not disable
-  the matchparen plugin (_Planned_).  To disable highlighting entirely
-  do not load matchparen.
+To disable match highlighting `let g:matchup_matchparen_enabled = 0`.
+If this option is set before the plugin is loaded, it will not disable
+the matchparen plugin (_Planned_).  To disable highlighting entirely
+do not load matchparen.
+
+#### (c.3) display matches off screen
+
+If a open or close which would have been highlighted is on a line
+positioned outside the current window, the match is shown in the
+status line.  If both the open and close match are off-screen, the
+close match is preferred.
 
 #### (d.1) auto-insert open, close, and mid
-  - end-wise completion: typing `CTRL-X <cr>` will insert the 
-  corresponding end construct.
-  
-  - automatic block insertion:
-  _Planned_. Typing `CTRL-X CTRL-B` to produce block skeletons.
+
+_Planned_.
+
+- end-wise style completion: typing `CTRL-X <cr>` will insert the 
+corresponding end word.
+
+- automatic block insertion: typing `CTRL-X CTRL-B` to produce
+block skeletons.
 
 #### (d.2) auto-completion
-  _Planned_. Typing `CTRL-X %` to give a menu of possible constructs.
+
+_Planned_. 
+
+Typing `CTRL-X M` will give a menu of possible words.
 
 #### (d.3) parallel transmutations
 
-  In insert mode, after changing text inside a construct, typing
-  `CTRL-G %` will change any matching constructs in parallel.
-  As an example,
+In insert mode, after changing text inside a word, matching words will
+be changed in parallel.
+As an example,
 
 ```html
 <pre>
@@ -177,7 +200,7 @@ XXX need () characterwise, others linewise except QUIRKS.
 </pre>
 ```
 
-Changing `pre` to `div` and typing `CTRL-G %` will produce:
+Changing `pre` to `div` and leaving insert mode will produce:
 
 ```html
 <div>
@@ -188,16 +211,29 @@ Changing `pre` to `div` and typing `CTRL-G %` will produce:
 This must be done before leaving insert mode.  A corresponding normal mode
 command is planned.
 
-_Planned_: `g:matchup_auto_transmute` 
+_Planned_: `g:matchup_auto_transmute`, `CTRL-G %` mapping.
 
 #### (d.4) split and join
 
 _Planned_.
 
-
 ### Inclusive and exclusive motions
 
+In vim, character motions following operators (such as `d` for delete
+and `c` for change) are either _inclusive_ or _exclusive_.  This means
+they either include the ending position or not.  match-up is designed so
+that `d]%` inside a set of parenthesis behaves exactly like `d])`.  For
+other words, exclusive motions will not include the close word.  In this
+example, where `█` is the cursor position,
 
+    if █| continue | endif
+
+pressing `d]%` will produce    
+
+    if endif
+
+To include the close word, use either `dv]%` or `vd]%`.  This is vim
+compatible.
 
 ## Options
 
