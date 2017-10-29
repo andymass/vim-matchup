@@ -22,8 +22,10 @@ Contributions are welcome!
   * [Overview](#overview)
   * [Installation](#installation)
   * [Features](#features)
+  * [Options](#options)
   * [FAQ](#faq)
   * [Interoperability](#interoperability)
+  * [Acknowledgements](#acknowledgements)
   * [Development](#development)
 
 ## Overview
@@ -56,25 +58,38 @@ Or use some other plugin manager:
 
 |       | feature                          | __match-up__  | matchit       | matchparen    |
 | ----- | -------------------------------- | ------------- | ------------- | ------------- |
-| (a.1) | jump between matching constructs | :thumbsup:    | :thumbsup:    | :x:           |
-| (a.2) | jump to open, close              | :thumbsup:    | :question:    | :x:           |
-| (a.3) | jump inside                      | :thumbsup:    | :question:    | :x:           |
-| (b.1) | full set of text objects         | :thumbsup:    | :x:           | :x:           |
-| (c.1) | auto-insert open, close, and mid | :thumbsup:    | :x:           | :x:           |
-| (c.2) | auto-completion                  | :thumbsup:    | :x:           | :x:           |
-| (c.3) | parallel transmutations :star2:  | :thumbsup:    | :x:           | :x:           |
-| (c.4) | split and join                   | :thumbsup:    | :x:           | :x:           |
-| (d.1) | highlight ()[]{}                 | :thumbsup:    | :x:           | :thumbsup:    |
-| (d.2) | highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
-| (e.1) | modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
-| (e.2) | actively developed               | :thumbsup:    | :x:           | :x:           |
+| [a.1] | jump between matching words      | :thumbsup:    | :thumbsup:    | :x:           |
+| [a.2] | jump to open & close words       | :thumbsup:    | :question:    | :x:           |
+| [a.3] | jump inside                      | :thumbsup:    | :x:           | :x:           |
+| [b.1] | full set of text objects         | :thumbsup:    | :question:    | :x:           |
+| [c.1] | auto-insert open, close, & mid   | :construction:| :x:           | :x:           |
+| [c.2] | completion                       | :construction:| :x:           | :x:           |
+| [c.3] | parallel transmutation :star2:   | :thumbsup:    | :x:           | :x:           |
+| [c.4] | split & join                     | :construction:| :x:           | :x:           |
+| [d.1] | highlight `()`, `[]`, & `{}`     | :thumbsup:    | :x:           | :thumbsup:    |
+| [d.2] | highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
+| [e.1] | modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
+| [e.2] | actively developed               | :thumbsup:    | :x:           | :x:           |
+
+[a.1]: #a1-jump-between-matching-words
+[a.2]: #a2-jump-to-open-&-close-words
+[a.3]: #a3-jump-inside
+[b.1]: #b1-full-set-of-text-objects
+[c.1]: #c1-auto-insert-open,-close,-&-mid
+[c.2]: #c2-completion
+[c.3]: #c3-parallel-transmutation-:star2:
+[c.4]: #c4-split-&-join
+[d.1]: #d1-highlight-`()[]{}`
+[d.2]: #d2-highlight-_all_-matches
+[e.1]: #e1-modern,-modular-coding-style
+[e.2]: #e2-actively-developed
 
 Legend: :thumbsup: supported. :construction: TODO, planned, or in progress.
 :question: poorly implemented, broken, or uncertain.  :x: not possible.
 
 ### Detailed feature documentation
 
-What do we mean by open, close, mid?  Here is an example:
+What do we mean by open, close, mid?  Here is a vim-script example:
 
 ```vim
 if l:x == 1
@@ -86,24 +101,32 @@ elseif
 endif
 ```
 
-The words `if`, `else`, `elseif`, `endif` are called "constructs." The
-open construct is `if`, the close construct is `endif`, and the mid
-constructs are `else` and `elseif`.  The `if`/`endif` pair is called an
+match-up understands the words `if`, `else`, `elseif`, `endif` and that
+they form a sequential construct in the vim-script language.  The
+"open" word is `if`, the "close" word is `endif`, and the "mid"
+words are `else` and `elseif`.  The `if`/`endif` pair is called an
 "open-to-close" block and the `if`/`else`, `else`/`elsif`, and
 `elseif`/`endif` are called "any" blocks.
 
-#### (a.1) jump between matching constructs
-  - `%` go forwards matching construct `[count]` times
+#### (a.1) jump between matching words
+  - `%` go forwards to next matching word.  If at a close word,
+  cycle back to the corresponding open word.
   - `{count}%` forwards `{count}` times.  Requires
-      `let g:matchup_override_Npercent = 1`
-  - `g%` go backwards matching construct `[count]` times
+  `let g:matchup_override_Npercent = 1`.
+  By default, `{count}%` goes to the `{count}` percentage in the file.
+  - `g%` go backwards to `[count]`th previous matching word.  If at an
+  open word, cycle around to the corresponding close word.
 
 #### (a.2) jump to open and close
-  - `[%` go to `[count]` previous unmatched open construct
-  - `]%` go to `[count]` next unmatched close construct
+  - `[%` go to `[count]`th previous unmatched open word.  Allows
+  navigation to the start of surrounding blocks.  This is similar to vim's
+  built-in `[(` and `[{` and is an [exclusive] motion.
+  - `]%` go to `[count]`th next unmatched close word.  This is an
+  [exclusive] motion.
 
 #### (a.3) jump inside
-  - `z%` go to inside nearest `[count]`th inner contained block.  
+  - `z%` go to inside `[count]`th nearest inner contained block.  This
+  is an [inclusive] motion.
 
 #### (b.1) full set of text objects
   - `i%` the inside of an open to close block
@@ -122,17 +145,17 @@ Let `g:matchup_all_charwise`.
 XXX inclusive, exclusive
 XXX need () characterwise, others linewise except QUIRKS.
 
-- (c.1) auto-insert open, close, and mid
+#### (c.1) auto-insert open, close, and mid
   - end-wise completion: typing `CTRL-X <cr>` will insert the 
   corresponding end construct.
   
   - automatic block insertion:
   _Planned_. Typing `CTRL-X CTRL-B` to produce block skeletons.
 
-- (c.2) auto-completion
+#### (c.2) auto-completion
   _Planned_. Typing `CTRL-X %` to give a menu of possible constructs.
 
-- (c.3) parallel transmutations
+#### (c.3) parallel transmutations
 
   In insert mode, after changing text inside a construct, typing
   `CTRL-G %` will change any matching constructs in parallel.
@@ -157,12 +180,12 @@ command is planned.
 
 _Planned_: `g:matchup_auto_transmute` 
 
-- (c.4) split and join
+#### (c.4) split and join
 
 _Planned_.
 
-- (d.1) highlight ()[]{}
-- (d.2) highlight _all_ matches          
+#### (d.1) highlight ()[]{}
+#### (d.2) highlight _all_ matches          
 
   To disable match highlighting `let g:matchup_matchparen_enabled = 0`.
   If this option is set before the plugin is loaded, it will not disable
@@ -172,7 +195,9 @@ _Planned_.
 ### Line-wise, exclusive, and inclusive motions
 
 
-### Options
+
+## Options
+
 
 
 ## FAQ

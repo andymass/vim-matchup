@@ -40,6 +40,11 @@ function! matchup#delim#init_buffer() " {{{1
 
   " enable/disable for this buffer
   let b:matchup_delim_enabled = 1
+
+  " surround? XXX
+  " let b:surround_37 = b:matchup_delim_re.all.open
+  "   \ . '\r' . b:matchup_delim_re.all.close
+
 endfunction
 
 " }}}1
@@ -574,7 +579,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
       " but checking might be too slow
       let l:aug = l:thisrebr.aug_comp[l:id][0]
       let l:augment.str = substitute(l:aug.str,
-            \ s:notslash.'\\'.'\(\d\)',
+            \ g:matchup#re#backref,
             \ '\=l:groups[submatch(1)]', 'g')
       let l:augment.unresolved = deepcopy(l:aug.outputmap)
     endif
@@ -728,7 +733,7 @@ function! s:get_matching_delims(down) dict " {{{1
       \ : [self.regextwo.open, 'zbW', max([line('.') - s:stopline, 1])]
 
   " these are the anchors for searchpair
-  let l:open = self.regexone.open     " XXX is this right?
+  let l:open = self.regexone.open     " XXX is this right? BADLOGIC
   let l:close = self.regexone.close
 
   " if we're searching up, we anchor by the augment, if it exists
@@ -736,7 +741,7 @@ function! s:get_matching_delims(down) dict " {{{1
     let l:open = self.augment.str
   endif
 
-  echo '% op' l:open 'cl' l:close 're' l:re '|' self.groups 'a' self.augment
+  "echo '% op' l:open 'cl' l:close 're' l:re '|' self.groups 'a' self.augment
 
   " turn \(\) into \%(\) for searchpairpos
   let l:open  = s:remove_capture_groups(l:open)
@@ -950,7 +955,7 @@ function! s:init_delim_lists() " {{{1
   " parse matchpairs and b:match_words
   let l:mps = escape(&matchpairs, '[$^.*~\\/?]')
   let l:match_words = get(b:, 'match_words', '') . ','.l:mps
-  let l:sets = split(l:match_words, s:notslash.',')
+  let l:sets = split(l:match_words, g:matchup#re#not_bslash.',')
 
   " do not duplicate whole groups of match words
   let l:seen = {}
@@ -958,7 +963,7 @@ function! s:init_delim_lists() " {{{1
     if has_key(l:seen, l:s) | continue | endif
     let l:seen[l:s] = 1
 
-    let l:words = split(l:s, s:notslash.':')
+    let l:words = split(l:s, g:matchup#re#not_bslash.':')
 
     " we will resolve backrefs to produce two sets of words,
     " one with \(foo\)s and one with \1s, along with a set of
@@ -983,13 +988,13 @@ function! s:init_delim_lists() " {{{1
     " if any of these contain \d raise a warning
     " and substitute it out (ref-2)
     for l:cg_i in keys(l:cg)
-      if l:cg[l:cg_i].str =~# s:notslash.'\\'.'\(\d\)'
+      if l:cg[l:cg_i].str =~# g:matchup#re#backref
         echohl WarningMsg
         echom 'match-up: capture group' l:cg[l:cg_i].str
               \ 'should not contain backrefs (ref-2)'
         echohl None
         let l:cg[l:cg_i].str = substitute(l:cg[l:cg_i].str,
-              \ s:notslash.'\\'.'\(\d\)', '', 'g')
+              \ g:matchup#re#backref, '', 'g')
       endif
     endfor
 
@@ -997,11 +1002,11 @@ function! s:init_delim_lists() " {{{1
     " of the capture groups with \9, \8, ..., \1
     " this must be done deepest to shallowest
     let l:augments = {}
-    let l:order = reverse(sort(keys(l:cg), 'N'))
-    call sort(l:order, 's:capture_group_sort', l:cg)
+    let l:order = matchup#delim#capture_group_replacement_order(l:cg)
 
     let l:curaug = l:words[0]
-    let l:augments[0] = l:curaug
+    " TODO: \0 should match the whole pattern..
+    let l:augments[0] = l:curaug " XXX does putting this in 0 make sense?
     for l:j in l:order
       " these indexes are not invalid because we work backwards
       let l:curaug = strpart(l:curaug, 0, l:cg[l:j].pos[0])
@@ -1013,9 +1018,14 @@ function! s:init_delim_lists() " {{{1
     " should we not fill groups that aren't needed?
 "    echo l:order l:augments
     " l:words[0] should never be used
+
+    " the last element in the order gives the most augmented string
+    " this includes groups that might not actually be needed elsewhere
     if !empty(l:order)
       let l:words[0] = l:augments[l:order[-1]]
     endif
+
+  echo l:augments
 
     " now for the rest of the words...
     for l:i in range(1, len(l:words)-1)
@@ -1026,7 +1036,7 @@ function! s:init_delim_lists() " {{{1
 
       " get the necessary \1, \2, etc back-references
       let l:needed_groups = []
-      call substitute(l:words_backref[l:i], s:notslash.'\\'.'\(\d\)', 
+      call substitute(l:words_backref[l:i], g:matchup#re#backref, 
             \ '\=len(add(l:needed_groups, submatch(1)))', 'g')
       call filter(l:needed_groups,
             \ 'index(l:needed_groups, v:val) == v:key')
@@ -1074,7 +1084,7 @@ function! s:init_delim_lists() " {{{1
 
         " if any backrefs remain, replace with re-numbered versions
         let l:words_backref[l:i] = substitute(l:words_backref[l:i],
-              \ s:notslash.'\\'.l:bref,
+              \ g:matchup#re#not_bslash.'\\'.l:bref,
               \ '\\\=l:group_renumber[l:i][submatch(1)]', 'g')
       endfor
 
@@ -1299,6 +1309,12 @@ function! s:capture_group_sort(a, b) dict
   return self[a:b].depth - self[a:a].depth
 endfunction
 
+function! matchup#delim#capture_group_replacement_order(cg)
+  let l:order = reverse(sort(keys(a:cg), 'N'))
+  call sort(l:order, 's:capture_group_sort', a:cg)
+  return l:order
+endfunction
+
 " }}}1
 
 function! s:init_delim_regexes() " {{{1
@@ -1492,7 +1508,7 @@ endfunction
 
 "}}}1
 function! matchup#delim#fill_backrefs(re, groups) " {{{
-  return substitute(a:re, s:notslash.'\\'.'\(\d\)',
+  return substitute(a:re, g:matchup#re#backref,
         \ '\=get(a:groups, submatch(1), "")', 'g')
 endfunction
 
@@ -1504,7 +1520,7 @@ endfunction
 " }}}1
 
 " initialize script variables
-let s:stopline = get(g:, 'matchup_delim_stopline', 300)
+let s:stopline = get(g:, 'matchup_delim_stopline', 400)
 
 let s:notslash = '\\\@<!\%(\\\\\)*'
 

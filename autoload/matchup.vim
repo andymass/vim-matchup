@@ -69,15 +69,21 @@ function! s:init_default_mappings()
   if get(g:, 'matchup_motion_enabled', 0)
     call s:map('n', '%',  '<plug>(matchup-%)',  1)
     call s:map('n', 'g%', '<plug>(matchup-g%)', 1)
-    call s:map('n', ']%', '<plug>(matchup-]%)', 1)
-    call s:map('n', '[%', '<plug>(matchup-[%)', 1)
 
     call s:map('x', '%',  '<plug>(matchup-%)',  1)
     call s:map('x', 'g%', '<plug>(matchup-g%)', 1)
     call s:map('o', '%',  '<plug>(matchup-%)',  1)
     call s:map('o', 'g%', '<plug>(matchup-g%)', 1)
 
-    call s:map('n', 'z%', '<plug>(matchup-z%)', 1)
+    call s:map('n', ']%', '<plug>(matchup-]%)', 1)
+    call s:map('n', '[%', '<plug>(matchup-[%)', 1)
+
+    call s:map('x', ']%', '<plug>(matchup-]%)', 1)
+    call s:map('x', '[%', '<plug>(matchup-[%)', 1)
+    call s:map('o', ']%', '<plug>(matchup-]%)', 1)
+    call s:map('o', '[%', '<plug>(matchup-[%)', 1)
+
+    call s:map('n', 'z%', '<plug>(matchup-z%)')
   endif
 
   if get(g:, 'matchup_text_obj_enabled', 0)
@@ -89,6 +95,7 @@ function! s:init_default_mappings()
 
   if get(g:, 'matchup_imap_enabled', 0)
     call s:map('i', '<c-x><cr>',  '<plug>(matchup-delim-close)')
+    " XXX other maps..?
   endif
 endfunction
 
