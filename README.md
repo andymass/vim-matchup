@@ -56,33 +56,34 @@ Or use some other plugin manager:
 
 ## Features
 
-|       | feature                          | __match-up__  | matchit       | matchparen    |
-| ----- | -------------------------------- | ------------- | ------------- | ------------- |
-| [a.1] | jump between matching words      | :thumbsup:    | :thumbsup:    | :x:           |
-| [a.2] | jump to open & close words       | :thumbsup:    | :question:    | :x:           |
-| [a.3] | jump inside                      | :thumbsup:    | :x:           | :x:           |
-| [b.1] | full set of text objects         | :thumbsup:    | :question:    | :x:           |
-| [c.1] | auto-insert open, close, & mid   | :construction:| :x:           | :x:           |
-| [c.2] | completion                       | :construction:| :x:           | :x:           |
-| [c.3] | parallel transmutation :star2:   | :thumbsup:    | :x:           | :x:           |
-| [c.4] | split & join                     | :construction:| :x:           | :x:           |
-| [d.1] | highlight `()`, `[]`, & `{}`     | :thumbsup:    | :x:           | :thumbsup:    |
-| [d.2] | highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
-| [e.1] | modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
-| [e.2] | actively developed               | :thumbsup:    | :x:           | :x:           |
+|         | feature                          | __match-up__  | matchit       | matchparen    |
+| ------- | -------------------------------- | ------------- | ------------- | ------------- |
+| ([a.1]) | jump between matching words      | :thumbsup:    | :thumbsup:    | :x:           |
+| ([a.2]) | jump to open & close words       | :thumbsup:    | :question:    | :x:           |
+| ([a.3]) | jump inside                      | :thumbsup:    | :x:           | :x:           |
+| ([b.1]) | full set of text objects         | :thumbsup:    | :question:    | :x:           |
+| ([c.1]) | highlight `()`, `[]`, & `{}`     | :thumbsup:    | :x:           | :thumbsup:    |
+| ([c.2]) | highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
+| ([d.1]) | auto-insert open, close, & mid   | :construction:| :x:           | :x:           |
+| ([d.2]) | completion                       | :construction:| :x:           | :x:           |
+| ([d.3]) | parallel transmutation           | :thumbsup:    | :x:           | :x:           |
+| ([d.4]) | split & join                     | :construction:| :x:           | :x:           |
+| ([e.1]) | modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
+| ([e.2]) | actively developed               | :thumbsup:    | :x:           | :x:           |
 
 [a.1]: #a1-jump-between-matching-words
-[a.2]: #a2-jump-to-open-&-close-words
+[a.2]: #a2-jump-to-open-and-close-words
 [a.3]: #a3-jump-inside
 [b.1]: #b1-full-set-of-text-objects
-[c.1]: #c1-auto-insert-open,-close,-&-mid
-[c.2]: #c2-completion
-[c.3]: #c3-parallel-transmutation-:star2:
-[c.4]: #c4-split-&-join
-[d.1]: #d1-highlight-`()[]{}`
-[d.2]: #d2-highlight-_all_-matches
-[e.1]: #e1-modern,-modular-coding-style
+[c.1]: #c1-highlight-
+[c.2]: #c2-highlight-all-matches
+[d.1]: #d1-auto-insert-open-close-and-mid
+[d.2]: #d2-completion
+[d.3]: #d3-parallel-transmutation
+[d.4]: #d4-split-and-join
+[e.1]: #e1-modern-modular-coding-style
 [e.2]: #e2-actively-developed
+[inclusive]: #inclusive-and-exclusive-motions
 
 Legend: :thumbsup: supported. :construction: TODO, planned, or in progress.
 :question: poorly implemented, broken, or uncertain.  :x: not possible.
@@ -117,7 +118,7 @@ words are `else` and `elseif`.  The `if`/`endif` pair is called an
   - `g%` go backwards to `[count]`th previous matching word.  If at an
   open word, cycle around to the corresponding close word.
 
-#### (a.2) jump to open and close
+#### (a.2) jump to open and close words
   - `[%` go to `[count]`th previous unmatched open word.  Allows
   navigation to the start of surrounding blocks.  This is similar to vim's
   built-in `[(` and `[{` and is an [exclusive] motion.
@@ -145,17 +146,26 @@ Let `g:matchup_all_charwise`.
 XXX inclusive, exclusive
 XXX need () characterwise, others linewise except QUIRKS.
 
-#### (c.1) auto-insert open, close, and mid
+#### (c.1) highlight ()[]{}
+
+#### (c.2) highlight _all_ matches          
+
+  To disable match highlighting `let g:matchup_matchparen_enabled = 0`.
+  If this option is set before the plugin is loaded, it will not disable
+  the matchparen plugin (_Planned_).  To disable highlighting entirely
+  do not load matchparen.
+
+#### (d.1) auto-insert open, close, and mid
   - end-wise completion: typing `CTRL-X <cr>` will insert the 
   corresponding end construct.
   
   - automatic block insertion:
   _Planned_. Typing `CTRL-X CTRL-B` to produce block skeletons.
 
-#### (c.2) auto-completion
+#### (d.2) auto-completion
   _Planned_. Typing `CTRL-X %` to give a menu of possible constructs.
 
-#### (c.3) parallel transmutations
+#### (d.3) parallel transmutations
 
   In insert mode, after changing text inside a construct, typing
   `CTRL-G %` will change any matching constructs in parallel.
@@ -180,19 +190,12 @@ command is planned.
 
 _Planned_: `g:matchup_auto_transmute` 
 
-#### (c.4) split and join
+#### (d.4) split and join
 
 _Planned_.
 
-#### (d.1) highlight ()[]{}
-#### (d.2) highlight _all_ matches          
 
-  To disable match highlighting `let g:matchup_matchparen_enabled = 0`.
-  If this option is set before the plugin is loaded, it will not disable
-  the matchparen plugin (_Planned_).  To disable highlighting entirely
-  do not load matchparen.
-
-### Line-wise, exclusive, and inclusive motions
+### Inclusive and exclusive motions
 
 
 
