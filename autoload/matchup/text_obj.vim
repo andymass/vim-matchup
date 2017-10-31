@@ -43,6 +43,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   for l:try_again in range(3)
     " on the first try, we use v:count which may be zero
     " on the next tries, use the previous count plus one
+    " TODO: make sure this logic is right
     let [l:open, l:close] = matchup#delim#get_surrounding(
           \ a:type, l:try_again ? (v:count1 + l:try_again) : v:count)
 
@@ -67,14 +68,14 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
     let [l:l1, l:c1, l:l2, l:c2] = [l:open.lnum,  l:open.cnum,
           \ l:close.lnum, l:close.cnum]
 
-    " special case: if inner, and the current selection coincides
+    let l:is_multiline = (l:l2 - l:l1) > 1 ? 1 : 0
+
+    " special case: if inner and the current selection coincides
     " with the open and close positions, try for a second time
     " this allows vi% in [[   ]] to work
-    if l:selection[1] == l:c1 && l:selection[3] == l:c2
+    if a:visual && a:is_inner && l:selection == [l:l1, l:c1, l:l2, l:c2]
       continue
     endif
-
-    let l:is_multiline = (l:l2 - l:l1) > 1 ? 1 : 0
 
     " adjust the borders
     if a:is_inner
@@ -98,7 +99,8 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
       let l:c2 += len(l:close.match) - 1
     endif
 
-    " in visual line mode, force new selection to be larger
+    " TODO: there is still a bug here in V mode
+    " in visual line mode, force new selection to not be smaller
     if a:visual && visualmode() ==# 'V'
           \ && (l:l1 > l:selection[0] || l:l2 < l:selection[2])
       continue
