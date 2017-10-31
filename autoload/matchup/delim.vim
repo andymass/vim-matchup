@@ -204,23 +204,39 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
 endfunction
 
 " }}}1
-function! matchup#delim#get_surrounding(type) " {{{1
+function! matchup#delim#get_surrounding(type, ...) " {{{1
+  call matchup#perf#tic('delim#get_surrounding')
+
   let l:save_pos = matchup#pos#get_cursor()
   let l:pos_val_cursor = matchup#pos#val(l:save_pos)
   let l:pos_val_last = l:pos_val_cursor
   let l:pos_val_open = l:pos_val_cursor - 1
 
+  let l:count = a:0 >= 1 ? a:1 : 1
+  let l:counter = l:count
+
+  " provided count == 0 refers to local any block
+  let l:local = l:count == 0 ? 1 : 0
+
   while l:pos_val_open < l:pos_val_last
-    let l:open = matchup#delim#get_prev(a:type, 'open')
+    let l:open = matchup#delim#get_prev(a:type,
+          \ l:local ? 'open_mid' : 'open')
     if empty(l:open) | break | endif
-   "  echo l:open.lnum l:open.cnum | sleep 1
-    let l:close = matchup#delim#get_matching(l:open)
-   "  echo l:close.lnum l:close.cnum | sleep 1
+
+    let l:match = matchup#delim#get_matching(l:open, 1)
+    let l:close = l:local ? l:open.links.next : l:open.links.close
+
     let l:pos_val_try = matchup#pos#val(l:close)
         \ + strdisplaywidth(l:close.match) - 1
     if l:pos_val_try >= l:pos_val_cursor
-      call matchup#pos#set_cursor(l:save_pos)
-      return [l:open, l:close]
+      if l:counter <= 1
+        " restore cursor and accept
+        call matchup#pos#set_cursor(l:save_pos)
+        call matchup#perf#toc('delim#get_surrounding', 'accept')
+        return [l:open, l:close]
+      endif
+      call matchup#pos#set_cursor(matchup#pos#prev(l:open))
+      let l:counter -= 1
     else
       call matchup#pos#set_cursor(matchup#pos#prev(l:open))
       let l:pos_val_last = l:pos_val_open
@@ -228,7 +244,9 @@ function! matchup#delim#get_surrounding(type) " {{{1
     endif
   endwhile
 
+  " restore cursor and return failure
   call matchup#pos#set_cursor(l:save_pos)
+  call matchup#perf#toc('delim#get_surrounding', 'fail')
   return [{}, {}]
 endfunction
 
@@ -1332,7 +1350,8 @@ function! s:init_delim_regexes() " {{{1
 
   let l:re.delim_tex = s:init_delim_regexes_generator('delim_tex')
 
-  for l:k in ['open', 'close', 'both', 'mid', 'both_all']
+  " XXX use keys(sidedict)
+  for l:k in ['open', 'close', 'both', 'mid', 'both_all', 'open_mid']
     let l:re.delim_all[l:k] = l:re.delim_tex[l:k]
     let l:re.all[l:k] = l:re.delim_all[l:k]
   endfor
@@ -1546,6 +1565,7 @@ let s:sidedict = {
       \ 'close'    : ['close'],
       \ 'both'     : ['close', 'open'],
       \ 'both_all' : ['close', 'mid', 'open'],
+      \ 'open_mid' : ['mid', 'open'],
       \}
   
 let s:basetypes = {

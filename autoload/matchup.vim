@@ -26,7 +26,7 @@ function! s:init_options()
   call s:init_option('matchup_text_obj_enabled', 1)
   call s:init_option('matchup_text_obj_linewise_operators', ['d', 'y'])
 
-  call s:init_option('matchup_transmute_enabled', 1)
+  call s:init_option('matchup_transmute_enabled', 0)
 
   call s:init_option('matchup_imap_enabled', 1)
   

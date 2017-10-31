@@ -23,82 +23,106 @@ function! matchup#text_obj#init_module() " {{{1
   endfor
 endfunction
 
+" MAXCOL is probably a lot bigger in actuality, but we don't want
+" to support such long lines
+let s:MAXCOL = 0x7fff
+
 " }}}1
 function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
+  " get the current selection, move to end of range
   if a:visual
     let l:selection = getpos("'<")[1:2] + getpos("'>")[1:2]
     call matchup#pos#set_cursor(getpos("'>"))
   endif
 
-  let [l:open, l:close] = matchup#delim#get_surrounding(a:type)
+  " determine if operator is able to act line-wise (i.e., for inner)
+  let l:linewise = index(g:matchup_text_obj_linewise_operators,
+        \ v:operator) >= 0
 
-  if empty(l:open)
-    if a:visual
-      normal! gv
-    endif
-    return
-  endif
+  " try up to three times (rarely)
+  for l:try_again in range(3)
+    " on the first try, we use v:count which may be zero
+    " on the next tries, use the previous count plus one
+    let [l:open, l:close] = matchup#delim#get_surrounding(
+          \ a:type, l:try_again ? (v:count1 + l:try_again) : v:count)
 
-  let [l:l1, l:c1, l:l2, l:c2] = [l:open.lnum,  l:open.cnum,
-                                \ l:close.lnum, l:close.cnum]
-
-  " Determine if operator is linewise
- let l:linewise = index(g:matchup_text_obj_linewise_operators,
-       \ v:operator) >= 0
- let l:linewise = 1
-
-  " Adjust the borders
-  if a:is_inner
-    let c1 += len(l:open.match)
-    let c2 -= 1
-
-    let l:is_inline = (l:l2 - l:l1) > 1 ? 1 : 0
-
-          " \ && match(strpart(getline(l1), c1   ), '^\s*$') >= 0
-          " \ && match(strpart(getline(l2), 0, c2), '^\s*$') >= 0
-
-    if l:is_inline
-      let l1 += 1
-      let c1 = strlen(matchstr(getline(l1), '^\s*')) + 1
-      let l2 -= 1
-      let c2 = strlen(getline(l2))
-      if c2 == 0 && !l:linewise
-        let l2 -= 1
-        let c2 = len(getline(l2)) + 1
-      endif
-    elseif c2 == 0
-      let l2 -= 1
-      let c2 = len(getline(l2)) + 1
-    endif
-  else
-    let c2 += len(l:close.match) - 1
-  endif
-
-    " select next pair if we reached the same selection
-    if a:visual && l:selection == [l1, c1, l2, c2]
-      echo 'foobar' | sleep 1
-      call matchup#pos#set_cursor(matchup#pos#next([l2, c2]))
-      let [l:open, l:close] = matchup#delim#get_surrounding(a:type)
-      if empty(l:open)
+    if empty(l:open)
+      if a:visual
         normal! gv
-        return
       endif
-      let [l1, c1, l2, c2] = [l:open.lnum, l:open.cnum,
-            \ l:close.lnum, l:close.cnum + len(l:close.match) - 1]
+      return
     endif
 
-    let l:is_inline = (l2 - l1) > 1
-          \ && match(strpart(getline(l1), 0, c1-1), '^\s*$') >= 0
-          \ && match(strpart(getline(l2), 0, c2),   '^\s*$') >= 0
+    " heuristic to handle overlapping any-blocks;
+    " if the start delimiter is inside our already visually selected
+    " area, try again but this time find open instead of open_mid
+    if a:visual && !l:try_again
+          \ && (l:open.lnum > l:selection[0]
+          \    || l:open.lnum == l:selection[0]
+          \    && l:open.cnum >= l:selection[1])
+      let [l:open, l:close] = matchup#delim#get_surrounding(
+            \ a:type, v:count1 + l:try_again)
+    endif
 
-  " Determine the select mode
-  let l:select_mode = l:is_inline && l:linewise ? 'V'
+    let [l:l1, l:c1, l:l2, l:c2] = [l:open.lnum,  l:open.cnum,
+          \ l:close.lnum, l:close.cnum]
+
+    " special case: if inner, and the current selection coincides
+    " with the open and close positions, try for a second time
+    " this allows vi% in [[   ]] to work
+    if l:selection[1] == l:c1 && l:selection[3] == l:c2
+      continue
+    endif
+
+    let l:is_multiline = (l:l2 - l:l1) > 1 ? 1 : 0
+
+    " adjust the borders
+    if a:is_inner
+      let l:c1 += len(l:open.match)
+      let l:c2 -= 1
+
+      if l:is_multiline
+        let l:l1 += 1
+        let l:c1 = strlen(matchstr(getline(l:l1), '^\s*')) + 1
+        let l:l2 -= 1
+        let l:c2 = strlen(getline(l:l2))
+        if l:c2 == 0 && !l:linewise
+          let l:l2 -= 1
+          let l:c2 = len(getline(l:l2)) + 1
+        endif
+      elseif l:c2 == 0
+        let l:l2 -= 1
+        let l:c2 = len(getline(l2)) + 1
+      endif
+    else
+      let l:c2 += len(l:close.match) - 1
+    endif
+
+    " in visual line mode, force new selection to be larger
+    if a:visual && visualmode() ==# 'V'
+          \ && (l:l1 > l:selection[0] || l:l2 < l:selection[2])
+      continue
+    endif
+
+    " try again if we reached the same selection
+    " for visual line mode, only check line numbers
+    " workaround for cases where the cursor might get fooled
+    " into going into one of the inner blocks
+    if a:visual && (l:selection == [l:l1, l:c1, l:l2, l:c2] 
+          \ || visualmode() ==# 'V'
+          \    && [l:selection[0], l:selection[2]] == [l:l1, l:l2])
+      continue
+    else
+      break
+    endif
+
+  endfor
+
+  " determine the proper select mode
+  let l:select_mode = l:is_multiline && l:linewise ? 'V'
         \ : (v:operator ==# ':') ? visualmode() : 'v'
 
-  echo l:is_inline l:linewise v:operator visualmode()
-        \ l:l2 l:l1 l:l2-l:l1  | sleep 1
-
-  " Apply selection
+  " apply selection
   execute 'normal!' l:select_mode
   call matchup#pos#set_cursor(l1, c1)
   normal! o

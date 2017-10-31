@@ -131,15 +131,18 @@ words are `else` and `elseif`.  The `if`/`endif` pair is called an
   is an [inclusive] motion.
 
 #### (b.1) full set of text objects
-  - `i%` the inside of an open to close block
-  - `1i%` the inside of an any block
-  - `{count}i%` If count is not 1, the inside open-to-close block
+- `i%` the inside of an any block
+- `1i%` the inside of an open-to-close block
+- `{count}i%` If count is greater than 1, the inside of the `{count}`th
+  surrounding open-to-close block
 
-  - `a%` an open-to-close block.
-  - `1a%` an any block.  Includes mids but does not include open and close.
-  - `{count}a%` if `{count}` is greater than 1, the `{count}` surrounding open-to-close block.
+- `a%` an any block.
+- `1a%` an open-to-close block.  Includes mids but does not include open
+  and close words.
+- `{count}a%` if `{count}` is greater than 1, the `{count}`th surrounding
+  open-to-close block.
 
-  Note: by default objects involving `matchpairs` such as `(){}[]` are
+Note: by default objects involving `matchpairs` such as `(){}[]` are
 performed character-wise, while `matchwords` such as `if`/`endif` are
 performed line-wise.
 The -wise can be forced using "v", "V", or `^V`
@@ -289,7 +292,7 @@ let g:matchup_text_obj_enabled = 0
 ```
 defaults: 1
 
-To enable the experimental [transmute](#d3-parallel-transmutation)
+To enable the experimental [transmute](#d1-parallel-transmutation)
 module,
 ```vim
 let g:matchup_transmute_enabled = 1
@@ -335,9 +338,37 @@ let g:matchup_matchparen_status_offscreen = 0
 ```
 default: 1
 
+Adjust timeouts for matchparen highlighting
+```
+let g:matchup_matchparen_timeout = 300
+let g:matchparen_insert_timeout = 60
+```
+default: 300, 60
+
 ### motion
 
-### text_obj
+To allow `{count}%`,
+```vim
+g:matchup_motion_override_Npercent = 1
+```
+default: 0
+
+If enabled, cursor will land on the end of mid and close words while
+moving downwards (`%`/`]%`).  While moving upwards (`g%`, `[%`) the cursor
+will land on the beginning.  To disable,
+```vim
+let g:matchup_motion_cursor_end = 0
+```
+default: 1
+
+### Module text_obj
+
+Modify the set of operators which may operate
+[line-wise](#line-wise-operator-text-object-combinations)
+```vim 
+let g:matchup_text_obj_linewise_operators' = ['d', 'y']
+```
+default: `['d', 'y']`
 
 ### transmute
 
@@ -523,6 +554,9 @@ Convert between single-line and multi-line blocks.  Mappings undecided.
 - write proper vim doc
 - thoroughly test with unicode, tabs
 - add screenshots and animations
+- add file type `quirks` module
+- investigate whether `&selection`/`&virtualedit` options are important
 - can match-up be integrated with
   [vim-surround](https://github.com/tpope/vim-surround)?
+- complete parallel transmutation in an efficient way.
 
