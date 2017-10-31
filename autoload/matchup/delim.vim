@@ -765,7 +765,10 @@ function! s:get_matching_delims(down) dict " {{{1
    " let s:foo+= 1
 
    " improves perceptual performance
-   sleep 1m
+   " XXX use s: mode flag
+   if mode() ==# 'i'
+     sleep 1m
+   endif
 
 "  call matchup#perf#tic('q7')
 "  TODO support timeout
@@ -1006,6 +1009,7 @@ function! s:init_delim_lists() " {{{1
 
     let l:curaug = l:words[0]
     " TODO: \0 should match the whole pattern..
+    " augments[0] is the original words[0] with original capture groups
     let l:augments[0] = l:curaug " XXX does putting this in 0 make sense?
     for l:j in l:order
       " these indexes are not invalid because we work backwards
@@ -1025,7 +1029,11 @@ function! s:init_delim_lists() " {{{1
       let l:words[0] = l:augments[l:order[-1]]
     endif
 
-  echo l:augments
+    " as a concrete example, 
+    " l:augments = { '0': '\<\(wh\%[ile]\|for\)\>', '1': '\<\1\>'}
+    " l:words[0] = \<\1\>
+
+  " echo l:augments l:words[0]
 
     " now for the rest of the words...
     for l:i in range(1, len(l:words)-1)

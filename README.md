@@ -60,35 +60,35 @@ Or use some other plugin manager:
 
 ## Features
 
-|         | feature                          | __match-up__  | matchit       | matchparen    |
-| ------- | -------------------------------- | ------------- | ------------- | ------------- |
-| ([a.1]) | jump between matching words      | :thumbsup:    | :thumbsup:    | :x:           |
-| ([a.2]) | jump to open & close words       | :thumbsup:    | :question:    | :x:           |
-| ([a.3]) | jump inside                      | :thumbsup:    | :x:           | :x:           |
-| ([b.1]) | full set of text objects         | :thumbsup:    | :question:    | :x:           |
-| ([c.1]) | highlight `()`, `[]`, & `{}`     | :thumbsup:    | :x:           | :thumbsup:    |
-| ([c.2]) | highlight _all_ matches          | :thumbsup:    | :x:           | :x:           |
-| ([c.3]) | display matches off-screen       | :thumbsup:    | :x:           | :x:           |
-| ([d.1]) | auto-insert open, close, & mid   | :construction:| :x:           | :x:           |
-| ([d.2]) | completion                       | :construction:| :x:           | :x:           |
-| ([d.3]) | parallel transmutation           | :thumbsup:    | :x:           | :x:           |
-| ([d.4]) | split & join                     | :construction:| :x:           | :x:           |
-| ([e.1]) | modern, modular coding style     | :thumbsup:    | :x:           | :x:           |
-| ([e.2]) | actively developed               | :thumbsup:    | :x:           | :x:           |
+|         | feature                          | __match-up__   | matchit       | matchparen    |
+| ------- | -------------------------------- | -------------- | ------------- | ------------- |
+| ([a.1]) | jump between matching words      | :thumbsup:     | :thumbsup:    | :x:           |
+| ([a.2]) | jump to open & close words       | :thumbsup:     | :question:    | :x:           |
+| ([a.3]) | jump inside                      | :thumbsup:     | :x:           | :x:           |
+| ([b.1]) | full set of text objects         | :thumbsup:     | :question:    | :x:           |
+| ([c.1]) | highlight `()`, `[]`, & `{}`     | :thumbsup:     | :x:           | :thumbsup:    |
+| ([c.2]) | highlight _all_ matches          | :thumbsup:     | :x:           | :x:           |
+| ([c.3]) | display matches off-screen       | :thumbsup:     | :x:           | :x:           |
+| ([d.1]) | auto-insert open, close, & mid   | :construction: | :x:           | :x:           |
+| ([d.2]) | completion                       | :construction: | :x:           | :x:           |
+| ([d.3]) | parallel transmutation           | :construction: | :x:           | :x:           |
+| ([d.4]) | split & join                     | :construction: | :x:           | :x:           |
+| ([e.1]) | modern, modular coding style     | :thumbsup:     | :x:           | :x:           |
+| ([e.2]) | actively developed               | :thumbsup:     | :x:           | :x:           |
 
 [a.1]: #a1-jump-between-matching-words
 [a.2]: #a2-jump-to-open-and-close-words
 [a.3]: #a3-jump-inside
 [b.1]: #b1-full-set-of-text-objects
-[c.1]: #c1-highlight-
+[c.1]: #c1-highlight---and-
 [c.2]: #c2-highlight-all-matches
 [c.3]: #c3-display-matches-off-screen
 [d.1]: #d1-auto-insert-open-close-and-mid
 [d.2]: #d2-completion
 [d.3]: #d3-parallel-transmutation
 [d.4]: #d4-split-and-join
-[e.1]: #e1-modern-modular-coding-style
-[e.2]: #e2-actively-developed
+[e.1]: #development
+[e.2]: #development
 [inclusive]: #inclusive-and-exclusive-motions
 [exclusive]: #inclusive-and-exclusive-motions
 
@@ -182,17 +182,16 @@ corresponding end word.
 - automatic block insertion: typing `CTRL-X CTRL-B` to produce
 block skeletons.
 
-#### (d.2) auto-completion
+#### (d.2) completion
 
 _Planned_. 
 
-Typing `CTRL-X M` will give a menu of possible words.
+Typing `CTRL-X O`/`CTRL-X W` will give a menu of possible words.
 
-#### (d.3) parallel transmutations
+#### (d.3) parallel transmutation
 
 In insert mode, after changing text inside a word, matching words will
-be changed in parallel.
-As an example,
+be changed in parallel.  As an example,
 
 ```html
 <pre>
@@ -208,10 +207,11 @@ Changing `pre` to `div` and leaving insert mode will produce:
 </div>
 ```
 
-This must be done before leaving insert mode.  A corresponding normal mode
-command is planned.
+Note: this currently only works for match words which define a backref
+relation like `\1`.  A wider set of transmutations are planned.
 
-_Planned_: `g:matchup_auto_transmute`, `CTRL-G %` mapping.
+_Planned_: `g:matchup_auto_transmute`, `CTRL-G %` mapping.  A
+corresponding normal mode command is also planned.
 
 #### (d.4) split and join
 
@@ -226,11 +226,15 @@ that `d]%` inside a set of parenthesis behaves exactly like `d])`.  For
 other words, exclusive motions will not include the close word.  In this
 example, where `█` is the cursor position,
 
-    if █| continue | endif
+```vim
+if █| continue | endif
+```
 
 pressing `d]%` will produce    
 
-    if endif
+```vim
+if endif
+```
 
 To include the close word, use either `dv]%` or `vd]%`.  This is vim
 compatible.
@@ -243,40 +247,41 @@ compatible.
 
 - match-up doesn't work
 
-The plugin requires a fairly recent version of vim.  Please tell me your
-vim version and error messages.  Try updating vim and see if the problem
-persists.
+  The plugin requires a fairly recent version of vim.  Please tell me your
+  vim version and error messages.  Try updating vim and see if the problem
+  persists.
 
 - Why does jumping not work for construct X in language Y?
 
-Please open a new issue 
+  Please open a new issue 
 
 - Highlighting is not correct for construct X
 
-match-up uses matchit's filetype-specific data, which may not give enough
-information to create proper highlights.  To fix this, you may need to add
-a highlight quirk.
+  match-up uses matchit's filetype-specific data, which may not give
+  enough information to create proper highlights.  To fix this, you may
+  need to add a highlight quirk.
 
 For help, please open a new issue and be a specific as possible.
 
 - I'm having performance problems
 
-match-up aims to be as fast as possible.  If you see any performance
-issues, please open a new issue and report `g:matchup#perf#times`.
+  match-up aims to be as fast as possible.  If you see any performance
+  issues, please open a new issue and report `g:matchup#perf#times`.
 
 - How can I contribute?
 
-Read the [contribution guidelines](CONTRIBUTING.md) and
-[issue template](ISSUE_TEMPLATE.md).  Be as precise and detailed
-as possible when submitting issues and pull requests.
+  Read the [contribution guidelines](CONTRIBUTING.md) and [issue
+  template](ISSUE_TEMPLATE.md).  Be as precise and detailed as possible
+  when submitting issues and pull requests.
 
 ## Interoperability
 
-  - match-up is not compatible with [vimtex](https://github.com/lervag/vimtex)
-  and will be disabled automatically when vimtex is detected.
-  - the end-completion maps conflict with [vim-endwise](https://github.com/tpope/vim-endwise).
+  - match-up's match highlighting is not compatible with [vimtex]'s
+  implementation.  match-up highlighting and will be disabled
+  automatically when vimtex is detected.
   - matchit.vim should not be loaded.  If it is loaded, it must be loaded
-  before match-up (in this case, matchit is disabled).
+  before match-up (in this case, matchit will be disabled when match-up
+  loads).
   - match-up loads matchparen if it is not already loaded.
 
 ## Acknowledgments 
@@ -284,20 +289,22 @@ as possible when submitting issues and pull requests.
 ### Origins
 
 match-up was originally based on [@lervag](https://github.com/lervag)'s
-[vimtex](github.com/lervag/vimtex).  The concept and style of this plugin
-and its development are heavily influenced by vimtex.
+[vimtex].  The concept and style of this plugin and its development are
+heavily influenced by vimtex. :beers:
+
+[vimtex]: https://github.com/lervag/vimtex
 
 ### Other inspirations
 
 - [matchit](http://ftp.vim.org/pub/vim/runtime/macros/matchit.txt)
 - [matchparen](http://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt)
+- [MatchTagAlways](https://github.com/Valloric/MatchTagAlways)
 - [vim-endwise](https://github.com/tpope/vim-endwise)
 - [auto-pairs](https://github.com/jiangmiao/auto-pairs)
 - [delimitMate](https://github.com/Raimondi/delimitMate)
 - [splitjoin.vim](https://github.com/AndrewRadev/splitjoin.vim)
 - [vim-surround](https://github.com/tpope/vim-surround)
 - [vim-sandwich](https://github.com/machakann/vim-sandwich)
-- [MatchTagAlways](https://github.com/Valloric/MatchTagAlways)
 
 ## license
 
@@ -354,11 +361,34 @@ Features not in matchit:
 
   Jump into
     z[]% go to the center of the next group of matchwords
+  
+- the end-completion maps conflict with [vim-endwise](https://github.com/tpope/vim-endwise).
 
 ## Development
 
-### TODO
+### Reporting problems
 
-- vim proper doc/
-- Add screenshots
+This is a brand new plugin and there are likely to be many bugs.
+Thorough issue reports are encouraged.  Please read the [issue
+template](ISSUE_TEMPLATE.md) first.  Be as precise and detailed as
+possible when submitting issues.  
+
+Feature requests are also welcome.
+
+### Contributing
+
+Read the [contribution guidelines](CONTRIBUTING.md) before contributing.
+
+### Planned feature wish-list
+
+This is a set of features planned for "version 1" but require a bit more
+research before they can be tackled.
+
+### Todo list
+
+- write proper vim doc
+- thoroughly test with unicode, tabs
+- add screenshots and animations
+- can match-up be integrated with
+  [vim-surround](https://github.com/tpope/vim-surround)?
 

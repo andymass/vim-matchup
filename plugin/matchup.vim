@@ -1,3 +1,8 @@
+" vim match-up - matchit replacement and more
+"
+" Maintainer: Andy Massimino
+" Email:      a@normed.space
+"
 
 if !get(g:, 'matchup_enabled', 1)
   finish
@@ -24,3 +29,4 @@ au! matchparen
 call matchup#init()
 
 " vim: fdm=marker sw=2
+

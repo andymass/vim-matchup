@@ -4,6 +4,9 @@
 " Email:      a@normed.space
 "
 
+let s:save_cpo = &cpo
+set cpo&vim
+
 function! matchup#pos#set_cursor(...) " {{{1
   call cursor(s:parse_args(a:000))
 endfunction
@@ -92,4 +95,7 @@ endfunction
 
 " }}}1
 
+let &cpo = s:save_cpo
+
 " vim: fdm=marker sw=2
+
