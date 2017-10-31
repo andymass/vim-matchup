@@ -1,0 +1,14 @@
+set nocompatible
+
+" load match-up
+let &rtp  = '~/.vim/bundle/matchup.vim,' . &rtp
+let &rtp .= ',~/.vim/bundle/matchup.vim/after'
+
+" load other plugins, if necessary
+" let &rtp = '~/path/to/other/plugin,' . &rtp
+
+filetype plugin indent on
+syntax enable
+
+" match-up options go here
+
