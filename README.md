@@ -69,10 +69,7 @@ Or use some other plugin manager:
 | ([c.1]) | highlight `()`, `[]`, & `{}`     | :thumbsup:     | :x:           | :thumbsup:    |
 | ([c.2]) | highlight _all_ matches          | :thumbsup:     | :x:           | :x:           |
 | ([c.3]) | display matches off-screen       | :thumbsup:     | :x:           | :x:           |
-| ([d.1]) | auto-insert open, close, & mid   | :construction: | :x:           | :x:           |
-| ([d.2]) | completion                       | :construction: | :x:           | :x:           |
-| ([d.3]) | parallel transmutation           | :construction: | :x:           | :x:           |
-| ([d.4]) | split & join                     | :construction: | :x:           | :x:           |
+| ([d.1]) | parallel transmutation           | :construction: | :x:           | :x:           |
 | ([e.1]) | modern, modular coding style     | :thumbsup:     | :x:           | :x:           |
 | ([e.2]) | actively developed               | :thumbsup:     | :x:           | :x:           |
 
@@ -83,10 +80,7 @@ Or use some other plugin manager:
 [c.1]: #c1-highlight---and-
 [c.2]: #c2-highlight-all-matches
 [c.3]: #c3-display-matches-off-screen
-[d.1]: #d1-auto-insert-open-close-and-mid
-[d.2]: #d2-completion
-[d.3]: #d3-parallel-transmutation
-[d.4]: #d4-split-and-join
+[d.1]: #d1-parallel-transmutation
 [e.1]: #development
 [e.2]: #development
 [inclusive]: #inclusive-and-exclusive-motions
@@ -172,23 +166,7 @@ positioned outside the current window, the match is shown in the
 status line.  If both the open and close match are off-screen, the
 close match is preferred.
 
-#### (d.1) auto-insert open, close, and mid
-
-_Planned_.
-
-- end-wise style completion: typing `CTRL-X <cr>` will insert the 
-corresponding end word.
-
-- automatic block insertion: typing `CTRL-X CTRL-B` to produce
-block skeletons.
-
-#### (d.2) completion
-
-_Planned_. 
-
-Typing `CTRL-X O`/`CTRL-X W` will give a menu of possible words.
-
-#### (d.3) parallel transmutation
+#### (d.1) parallel transmutation
 
 In insert mode, after changing text inside a word, matching words will
 be changed in parallel.  As an example,
@@ -213,10 +191,6 @@ relation like `\1`.  A wider set of transmutations are planned.
 _Planned_: `g:matchup_auto_transmute`, `CTRL-G %` mapping.  A
 corresponding normal mode command is also planned.
 
-#### (d.4) split and join
-
-_Planned_.
-
 ### Inclusive and exclusive motions
 
 In vim, character motions following operators (such as `d` for delete
@@ -237,11 +211,137 @@ if endif
 ```
 
 To include the close word, use either `dv]%` or `vd]%`.  This is vim
-compatible.
+compatible with `d])` and `d]}`.
+
+Unlike `]%`, `%` is an _inclusive_ motion.  As a special case for the 
+`d` (delete) operator, if `d%` leaves behind lines white-space, they will
+be deleted also.  In effect, it will be operating line-wise.  As an
+example, pressing `d%` will leave behind nothing.
+
+```text
+   █(
+
+   )
+```
+
+To operate character-wise in this situation, use `dv%` or `vd%`.
+This is vim compatible with the built-in `d%` on `matchpairs`.
+
+### Line-wise operator/text-object combinations
+
+Normally, the text objects `i%` and `a%` work character-wise.  However,
+there are some special cases.  For certain operators combined with
+`i%` (by default `di%` and `yi%`), under certain conditions, match-up
+will operate line-wise instead.  For example, in
+```vim
+if condition
+ █call one()
+  call two()
+endif
+```
+pressing `di%` will produce
+```vim
+if condition
+endif
+```
+even though deleting ` condition` would be suggested by the object `i%`.
+The intention is to make operators more useful in some cases.  The
+following rules apply:
+- The operator must be listed in `g:matchup_text_obj_linewise_operators`
+- The outer block must span multiple lines.
+- The open and close delimiters must be more than one character long.  In
+  particular, `di%` involving a `(`...`)` block will not be subject to
+  these special rules.
+
+To prevent this behavior for a particular sequence `dvi%` or `vdi%`.
+
+To disable this entirely, remove the operator from the following variable,
+```vim
+let g:matchup_text_obj_linewise_operators = [ 'y' ]
+```
+
+Note: unlike vim's built-in `i)`, `ab`, etc., `i%` does not make an
+existing visual mode character-wise.
+
+A second special case involves `da%`.  In this example,
+```vim
+    if condition
+     █call one()
+      call two()
+    endif
+```
+pressing `da%` will delete all four lines and leave no white-space.  This
+is vim compatible with `da(`, `dab`, etc.
 
 ## Options
 
+To disable the plugin entirely,
+```vim
+let g:matchup_enabled = 0
+```
+default: 1
 
+To disable a particular module,
+```vim
+let g:matchup_matchparen_enabled = 0
+let g:matchup_motion_enabled = 0
+let g:matchup_text_obj_enabled = 0
+```
+defaults: 1
+
+To enable the experimental [transmute](#d3-parallel-transmutation)
+module,
+```vim
+let g:matchup_transmute_enabled = 1
+```
+default: 0
+
+### Module matchparen
+
+The matchparen module can be disabled on a per-buffer basis
+
+```vim
+let b:matchup_matchparen_enabled = 0
+```
+default: 1
+
+If this module is disabled on a particular buffer, match-up will still
+fall-back to the vim standard plugin matchit, which will highlight
+`matchpairs` such as `()`, `[]`, & `{}`.  To disable this,
+```vim
+let b:matchup_matchparen_fallback = 0
+```
+default: 1
+
+A common usage is to automatically disable matchparen for
+particular file types;
+```vim
+augroup matchup_matchparen_disable_ft
+  autocmd!
+  autocmd FileType tex let [b:matchup_matchparen_fallback,
+      \ b:matchup_matchparen_enabled] = [0, 0]
+augroup END
+```
+
+Whether to highlight known words even if there is no match:
+```vim
+let g:matchup_matchparen_singleton = 1
+```
+default: 0
+
+Whether to replace the statusline for off-screen matches:
+```vim
+let g:matchup_matchparen_status_offscreen = 0
+```
+default: 1
+
+### motion
+
+### text_obj
+
+### transmute
+
+_Options planned_.
 
 ## FAQ
 
@@ -261,7 +361,7 @@ compatible.
   enough information to create proper highlights.  To fix this, you may
   need to add a highlight quirk.
 
-For help, please open a new issue and be a specific as possible.
+  For help, please open a new issue and be a specific as possible.
 
 - I'm having performance problems
 
@@ -377,12 +477,46 @@ Feature requests are also welcome.
 
 ### Contributing
 
-Read the [contribution guidelines](CONTRIBUTING.md) before contributing.
+Please read the [contribution guidelines](CONTRIBUTING.md) before
+contributing.
 
 ### Planned feature wish-list
 
 This is a set of features planned for "version 1" but require a bit more
-research before they can be tackled.
+research before they can be properly tackled.
+
+|         | feature                          | __match-up__   | matchit       | matchparen    |
+| ------- | -------------------------------- | -------------- | ------------- | ------------- |
+| ([d.2]) | auto-insert open, close, & mid   | :construction: | :x:           | :x:           |
+| ([d.3]) | completion                       | :construction: | :x:           | :x:           |
+| ([d.4]) | split & join                     | :construction: | :x:           | :x:           |
+
+[d.2]: #d2-auto-insert-open-close-and-mid
+[d.3]: #d3-completion
+[d.4]: #d4-split-and-join
+
+#### (d.2) auto-insert open, close, and mid
+
+_Planned_.
+
+- end-wise style completion: typing `CTRL-X <cr>` will insert the 
+corresponding end word (mapping subject to change).
+
+- automatic block insertion: typing `CTRL-X CTRL-B` to produce
+block skeletons (mapping subject to change).
+
+#### (d.3) completion
+
+_Planned_. 
+
+Typing `CTRL-X O`/`CTRL-X W` will give a menu of possible words (mapping
+subject to change).
+
+#### (d.4) split and join
+
+_Planned_.
+
+Convert between single-line and multi-line blocks.  Mappings undecided.
 
 ### Todo list
 
