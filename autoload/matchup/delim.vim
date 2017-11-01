@@ -285,12 +285,7 @@ function! s:get_delim(opts) " {{{1
     return {}
   endif
 
-   let l:time_start = reltime()
-
-  " if col('.') < indent(line('.'))
-  "     let l:elapsed_time = 1000*reltimefloat(reltime(l:time_start))
-  "     echo 'nothing' l:elapsed_time
-  " endif
+  call matchup#perf#tic('s:get_delim')
 
   let l:save_pos = matchup#pos#get_cursor()
 
@@ -386,14 +381,13 @@ function! s:get_delim(opts) " {{{1
   " restore cursor
   call matchup#pos#set_cursor(l:save_pos)
 
-  if l:lnum == 0
-    let l:elapsed_time = 1000*reltimefloat(reltime(l:time_start)) 
-    " echo 'X' l:elapsed_time
-   " v:vim_did_enter
-  endif
+  call matchup#perf#toc('s:get_delim', 'firstpass')
 
   " nothing found, leave now
-  if l:lnum == 0 | return {} | endif
+  if l:lnum == 0
+    call matchup#perf#toc('s:get_delim', 'nothingfound')
+    return {}
+  endif
 
   " now we get more data about the match in this position
   " there may be capture groups which need to be stored
@@ -422,91 +416,15 @@ function! s:get_delim(opts) " {{{1
     endif
   endfor
 
-  " PP l:result
-  return empty(l:result.type) ? {} : l:result
-
-  return {}
-
-  " echo l:result.type
-    " let l:sides = ['open', 'close', 'mid']
-    " for l:rbr in b:matchup_delim_lists[a:opts.type].regex_backref
-    "   for l:s in l:sides
-    "     " xxx must use matchstrpos and compare column (?)
-    "     " echo l:s l:rbr[l:s] l:cnum l:matches
-    "     if l:cnum + strdisplaywidth(l:match)
-    "         \ + (mode() ==# 'i' ? 1 : 0) > col('.')
-    "       let l:found = 1
-    "     endif
-
-    "     if l:found | break | endif
-    "   endfor
-    "   if l:found | break | endif
-    " endfor
-
-    " if l:found
-    "   " echo l:matches | sleep 200m
-    " endif
-  " endif
-
-" return {}
-
-    " let l:realside = l:line =~# b:matchup_delim_re[a:opts.type].open
-    "   \ ? 'open'
-    "   \ : l:line =~# b:matchup_delim_re[a:opts.type].close
-    "   \   ? 'close'
-    "   \   : 'mid'
-    " let l:idx = s:parser_delim_find_regexp(getline(l:lnum), l:realside)
-    " echo l:realside l:lnum l:line l:idx | sleep 100m
-
-  "     " echo l:reb[l:s] | sleep 500m
-  "   endfor
-  " endfor
-  " echo l:idx
-
-  " let l:matches = matchlist(getline(l:lnum), '^' . l:re, l:cnum-1)
-  " let l:match = l:matches[0]
-  " echo l:re l:lnum l:cnum-1
-
-  " let l:match = matchstr(getline(l:lnum), '^' . l:re, l:cnum-1)
-  let l:match = l:matches[0]
-
-  " echo l:lnum l:cnum-1 l:match
-
-  " check that the cursor is inside the match
-  if a:opts.direction ==# 'current'
-        \ && l:cnum + strdisplaywidth(l:match)
-        \  + (mode() ==# 'i' ? 1 : 0) <= col('.')
-    let l:match = ''
-    let l:lnum = 0
-    let l:cnum = 0
-  endif
-
-
-  " get some more info about the match
-  " the parser figures out what side the match it was
-  let l:types = [
-      \ {
-      \   'regex' : b:matchup_delim_re.delim_all.both_all,
-      \   'parser' : function('s:parser_delim'),
-      \ },
-      \]
-  for l:type in l:types
-    if l:match =~# '^' . l:type.regex
-      let l:result = extend(
-            \ l:type.parser(l:match, l:lnum, l:cnum,
-            \   a:opts.side, a:opts.type, a:opts.direction),
-            \ l:result, 'keep')
-      break
-    endif
-  endfor
+  call matchup#perf#toc('s:get_delim', 'gotresults')
 
   return empty(l:result.type) ? {} : l:result
 endfunction
 
 " }}}1
 
-" enforce b:match_ignorecase, if necessary
-function! s:ignorecase_start()
+function! s:ignorecase_start() " {{{1
+  " enforce b:match_ignorecase, if necessary
   if exists('s:save_ic')
     return
   endif
@@ -516,13 +434,16 @@ function! s:ignorecase_start()
   endif
 endfunction
 
-" restore ignorecase 
-function! s:ignorecase_end()
+"}}}1
+function! s:ignorecase_end() " {{{1
+  " restore ignorecase
   if exists('s:save_ic')
     noautocmd let &ignorecase = s:save_ic
     unlet s:save_ic
   endif
 endfunction
+
+"}}}1
 
 function! s:parser_delim_new(lnum, cnum, opts) " {{{1
   let l:time_start = reltime()
@@ -564,7 +485,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
 
     " for current we want the first match which the cursor is inside
         if a:opts.direction ==# 'current'
-          let l:re_anchored .= '\%>'.(l:cursorpos).'c'   
+          let l:re_anchored .= '\%>'.(l:cursorpos).'c'
         endif
 
 
@@ -618,7 +539,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
       " echo l:thisrebr.aug_comp[l:id][0]
 
       " fill in augment pattern
-      " TODO all the augment patterns should match, 
+      " TODO all the augment patterns should match,
       " but checking might be too slow
       let l:aug = l:thisrebr.aug_comp[l:id][0]
       let l:augment.str = substitute(l:aug.str,
@@ -652,115 +573,8 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
 
   endif
 
-  return {} 
+  return {}
 endfunction
-" }}}1
-
-function! s:parser_delim(match, lnum, cnum, ...) " {{{1
-  let result = {}
-  let result.type = 'delim'
-  let result.side = a:match =~# b:matchup_delim_re.delim_all.open
-    \ ? 'open'
-    \ : a:match =~# b:matchup_delim_re.delim_all.close
-    \   ? 'close'
-    \   : 'mid'
-  let result.get_matching = function('s:get_matching_delims')
-
-  let result.is_open = result.side ==# 'open'  " xxx remove
-
-  let l:type = 'delim_all'
-
-  " find corresponding delimiter and the regexps
-  let d1 = a:match
-
-  let l:idx = s:parser_delim_find_regexp(a:match, result.side)
-  let l:re1 = b:matchup_delim_lists[l:type].regex[l:idx][result.side]
-
-  let l:rex = b:matchup_delim_lists[l:type].regex[l:idx]
-  " echo l:result.side l:rex
-
-  " let l:re1 = b:matchup_delim_lists[l:type].re[l:idx][result.is_open ? 0 : -1]
-
-  " echo l:idx l:re1
-  " let [re1, idx] = s:parser_delim_get_regexp(a:match, result.is_open ? 0 : -1)
-
-  " let d2 = s:parser_delim_get_corr(a:match)
-  " let [re2, idx] = s:parser_delim_get_regexp(d2, result.is_open ? -1 : 0)
-
-  " ending delimiter *DEPRECATE THIS
-  let d2 = b:matchup_delim_lists[l:type].name[l:idx][result.is_open ? -1 : 0]
-  let re2 = b:matchup_delim_lists[l:type].re[l:idx][result.is_open ? -1 : 0]
-
-  " middle set
-  let d3 = b:matchup_delim_lists[l:type].name[l:idx][1:-2]
-  let re3 = join(b:matchup_delim_lists[l:type].re[l:idx][1:-2], '\|')
-
-  " echo 'd1' d1 're1' re1 'd2' d2 're2' re2 | sleep 400m
-
-  let result.regex = re1
-  let result.regextwo = b:matchup_delim_lists[l:type].regex[l:idx]
-
-  " xxx we really don't need the rest of these
-  " let result.links = {
-  "       \ 'open'   : {},
-  "       \ 'prev'   : {},
-  "       \ 'next'   : {},
-  "       \ 'close'  : {},
-  "       \}
-  let result.delim = d1
-  let result.mod = ''       " xxx defunct
-  let result.corr = 'FIXME2'
-  let result.corr_delim = d2
-  let result.corr_mod = ''  " xxx defunct
-  let result.mids_ = 'FIXME3'     " xxx unused?
-  let result.regextwo.this = re1
-  let result.re = {
-        \ 'this'  : re1,
-        \ 'corr'  : re2,
-        \ 'open'  : result.is_open ? re1 : re2,
-        \ 'close' : result.is_open ? re2 : re1,
-        \ 'mids'  : re3,
-        \}
-
-  return result
-endfunction
-
-" }}}1
-function! s:parser_delim_find_regexp(delim, side, ...) " {{{1
-  let l:type = a:0 > 0 ? a:1 : 'delim_all'
-
-  let l:index = index(map(copy(b:matchup_delim_lists[l:type].regex),
-        \ 'a:delim =~# v:val.' . a:side), 1)
-
-  return l:index
-endfunction
-
-" }}}1
-function! s:parser_delim_get_regexp(delim, side, ...) " {{{1
-   " DEPRECATED REMOVE
-  let l:type = a:0 > 0 ? a:1 : 'delim_all'
-
-  let l:index = index(map(copy(b:matchup_delim_lists[l:type].re),
-        \   'a:delim =~# v:val[' . a:side . ']'), 1)
-
-  return [l:index >= 0
-        \ ? b:matchup_delim_lists[l:type].re[l:index][a:side]
-        \ : '', l:index]
-endfunction
-
-" }}}1
-function! s:parser_delim_get_corr(delim, ...) " {{{1
-  let l:type = a:0 > 0 ? a:1 : 'delim_all'
-
-  for l:pair in b:matchup_delim_lists[l:type].re
-    if a:delim =~# l:pair[0]
-      return l:pair[-1]
-    elseif a:delim =~# l:pair[-1]
-      return l:pair[0]
-    endif
-  endfor
-endfunction
-
 " }}}1
 
 function! s:get_matching_delims(down) dict " {{{1
@@ -979,27 +793,6 @@ function! s:get_matching_delims(down) dict " {{{1
   " echo a:down l:list | sleep 1
 
   return l:list
-endfunction
-" }}}1
-
-" XXX defunct
-function! s:get_matching_delim() dict " {{{1
-  let [re, flags, stopline] = self.is_open
-        \ ? [self.re.close,  'nW', line('.') + s:stopline]
-        \ : [self.re.open,  'bnW', max([line('.') - s:stopline, 1])]
-
-  " xxx spin-off
-" function! s:remove_capture_groups(re) 
-  let l:open =  substitute(self.re.open,
-    \ '\(\\\@<!\(\\\\\)*\)\@<=\\(', '\\%(', 'g')
-  let l:close =  substitute(self.re.close,
-    \ '\(\\\@<!\(\\\\\)*\)\@<=\\(', '\\%(', 'g')
-
-  let [lnum, cnum] = searchpairpos(l:open, '', l:close,
-        \ flags, '', stopline)
-  let match = matchstr(getline(lnum), '^' . re, cnum-1)
-
-  return [match, lnum, cnum]
 endfunction
 " }}}1
 
@@ -1599,13 +1392,6 @@ endfunction
 
 " initialize script variables
 let s:stopline = get(g:, 'matchup_delim_stopline', 400)
-
-let s:notslash = '\\\@<!\%(\\\\\)*'
-
-" xxx consider using instead?
-let s:not_bslash =  '\v%(\\@<!%(\\\\)*)@<=\m'
-" xxx need to use this through code
-let s:backref = s:notslash.'\\'.'\(\d\)'
 
 " whether we're behaving like in insert mode
 let s:insertmode = 0
