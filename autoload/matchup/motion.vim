@@ -48,9 +48,11 @@ function! matchup#motion#init_module() " {{{1
   xmap     <plug>(matchup-]%) <sid>(matchup-]%)
   xmap     <plug>(matchup-[%) <sid>(matchup-[%)
   onoremap <plug>(matchup-]%)
-        \ :<c-u>call <sid>oper("normal \<sid>(v)\<sid>(matchup-]%)")<cr>
+        \ :<c-u>call <sid>oper("normal \<sid>(v)"
+        \ . v:count1 . "\<sid>(matchup-]%)")<cr>
   onoremap <plug>(matchup-[%)
-        \ :<c-u>call <sid>oper("normal \<sid>(v)\<sid>(matchup-[%)")<cr>
+        \ :<c-u>call <sid>oper("normal \<sid>(v)"
+        \ . v:count1 . "\<sid>(matchup-[%)")<cr>
 
   " jump inside z% 
   nnoremap <silent> <plug>(matchup-z%)
@@ -163,46 +165,29 @@ endfunction
 
 " }}}1
 function! matchup#motion#find_unmatched(visual, down) " {{{1
+  call matchup#perf#tic('motion#find_unmatched')
+
+  let l:count = v:count1
+
   if a:visual
     normal! gv
   endif
 
-  let [l:open, l:close] = matchup#delim#get_surrounding(
-        \ 'delim_all', v:count1)
-
-  if empty(l:open) || empty(l:close)
-    return
-  endif
-
-  let l:delim = a:down ? l:close : l:open
-
-  let l:save_pos = matchup#pos#get_cursor()
-  let l:new_pos = [l:delim.lnum, l:delim.cnum]
-  if l:delim.side ==# 'close'
-    if empty(get(s:, 'v_operator', 0))
-      "XXX spin this off
-      let l:new_pos[1] += strdisplaywidth(l:delim.match) - 1
-    else
-      let l:new_pos[1] -= 1
-    endif
-  endif 
-
-  " if the cursor didn't move
-  if matchup#pos#equal(l:save_pos, l:new_pos)
-    call matchup#pos#set_cursor(a:down
-          \ ? matchup#pos#next(l:new_pos)
-          \ : matchup#pos#prev(l:new_pos))
-
-    let [l:open, l:close] = matchup#delim#get_surrounding('delim_all', v:count)
-    call matchup#pos#set_cursor(l:save_pos)
+  for l:second_try in range(2)
+    let [l:open, l:close] = matchup#delim#get_surrounding('delim_all',
+          \ l:second_try ? l:count : 1)
 
     if empty(l:open) || empty(l:close)
+      call matchup#perf#toc('motion#find_unmatched', 'fail'.l:second_try)
       return
     endif
 
     let l:delim = a:down ? l:close : l:open
-    let l:new_pos = [l:delim.lnum, l:delim.cnum]
 
+    let l:save_pos = matchup#pos#get_cursor()
+    let l:new_pos = [l:delim.lnum, l:delim.cnum]
+ 
+    " this is an exclusive motion
     if l:delim.side ==# 'close'
       if empty(get(s:, 'v_operator', 0))
         "XXX spin this off
@@ -210,15 +195,22 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
       else
         let l:new_pos[1] -= 1
       endif
-    endif
-  endif
+    endif 
 
- " echo l:open l:close
-   " let [l:open, l:close] = matchup#delim#get_surrounding('delim_all')
-  " if empty(l:delim) | return | endif
+    " if the cursor didn't move, increment count
+    if matchup#pos#equal(l:save_pos, l:new_pos)
+      let l:count += 1
+    endif
+
+    if l:count <= 1
+      break
+    endif
+  endfor
 
   normal! m`
   call matchup#pos#set_cursor(l:new_pos)
+
+  call matchup#perf#toc('motion#find_unmatched', 'done')
 endfunction
 
 " }}}1
