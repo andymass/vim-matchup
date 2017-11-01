@@ -163,13 +163,12 @@ endfunction
 
 " }}}1
 function! matchup#motion#find_unmatched(visual, down) " {{{1
-  " XXX handle count
-  
   if a:visual
     normal! gv
   endif
-  
-  let [l:open, l:close] = matchup#delim#get_surrounding('delim_all')
+
+  let [l:open, l:close] = matchup#delim#get_surrounding(
+        \ 'delim_all', v:count1)
 
   if empty(l:open) || empty(l:close)
     return
@@ -177,8 +176,6 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
 
   let l:delim = a:down ? l:close : l:open
 
-  " TODO: while loop this
-  "
   let l:save_pos = matchup#pos#get_cursor()
   let l:new_pos = [l:delim.lnum, l:delim.cnum]
   if l:delim.side ==# 'close'
@@ -196,12 +193,13 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
           \ ? matchup#pos#next(l:new_pos)
           \ : matchup#pos#prev(l:new_pos))
 
-    let [l:open, l:close] = matchup#delim#get_surrounding('delim_all')
+    let [l:open, l:close] = matchup#delim#get_surrounding('delim_all', v:count)
     call matchup#pos#set_cursor(l:save_pos)
 
     if empty(l:open) || empty(l:close)
       return
     endif
+
     let l:delim = a:down ? l:close : l:open
     let l:new_pos = [l:delim.lnum, l:delim.cnum]
 

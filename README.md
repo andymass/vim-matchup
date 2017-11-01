@@ -41,7 +41,7 @@ This plugin
 
 Planned features:
 
-- Adds auto-completion for words and symbols- for example you could 
+- Add auto-completion for words and symbols- for example you could 
   automatically insert corresponding a `)` or `endif`.
 
 ## Installation
@@ -299,6 +299,17 @@ let g:matchup_transmute_enabled = 1
 ```
 default: 0
 
+### Variables  
+
+matchup understands the following variables from matchit.
+- `b:match_words`
+- `b:match_skip`
+- `b:match_ignorecase`
+
+These are set in the respective ftplugin files.  They may not exist for
+every file type.  To support a new file type, create a file
+`after/ftplugin/{filetype}.vim` which sets them appropriately.
+
 ### Module matchparen
 
 The matchparen module can be disabled on a per-buffer basis
@@ -345,7 +356,7 @@ let g:matchparen_insert_timeout = 60
 ```
 default: 300, 60
 
-### motion
+### Module motion
 
 To allow `{count}%`,
 ```vim
@@ -370,7 +381,7 @@ let g:matchup_text_obj_linewise_operators' = ['d', 'y']
 ```
 default: `['d', 'y']`
 
-### transmute
+### Module transmute
 
 _Options planned_.
 
@@ -462,10 +473,6 @@ Definitions
 
 Variables
 
-  matchup understands the following variables
-    b:match_words        a set of 
-    b:match_ignorecase
-    b:match_skip
     loaded_matchit
 
 Existing matchit features, made better:
@@ -553,10 +560,11 @@ Convert between single-line and multi-line blocks.  Mappings undecided.
 
 - write proper vim doc
 - thoroughly test with unicode, tabs
+- complete parallel transmutation in an efficient way.
 - add screenshots and animations
+- support for fenced code possible?
 - add file type `quirks` module
 - investigate whether `&selection`/`&virtualedit` options are important
 - can match-up be integrated with
   [vim-surround](https://github.com/tpope/vim-surround)?
-- complete parallel transmutation in an efficient way.
 

@@ -1,3 +1,11 @@
+" vim match-up - matchit replacement and more
+"
+" Maintainer: Andy Massimino
+" Email:      a@normed.space
+"
+
+let s:save_cpo = &cpo
+set cpo&vim
 
 function! matchup#init()
   call s:init_options()
@@ -28,9 +36,9 @@ function! s:init_options()
 
   call s:init_option('matchup_transmute_enabled', 0)
 
-  call s:init_option('matchup_imap_enabled', 1)
+  call s:init_option('matchup_imap_enabled', 0)
   
-  call s:init_option('matchup_complete_enabled', 1)
+  call s:init_option('matchup_complete_enabled', 0)
 
 endfunction
 
@@ -103,4 +111,7 @@ let s:modules = map(
       \ glob(fnamemodify(expand('<sfile>'), ':r') . '/*.vim', 0, 1),
       \ 'fnamemodify(v:val, '':t:r'')')
 
+let &cpo = s:save_cpo
+
 " vim: fdm=marker sw=2
+
