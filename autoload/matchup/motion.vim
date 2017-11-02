@@ -4,6 +4,9 @@
 " Email:      a@normed.space
 "
 
+let s:save_cpo = &cpo
+set cpo&vim
+
 function! matchup#motion#init_module() " {{{1
   if !g:matchup_motion_enabled | return | endif
 
@@ -98,6 +101,9 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
 
   let [l:start_lnum, l:start_cnum] =  matchup#pos#get_cursor()[1:2]
 
+  " disable the timeout
+  call matchup#perf#timeout_start(0)
+
   " get a delim where the cursor is
   let l:delim = matchup#delim#get_current('all', 'both_all')
   if empty(l:delim)
@@ -173,6 +179,9 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
     normal! gv
   endif
 
+  " disable the timeout
+  call matchup#perf#timeout_start(0)
+
   for l:second_try in range(2)
     let [l:open, l:close] = matchup#delim#get_surrounding('delim_all',
           \ l:second_try ? l:count : 1)
@@ -232,4 +241,7 @@ endfunction
 
 " }}}1
 
+let &cpo = s:save_cpo
+
 " vim: fdm=marker sw=2
+

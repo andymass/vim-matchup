@@ -17,6 +17,7 @@ function! matchup#transmute#enable() " {{{1
     autocmd!
     autocmd InsertEnter * call s:transmute.setup()
     autocmd InsertLeave * call s:transmute.commit()
+    autocmd TextChanged * call s:transmute.textchanged()
   augroup END
 endfunction
 
@@ -29,6 +30,13 @@ endfunction
 
 let s:transmute = {}
 
+function! s:transmute.textchanged() abort dict " {{{1
+  if exists('w:matchparen_current')
+    echo w:matchparen_current.links.close.match
+  endif
+endfunction
+
+" }}}1
 function! s:transmute.setup() abort dict " {{{1
   if !g:matchup_transmute_enabled | return | endif
 
@@ -121,3 +129,4 @@ let s:notslash = '\\\@<!\%(\\\\\)*'
 " }}}1
 
 " vim: fdm=marker sw=2
+

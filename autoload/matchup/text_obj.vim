@@ -39,6 +39,9 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   let l:linewise = index(g:matchup_text_obj_linewise_operators,
         \ v:operator) >= 0
 
+  " disable the timeout
+  call matchup#perf#timeout_start(0)
+
   " try up to three times (rarely)
   for l:try_again in range(3)
     " on the first try, we use v:count which may be zero

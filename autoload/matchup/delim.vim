@@ -578,8 +578,10 @@ endfunction
 " }}}1
 
 function! s:get_matching_delims(down) dict " {{{1
-  " called from:  a:delim.get_matching
-  "               matchup#delim#get_matching
+  " called as:   a:delim.get_matching(...)
+  " called from: matchup#delim#get_matching <- matchparen, motion
+  "   from: matchup#delim#get_surrounding <- matchparen, motion, text_obj
+  "   from: matchup#delim#close <- delim
 
   call matchup#perf#tic('get_matching_delims')
 
@@ -619,9 +621,11 @@ function! s:get_matching_delims(down) dict " {{{1
 
   " XXX timeout
    " XXX use s: mode flag
-  let l:timeout = (mode() ==# 'i')
-        \ ? g:matchup_matchparen_insert_timeout
-        \ : g:matchup_matchparen_timeout
+  " let l:timeout = (mode() ==# 'i')
+  "       \ ? g:matchup_matchparen_insert_timeout
+  "       \ : g:matchup_matchparen_timeout
+
+  if matchup#perf#timeout_check() | return [['', 0, 0]] | endif
 
   " this is the corresponding part of an open:close pair
    " if !exists('s:foo') | let s:foo = 1 | endif
@@ -641,7 +645,7 @@ function! s:get_matching_delims(down) dict " {{{1
 "  call matchup#perf#tic('q7')
 "  TODO support timeout
   let [l:lnum_corr, l:cnum_corr] = searchpairpos(l:open, '', l:close,
-        \ 'n'.l:flags, l:skip, l:stopline, l:timeout)
+        \ 'n'.l:flags, l:skip, l:stopline, matchup#perf#timeout())
 "  call matchup#perf#toc('q7', 'q8')
   call matchup#perf#toc('get_matching_delims', 'initial_pair')
 
@@ -746,8 +750,11 @@ function! s:get_matching_delims(down) dict " {{{1
 
   let l:list = []
   while 1
+
+    if matchup#perf#timeout_check() | break | endif
+
     let [l:lnum, l:cnum] = searchpairpos(l:open, l:mids, l:close,
-      \ l:flags, l:skip, l:lnum_corr)
+      \ l:flags, l:skip, l:lnum_corr, matchup#perf#timeout())
     if l:lnum <= 0 | break | endif
 
     " echo '>' l:lnum l:cnum | sleep 500m
@@ -1393,7 +1400,10 @@ endfunction
 " initialize script variables
 let s:stopline = get(g:, 'matchup_delim_stopline', 400)
 
-" whether we're behaving like in insert mode
+" whether we're behaving like in insert mode; changes
+"   1) effective cursor position for highlight
+"   2) which is timeout used
+"   XXX should really be in matchparen
 let s:insertmode = 0
 
 let s:sidedict = {

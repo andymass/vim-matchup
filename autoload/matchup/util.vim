@@ -4,6 +4,9 @@
 " Email:      a@normed.space
 "
 
+let s:save_cpo = &cpo
+set cpo&vim
+
 function! matchup#util#in_comment(...) " {{{1
   return call('matchup#util#in_syntax', ['Comment'] + a:000)
 endfunction
@@ -61,4 +64,7 @@ endfunction
 
 " }}}1
 
+let &cpo = s:save_cpo
+
 " vim: fdm=marker sw=2
+

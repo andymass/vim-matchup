@@ -1,7 +1,7 @@
 # matchup.vim
 
-:warning: warning :warning: this plugin is unfinished and under heavy
-active development. It is not ready for use yet!
+:warning: warning :warning: this plugin is under heavy
+active development.  There are probably bugs!
 
 match-up is a replacement for the venerable vim plugin [matchit.vim]
 match-up aims to replicate all of matchit's features, fix a number of its
@@ -448,59 +448,6 @@ heavily influenced by vimtex. :beers:
 - [vim-surround](https://github.com/tpope/vim-surround)
 - [vim-sandwich](https://github.com/machakann/vim-sandwich)
 
-## license
-
-Totally new features
-
-  - parallel transformations (transmutation)
-     (need to cache matches and see if they change)
-    - polymorphic / smart -> if:end,while:end
-  - native split/join
-  - quirks
-  - auto insert
-
-Definitions
-
-  Matchword
-    A matchword is an regular expression which defines interesting items
-    to matchup matchup treats specially.  For instance, by default ( and ) are 
-    paired matchwords.
-    is on the matched to buffer text,
-    becomes a matched word, 
-
-  Matched word
-    A matched word is an instance of buffer text which matches
-
-Variables
-
-    loaded_matchit
-
-Existing matchit features, made better:
-
-% v_%       between matches
-g% v_g%     backwards between matches
-[% ]%       to nearest unmatched
-o_a% o_i%   delimited text object
-
-Features in matchparen:
-
-  matchup emulates matchparen's highlighting for matchpairs
-  Echo invisible pairs 
-
-Features not in matchit:
-
-  Auto-completion
-    ctrl-x <CR> shift <CR>
-    completes the nearest unmatched matchword.  When n-tuple matchwords are used
-    the last one is inserted.
-
-  Highlighting general
-    matchup highlights matches for b:match_words
-
-  Jump into
-    z[]% go to the center of the next group of matchwords
-  
-- the end-completion maps conflict with [vim-endwise](https://github.com/tpope/vim-endwise).
 
 ## Development
 

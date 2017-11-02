@@ -4,6 +4,9 @@
 " Email:      a@normed.space
 "
 
+let s:save_cpo = &cpo
+set cpo&vim
+
 function! matchup#matchparen#init_module() " {{{1
   if !g:matchup_matchparen_enabled | return | endif
 
@@ -91,14 +94,18 @@ function! s:matchparen.highlight() abort dict " {{{1
 
   call matchup#perf#tic('matchparen.highlight')
 
-  let l:time_start = reltime()
-
   call self.clear()
 
   " if matchup#util#in_comment() || matchup#util#in_string()
   if matchup#delim#skip()
     return
   endif
+
+  " start the timeout period XXX use effective mode
+  let l:timeout = (mode() ==# 'i')
+        \ ? g:matchup_matchparen_insert_timeout
+        \ : g:matchup_matchparen_timeout
+  call matchup#perf#timeout_start(l:timeout)
 
   let l:current = matchup#delim#get_current('all', 'both_all')
   call matchup#perf#toc('matchparen.highlight', 'get_current')
@@ -220,14 +227,11 @@ function! s:matchparen.highlight() abort dict " {{{1
   " echo '\%' . l:open.lnum . 'l\%' . l:open.cnum . 'c' . l:open.re.this
     " \ '\%' . l:close.lnum . 'l\%' . l:close.cnum . 'c' . l:close.re.this
 
-  let g:matchup_hi_time = 1000*reltimefloat(reltime(l:time_start))
-
   call matchup#perf#toc('matchparen.highlight', 'end')
-
 endfunction
 
 " }}}1
-function! matchup#matchparen#offscreen(current) " {{{ 1
+function! matchup#matchparen#offscreen(current) " {{{1
   let l:offscreen = {}
 
   " prefer to show close 
@@ -294,5 +298,7 @@ function! matchup#matchparen#offscreen(current) " {{{ 1
 endfunction
 
 " }}}1
+
+let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
