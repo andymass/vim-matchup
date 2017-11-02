@@ -251,6 +251,28 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
 endfunction
 
 " }}}1
+function! matchup#delim#jump_target(delim) "{{{1
+  let l:save_pos = matchup#pos#get_cursor()
+
+  let l:column = a:delim.cnum
+  let l:column += strdisplaywidth(a:delim.match) - 1
+
+  for l:tries in range(strdisplaywidth(a:delim.match)-2)
+    call matchup#pos#set_cursor(a:delim.lnum, l:column)
+
+    let l:delim_test = matchup#delim#get_current('all', a:delim.side)
+    if l:delim_test.class[0] ==# a:delim.class[0]
+      break
+    endif
+
+    let l:column -= 1
+  endfor
+
+  call matchup#pos#set_cursor(l:save_pos)
+  return l:column
+endfunction
+
+" }}}1
 
 function! s:get_delim(opts) " {{{1
   " Arguments: {{{2
@@ -381,11 +403,11 @@ function! s:get_delim(opts) " {{{1
   " restore cursor
   call matchup#pos#set_cursor(l:save_pos)
 
-  call matchup#perf#toc('s:get_delim', 'firstpass')
+  call matchup#perf#toc('s:get_delim', 'first_pass')
 
   " nothing found, leave now
   if l:lnum == 0
-    call matchup#perf#toc('s:get_delim', 'nothingfound')
+    call matchup#perf#toc('s:get_delim', 'nothing_found')
     return {}
   endif
 
@@ -416,7 +438,7 @@ function! s:get_delim(opts) " {{{1
     endif
   endfor
 
-  call matchup#perf#toc('s:get_delim', 'gotresults')
+  call matchup#perf#toc('s:get_delim', 'got_results')
 
   return empty(l:result.type) ? {} : l:result
 endfunction
@@ -602,6 +624,11 @@ function! s:get_matching_delims(down) dict " {{{1
 
   "echo '% op' l:open 'cl' l:close 're' l:re '|' self.groups 'a' self.augment
 
+  " XXX temporary workaround for BADLOGIC
+  if a:down && self.side ==# 'mid'
+    let l:open = self.regextwo.open
+  endif
+
   " turn \(\) into \%(\) for searchpairpos
   let l:open  = s:remove_capture_groups(l:open)
   let l:close = s:remove_capture_groups(l:close)
@@ -654,6 +681,10 @@ function! s:get_matching_delims(down) dict " {{{1
 
   " echo l:lnum_corr l:open l:close self.groups self.regexone.close
   " echo self.regexone.open self.regextwo.open
+  " if a:down
+  "   echo '^^' a:down l:lnum_corr l:cnum_corr l:open
+  "         \ l:close l:stopline " self.augment.str
+  " endif
 
   " if nothing found, bail immediately
   if l:lnum_corr == 0 | return [['', 0, 0]] | endif

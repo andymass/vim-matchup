@@ -119,13 +119,17 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
     if empty(l:delim) | return | endif
   endfor
 
+  " go to the end of the delimiter, if necessary
   let l:column = l:delim.cnum
   if g:matchup_motion_cursor_end
         \ && ((a:down && l:delim.side !=# 'open')
         \       || l:delim.side ==# 'close')
 
     " XXX spin this off into delim object
-    let l:column += strdisplaywidth(l:delim.match) - 1
+    " let l:column += strdisplaywidth(l:delim.match) - 1
+
+  " XXX
+    let l:column = matchup#delim#jump_target(l:delim)
 
     " TODO
     " let l:test = matchup#delim#get_current('all', 'both_all')

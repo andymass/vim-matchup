@@ -25,7 +25,7 @@ Contributions are welcome!
   * [Options](#options)
   * [FAQ](#faq)
   * [Interoperability](#interoperability)
-  * [Acknowledgements](#acknowledgements)
+  * [Acknowledgments](#acknowledgments)
   * [Development](#development)
 
 ## Overview
@@ -204,7 +204,7 @@ other words, exclusive motions will not include the close word.  In this
 example, where `█` is the cursor position,
 
 ```vim
-if █| continue | endif
+if █x | continue | endif
 ```
 
 pressing `d]%` will produce    
@@ -349,7 +349,7 @@ let g:matchup_matchparen_status_offscreen = 0
 ```
 default: 1
 
-Adjust timeouts for matchparen highlighting
+Adjust timeouts in milliseconds for matchparen highlighting
 ```
 let g:matchup_matchparen_timeout = 300
 let g:matchparen_insert_timeout = 60
@@ -375,7 +375,7 @@ default: 1
 ### Module text_obj
 
 Modify the set of operators which may operate
-[line-wise](#line-wise-operator-text-object-combinations)
+[line-wise](#line-wise-operatortext-object-combinations)
 ```vim 
 let g:matchup_text_obj_linewise_operators' = ['d', 'y']
 ```

@@ -122,6 +122,9 @@ function! s:matchparen.highlight() abort dict " {{{1
   " echo l:corrlist[0].class l:corrlist[1].class
   "  \ l:corrlist[0].side l:corrlist[1].side
 
+  " echo 'vv' map(copy(l:corrlist), 'v:val.match')
+  "   \ map(copy(l:corrlist), 'v:val.lnum')
+
   if len(l:corrlist) <= 1 && !g:matchup_matchparen_singleton
     return
   endif
@@ -233,6 +236,8 @@ endfunction
 " }}}1
 function! matchup#matchparen#offscreen(current) " {{{1
   let l:offscreen = {}
+
+  if !has_key(a:current, 'links') | return | endif
 
   " prefer to show close 
   if a:current.links.open.lnum < line('w0')
