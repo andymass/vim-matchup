@@ -127,8 +127,25 @@ words are `else` and `elseif`.  The `if`/`endif` pair is called an
   [exclusive] motion.
 
 #### (a.3) jump inside
-  - `z%` go to inside `[count]`th nearest inner contained block.  This
-  is an [exclusive] motion, except it eats whitespace in operators.
+- `z%` go to inside `[count]`th nearest inner contained block.  This
+  is an [exclusive] motion when used with operators, except it eats
+  whitespace.  For example, where `█` is the cursor position,
+
+```vim
+  █ call somefunction(param1, param2)
+```
+`dz%` produces
+```vim
+  param1, param2)
+```
+but in
+```vim
+  █ call somefunction(      param1, param2)
+```
+`dz%` also produces
+```vim
+  param1, param2)
+```
 
 #### (b.1) full set of text objects
 - `i%` the inside of an any block
