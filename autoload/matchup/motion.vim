@@ -60,6 +60,12 @@ function! matchup#motion#init_module() " {{{1
   " jump inside z% 
   nnoremap <silent> <plug>(matchup-z%)
         \ :<c-u>call matchup#motion#jump_inside(0)<cr>
+  xnoremap <silent> <sid>(matchup-z%)
+        \ :<c-u>call matchup#motion#jump_inside(1)<cr>
+  xmap     <silent> <plug>(matchup-z%) <sid>(matchup-z%)
+  onoremap <silent> <plug>(matchup-z%)
+        \ :<c-u>call <sid>oper("normal \<sid>(v)"
+        \ . v:count1 . "\<sid>(matchup-z%)")<cr>
 endfunction
 
 " }}}1
@@ -202,7 +208,7 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
  
     " this is an exclusive motion
     if l:delim.side ==# 'close'
-      if empty(get(s:, 'v_operator', 0))
+      if empty(get(s:, 'v_operator', ''))
         "XXX spin this off
         let l:new_pos[1] += strdisplaywidth(l:delim.match) - 1
       else
@@ -229,18 +235,44 @@ endfunction
 " }}}1
 function! matchup#motion#jump_inside(visual) " {{{1
   " TODO handle count
-  " TODO handle visual
- 
-  let l:delim = matchup#delim#get_next('all', 'open')
-  if empty(l:delim)
-    return
+
+  let l:count = v:count1
+
+  let l:save_pos = matchup#pos#get_cursor()
+
+  if a:visual
+    normal! gv
   endif
 
-  let l:new_pos = [l:delim.lnum, l:delim.cnum]
-  let l:new_pos[1] += strdisplaywidth(l:delim.match) - 1
+  for l:dummy in range(l:count)
+    let l:delim = matchup#delim#get_next('all', 'open')
+    if empty(l:delim)
+      call matchup#pos#set_cursor(l:save_pos)
+      return
+    endif
+
+    let l:new_pos = [l:delim.lnum, l:delim.cnum]
+    " XXX spin this off
+    let l:new_pos[1] += strdisplaywidth(l:delim.match) - 1
+
+    call matchup#pos#set_cursor(matchup#pos#next(l:new_pos))
+  endfor
+
+  call matchup#pos#set_cursor(l:save_pos)
+
+  " convert to [~, lnum, cnum, ~] format
+  let l:new_pos = matchup#pos#next(l:new_pos)
+
+  " this is an exclusive motion except when dealing with whitespace
+  if !empty(get(s:, 'v_operator', ''))
+    while matchup#util#in_whitespace(l:new_pos[1], l:new_pos[2])
+      let l:new_pos = matchup#pos#next(l:new_pos)
+    endwhile
+    let l:new_pos = matchup#pos#prev(l:new_pos)
+  endif 
 
   normal! m`
-  call matchup#pos#set_cursor(matchup#pos#next(l:new_pos))
+  call matchup#pos#set_cursor(l:new_pos)
 endfunction
 
 " }}}1

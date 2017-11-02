@@ -128,7 +128,7 @@ words are `else` and `elseif`.  The `if`/`endif` pair is called an
 
 #### (a.3) jump inside
   - `z%` go to inside `[count]`th nearest inner contained block.  This
-  is an [inclusive] motion.
+  is an [exclusive] motion, except it eats whitespace in operators.
 
 #### (b.1) full set of text objects
 - `i%` the inside of an any block

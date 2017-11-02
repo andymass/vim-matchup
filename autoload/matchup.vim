@@ -73,25 +73,27 @@ function! s:init_default_mappings()
     endif
   endfunction
 
-  " these are forced in order to overwrite matchit mappings
+  " these won't conflict since matchit should not be loaded at this point
   if get(g:, 'matchup_motion_enabled', 0)
-    call s:map('n', '%',  '<plug>(matchup-%)',  1)
-    call s:map('n', 'g%', '<plug>(matchup-g%)', 1)
+    call s:map('n', '%',  '<plug>(matchup-%)' )
+    call s:map('n', 'g%', '<plug>(matchup-g%)')
 
-    call s:map('x', '%',  '<plug>(matchup-%)',  1)
-    call s:map('x', 'g%', '<plug>(matchup-g%)', 1)
-    call s:map('o', '%',  '<plug>(matchup-%)',  1)
-    call s:map('o', 'g%', '<plug>(matchup-g%)', 1)
+    call s:map('x', '%',  '<plug>(matchup-%)' )
+    call s:map('x', 'g%', '<plug>(matchup-g%)')
+    call s:map('o', '%',  '<plug>(matchup-%)' )
+    call s:map('o', 'g%', '<plug>(matchup-g%)')
 
-    call s:map('n', ']%', '<plug>(matchup-]%)', 1)
-    call s:map('n', '[%', '<plug>(matchup-[%)', 1)
+    call s:map('n', ']%', '<plug>(matchup-]%)')
+    call s:map('n', '[%', '<plug>(matchup-[%)')
 
-    call s:map('x', ']%', '<plug>(matchup-]%)', 1)
-    call s:map('x', '[%', '<plug>(matchup-[%)', 1)
-    call s:map('o', ']%', '<plug>(matchup-]%)', 1)
-    call s:map('o', '[%', '<plug>(matchup-[%)', 1)
+    call s:map('x', ']%', '<plug>(matchup-]%)')
+    call s:map('x', '[%', '<plug>(matchup-[%)')
+    call s:map('o', ']%', '<plug>(matchup-]%)')
+    call s:map('o', '[%', '<plug>(matchup-[%)')
 
     call s:map('n', 'z%', '<plug>(matchup-z%)')
+    call s:map('x', 'z%', '<plug>(matchup-z%)')
+    call s:map('o', 'z%', '<plug>(matchup-z%)')
   endif
 
   if get(g:, 'matchup_text_obj_enabled', 0)

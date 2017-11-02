@@ -34,6 +34,12 @@ function! matchup#util#in_syntax(name, ...) " {{{1
 endfunction
 
 " }}}1
+function! matchup#util#in_whitespace(...) " {{{1
+  let l:pos = a:0 > 0 ? [a:1, a:2] : [line('.'), col('.')]
+  return matchstr(getline(l:pos[0]), '\%'.l:pos[1].'c.') =~# '\s'
+endfunction
+" }}}1
+
 function! matchup#util#uniq(list) " {{{1
   if exists('*uniq') | return uniq(a:list) | endif
   if len(a:list) <= 1 | return a:list | endif
