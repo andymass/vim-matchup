@@ -116,6 +116,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
   " get all the matching position(s)
   " *important*: in the case of mid, we search up before searching down
   " this gives us a context object which we use for the other side
+  " XXX: what if no open is found here?
   let l:matches = []
   for l:down in {'open': [1], 'close': [0], 'mid': [0,1]}[a:delim.side]
     let l:save_pos = matchup#pos#get_cursor()
@@ -256,6 +257,10 @@ function! matchup#delim#jump_target(delim) "{{{1
 
   let l:column = a:delim.cnum
   let l:column += strdisplaywidth(a:delim.match) - 1
+
+  if strdisplaywidth(a:delim.match) <= 2
+    return l:column
+  endif
 
   for l:tries in range(strdisplaywidth(a:delim.match)-2)
     call matchup#pos#set_cursor(a:delim.lnum, l:column)
