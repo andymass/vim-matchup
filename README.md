@@ -159,13 +159,8 @@ but in
 - `{count}a%` if `{count}` is greater than 1, the `{count}`th surrounding
   open-to-close block.
 
-Note: by default objects involving `matchpairs` such as `(){}[]` are
-performed character-wise, while `matchwords` such as `if`/`endif` are
-performed line-wise.
-The -wise can be forced using "v", "V", or `^V`
-Let `g:matchup_all_charwise`.
-XXX inclusive, exclusive
-XXX need () characterwise, others linewise except QUIRKS.
+See [here](#line-wise-operatortext-object-combinations)
+for some examples and important special cases.
 
 #### (c.1) highlight `()`, `[]`, and `{}`
 
@@ -250,9 +245,9 @@ This is vim compatible with the built-in `d%` on `matchpairs`.
 ### Line-wise operator/text-object combinations
 
 Normally, the text objects `i%` and `a%` work character-wise.  However,
-there are some special cases.  For certain operators combined with
-`i%` (by default `di%` and `yi%`), under certain conditions, match-up
-will operate line-wise instead.  For example, in
+there are some special cases.  For certain operators combined with `i%`,
+under certain conditions, match-up will effectively operate line-wise
+instead.  For example, in
 ```vim
 if condition
  █call one()
@@ -267,9 +262,10 @@ endif
 even though deleting ` condition` would be suggested by the object `i%`.
 The intention is to make operators more useful in some cases.  The
 following rules apply:
-- The operator must be listed in `g:matchup_text_obj_linewise_operators`
-- The outer block must span multiple lines.
-- The open and close delimiters must be more than one character long.  In
+1. The operator must be listed in `g:matchup_text_obj_linewise_operators`.
+  By default this is `d` and `y` (e.g., `di%` and `ya%`).
+2. The outer block must span multiple lines.
+3. The open and close delimiters must be more than one character long.  In
   particular, `di%` involving a `(`...`)` block will not be subject to
   these special rules.
 
