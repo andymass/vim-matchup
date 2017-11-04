@@ -19,13 +19,10 @@ function! s:init_options()
   call s:init_option('matchup_matchparen_status_offscreen', 1)
   call s:init_option('matchup_matchparen_singleton', 0)
 
-  " TODO
   call s:init_option('matchup_matchparen_timeout',
     \ get(g:, 'matchparen_timeout', 300))
   call s:init_option('matchup_matchparen_insert_timeout', 
     \ get(g:, 'matchparen_insert_timeout', 60))
-
-  " see *cpo-M*
 
   call s:init_option('matchup_motion_enabled', 1)
   call s:init_option('matchup_motion_cursor_end', 1)
@@ -39,7 +36,6 @@ function! s:init_options()
   call s:init_option('matchup_imap_enabled', 0)
   
   call s:init_option('matchup_complete_enabled', 0)
-
 endfunction
 
 function! s:init_option(option, default)
@@ -62,6 +58,13 @@ function! s:init_modules()
   endfor
 endfunction
 
+let g:v_motion_force = ''
+function! s:force(wise)
+  let g:v_motion_force = a:wise
+  " let g:v_operator = v:operator
+  return ''
+endfunction
+
 function! s:init_default_mappings()
   if !get(g:,'matchup_mappings_enabled', 1) | return | endif
 
@@ -72,6 +75,11 @@ function! s:init_default_mappings()
                             " <silent> XXX
     endif
   endfunction
+
+  for l:opforce in ['', 'v', 'V', '<c-v>']
+    call s:map('onore', '<expr> <plug>(matchup-o_'.l:opforce.')',
+          \ '<sid>force('''.l:opforce.''')')
+  endfor
 
   " these won't conflict since matchit should not be loaded at this point
   if get(g:, 'matchup_motion_enabled', 0)
@@ -88,19 +96,33 @@ function! s:init_default_mappings()
 
     call s:map('x', ']%', '<plug>(matchup-]%)')
     call s:map('x', '[%', '<plug>(matchup-[%)')
+
     call s:map('o', ']%', '<plug>(matchup-]%)')
     call s:map('o', '[%', '<plug>(matchup-[%)')
 
     call s:map('n', 'z%', '<plug>(matchup-z%)')
     call s:map('x', 'z%', '<plug>(matchup-z%)')
     call s:map('o', 'z%', '<plug>(matchup-z%)')
+
+    for l:opforce in ['v', 'V', '<c-v>']
+      call s:map('o', l:opforce.']%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-]%)')
+      call s:map('o', l:opforce.'[%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-[%)')
+      call s:map('o', l:opforce.'z%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-z%)')
+    endfor
   endif
 
   if get(g:, 'matchup_text_obj_enabled', 0)
     call s:map('x', 'i%', '<plug>(matchup-i%)')
     call s:map('x', 'a%', '<plug>(matchup-a%)')
-    call s:map('o', 'i%', '<plug>(matchup-i%)')
-    call s:map('o', 'a%', '<plug>(matchup-a%)')
+    for l:opforce in ['', 'v', 'V', '<c-v>']
+      call s:map('o', l:opforce.'i%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-i%)')
+      call s:map('o', l:opforce.'a%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-a%)')
+    endfor
   endif
 
   if get(g:, 'matchup_imap_enabled', 0)

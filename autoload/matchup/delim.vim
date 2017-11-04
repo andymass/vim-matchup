@@ -452,7 +452,7 @@ endfunction
 
 function! s:ignorecase_start() " {{{1
   " enforce b:match_ignorecase, if necessary
-  if exists('s:save_ic')
+  if !exists('s:save_ic')
     return
   endif
   if exists('b:match_ignorecase') && b:match_ignorecase !=# &ignorecase

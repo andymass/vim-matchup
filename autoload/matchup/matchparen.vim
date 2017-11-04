@@ -125,13 +125,12 @@ function! s:matchparen.highlight() abort dict " {{{1
   " echo 'vv' map(copy(l:corrlist), 'v:val.match')
   "   \ map(copy(l:corrlist), 'v:val.lnum')
 
+  let w:matchparen_current = l:current
+
   if len(l:corrlist) <= 1 && !g:matchup_matchparen_singleton
     return
   endif
 
-  " return
-
-  let w:matchparen_current = l:current
   let w:matchparen_corrlist = l:corrlist
 
 

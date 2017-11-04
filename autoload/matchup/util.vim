@@ -38,6 +38,13 @@ function! matchup#util#in_whitespace(...) " {{{1
   let l:pos = a:0 > 0 ? [a:1, a:2] : [line('.'), col('.')]
   return matchstr(getline(l:pos[0]), '\%'.l:pos[1].'c.') =~# '\s'
 endfunction
+
+" }}}1
+function! matchup#util#in_indent(...) " {{{1
+  let l:pos = a:0 > 0 ? [a:1, a:2] : [line('.'), col('.')]
+  return l:pos[1] > 0 && getline(l:pos[0]) =~# '^\s*\%'.(l:pos[1]+1).'c'
+endfunction
+
 " }}}1
 
 function! matchup#util#uniq(list) " {{{1

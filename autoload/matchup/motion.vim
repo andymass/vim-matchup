@@ -13,6 +13,7 @@ function! matchup#motion#init_module() " {{{1
   " utility maps to avoid conflict with "normal" command
   nnoremap <sid>(v) v
   nnoremap <sid>(V) V
+  " c-v
 
   " jump between matching pairs
        " TODO XXX add "forced" omap: dV% (must make v,V,C-V)
@@ -53,9 +54,12 @@ function! matchup#motion#init_module() " {{{1
   onoremap <plug>(matchup-]%)
         \ :<c-u>call <sid>oper("normal \<sid>(v)"
         \ . v:count1 . "\<sid>(matchup-]%)")<cr>
+
   onoremap <plug>(matchup-[%)
         \ :<c-u>call <sid>oper("normal \<sid>(v)"
         \ . v:count1 . "\<sid>(matchup-[%)")<cr>
+
+  " xxx va Va c-va
 
   " jump inside z% 
   nnoremap <silent> <plug>(matchup-z%)
@@ -206,7 +210,7 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
     let l:save_pos = matchup#pos#get_cursor()
     let l:new_pos = [l:delim.lnum, l:delim.cnum]
  
-    " this is an exclusive motion
+    " this is an exclusive motion, ]%
     if l:delim.side ==# 'close'
       if empty(get(s:, 'v_operator', ''))
         "XXX spin this off
@@ -225,6 +229,14 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
       break
     endif
   endfor
+
+  " this is an exclusive motion, [%
+  if !a:down && !empty(get(s:, 'v_operator', ''))
+    normal! o
+    call matchup#pos#set_cursor(matchup#pos#prev(
+          \ matchup#pos#get_cursor()))
+    normal! o
+  endif
 
   normal! m`
   call matchup#pos#set_cursor(l:new_pos)

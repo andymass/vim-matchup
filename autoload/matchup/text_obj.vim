@@ -24,7 +24,7 @@ function! matchup#text_obj#init_module() " {{{1
 endfunction
 
 " MAXCOL is probably a lot bigger in actuality, but we don't want
-" to support such long lines
+" to support such long lines XXX not used
 let s:MAXCOL = 0x7fff
 
 " }}}1
@@ -35,8 +35,11 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
     call matchup#pos#set_cursor(getpos("'>"))
   endif
 
+  " motion forcing
+  let l:forced = a:visual ? '' : g:v_motion_force
+
   " determine if operator is able to act line-wise (i.e., for inner)
-  let l:linewise = index(g:matchup_text_obj_linewise_operators,
+  let l:linewise_op = index(g:matchup_text_obj_linewise_operators,
         \ v:operator) >= 0
 
   " disable the timeout
@@ -71,6 +74,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
     let [l:l1, l:c1, l:l2, l:c2] = [l:open.lnum,  l:open.cnum,
           \ l:close.lnum, l:close.cnum]
 
+    " XXX should be > 0 or > 1?
     let l:is_multiline = (l:l2 - l:l1) > 1 ? 1 : 0
 
     " special case: if inner and the current selection coincides
@@ -82,27 +86,40 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
 
     " adjust the borders
     if a:is_inner
-      let l:c1 += len(l:open.match)
-      let l:c2 -= 1
+      let l:c1 += strlen(l:open.match) - 1
+      let [l:l1, l:c1] = matchup#pos#next(l:l1, l:c1)[1:2]
+      let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
 
-      if l:is_multiline
+      " don't select only indent at close
+      let l:sol = (l:c2 <= 1)
+      while matchup#util#in_indent(l:l2, l:c2)
+        let l:c2 = 1
+        let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
+        let l:sol = 1
+      endwhile
+
+      " in visual include a line break
+      if a:visual && l:sol
+        let l:c2 = strlen(getline(l:l2))+1
+      endif
+
+      " not visual, get rid of a single line-break-only line
+      if !a:visual && l:sol && strlen(getline(l:l2)) == 0
+            \ && (l:forced ==# '')
+        let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
+      endif
+
+      " check for the line-wise special case
+      if l:is_multiline && l:linewise_op && strlen(l:close.match) > 1
         let l:l1 += 1
-        let l:c1 = strlen(matchstr(getline(l:l1), '^\s*')) + 1
-        let l:l2 -= 1
-        let l:c2 = strlen(getline(l:l2))
-        if l:c2 == 0 && !l:linewise
-          let l:l2 -= 1
-          let l:c2 = len(getline(l:l2)) + 1
-        endif
-      elseif l:c2 == 0
-        let l:l2 -= 1
-        let l:c2 = len(getline(l2)) + 1
+        let l:c1 = 1
+        let l:c2 = strlen(getline(l:l2))+1
       endif
     else
-      let l:c2 += len(l:close.match) - 1
+      let l:c2 += strlen(l:close.match) - 1
     endif
 
-    " TODO: there is still a bug here in V mode
+    " TODO: is there still a bug here in V mode?
     " in visual line mode, force new selection to not be smaller
     if a:visual && visualmode() ==# 'V'
           \ && (l:l1 > l:selection[0] || l:l2 < l:selection[2])
@@ -123,12 +140,27 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
 
   endfor
 
-  " determine the proper select mode
-  let l:select_mode = l:is_multiline && l:linewise ? 'V'
-        \ : (v:operator ==# ':') ? visualmode() : 'v'
+  " toggle exclusive: difference between di% and dvi% TODO: &selection
+  if l:forced ==# 'v'
+    let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
+  endif
+
+  " " possible extra line with force
+  if l:sol && (l:forced =~# 'V' || l:forced ==# 'v')
+    let l:l2 += 1
+    let l:c2 = 1
+  endif
+
+  " set the proper visual mode for this selection
+  let l:select_mode = (v:operator ==# ':')
+        \ ? visualmode()
+        \ : (l:forced !=# '')
+        \   ? l:forced
+        \   : 'v'
 
   " apply selection
   execute 'normal!' l:select_mode
+  normal! o
   call matchup#pos#set_cursor(l1, c1)
   normal! o
   call matchup#pos#set_cursor(l2, c2)

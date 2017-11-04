@@ -30,10 +30,19 @@ endfunction
 
 let s:transmute = {}
 
+" let s:cancel_next = 0
 function! s:transmute.textchanged() abort dict " {{{1
-  if exists('w:matchparen_current')
-    echo w:matchparen_current.links.close.match
-  endif
+  " if exists('w:matchparen_current')
+  "   echo w:matchparen_current.links.close.match
+  " endif
+  " if s:cancel_next
+  "   return
+  "   let s:cancel_next = 0
+  " endif
+
+  call s:transmute.setup()
+  call s:transmute.commit()
+
 endfunction
 
 " }}}1
@@ -64,6 +73,8 @@ endfunction
 
 " }}}1
 function! s:transmute.commit() abort dict " {{{1
+  "echo 'commit' reltime() | sleep 1
+
   if !g:matchup_transmute_enabled | return | endif
   if !exists('w:transmute_state') | return | endif
 
@@ -73,7 +84,7 @@ function! s:transmute.commit() abort dict " {{{1
   let l:corrlist = w:transmute_state.corrlist
   let l:prior = w:transmute_state.prior
 
-  " echo l:current.match  | sleep 1
+ " echo l:current.match l:prior.match
 
   if empty(l:current) | return | endif
   "let l:threshold = l:prior.cnum + 
@@ -119,7 +130,9 @@ function! s:transmute.commit() abort dict " {{{1
 
       let l:groups[l:grp] = l:current.groups[l:grp]
     endfor
-    call setline(l:corr.lnum, l:line)
+    if getline(l:corr.lnum) !=# l:line
+      call setline(l:corr.lnum, l:line)
+    endif
   endfor
 
 endfunction

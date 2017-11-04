@@ -45,7 +45,8 @@ function! matchup#pos#prev(...) " {{{1
 
   return l:cnum > 1
         \ ? [0, l:lnum, l:cnum-1, 0]
-        \ : [0, max([l:lnum-1, 1]), strlen(getline(l:lnum-1)), 0]
+        \ : [0, max([l:lnum-1, 1]),
+        \     max([strlen(getline(l:lnum-1)), 1]), 0]
 endfunction
 
 " }}}1
@@ -66,7 +67,12 @@ function! matchup#pos#smaller(pos1, pos2) " {{{1
 endfunction
 
 " }}}1
+function! matchup#pos#smaller_or_equal(pos1, pos2) " {{{1
+  return matchup#pos#smaller(a:pos1, a:pos2)
+        \ || matchup#pos#equal(a:pos1, a:pos2)
+endfunction
 
+" }}}1
 function! s:parse_args(args) " {{{1
   "
   " The arguments should be in one of the following forms (when unpacked):
