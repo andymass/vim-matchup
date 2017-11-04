@@ -84,7 +84,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
       continue
     endif
 
-    " adjust the borders
+    " adjust the borders of the selection
     if a:is_inner
       let l:c1 += strlen(l:open.match) - 1
       let [l:l1, l:c1] = matchup#pos#next(l:l1, l:c1)[1:2]
@@ -115,8 +115,28 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         let l:c1 = 1
         let l:c2 = strlen(getline(l:l2))+1
       endif
+  
+      " toggle exclusive: difference between di% and dvi%
+      " TODO: &selection
+      if l:forced ==# 'v'
+        let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
+      endif
+
+      " possible extra line with force
+      if l:sol && (l:forced =~# 'V' || l:forced ==# 'v')
+        let l:l2 += 1
+        let l:c2 = 1
+      endif
     else
       let l:c2 += strlen(l:close.match) - 1
+
+      " special case for delete operator
+      if v:operator ==# 'd'
+            \ && strpart(getline(l:l2), l:c2) =~# '\s*$'
+            \ && strpart(getline(l:l2), 0, l:c1-1) =~# '^\s'
+        let l:c1 = 1
+        let l:c2 = strlen(getline(l:l2))+1
+      endif
     endif
 
     " TODO: is there still a bug here in V mode?
@@ -137,19 +157,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
     else
       break
     endif
-
   endfor
-
-  " toggle exclusive: difference between di% and dvi% TODO: &selection
-  if l:forced ==# 'v'
-    let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
-  endif
-
-  " " possible extra line with force
-  if l:sol && (l:forced =~# 'V' || l:forced ==# 'v')
-    let l:l2 += 1
-    let l:c2 = 1
-  endif
 
   " set the proper visual mode for this selection
   let l:select_mode = (v:operator ==# ':')
