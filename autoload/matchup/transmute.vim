@@ -4,6 +4,9 @@
 " Email:      a@normed.space
 "
 
+let s:save_cpo = &cpo
+set cpo&vim
+
 function! matchup#transmute#init_module() " {{{1
   if !g:matchup_transmute_enabled | return | endif
 
@@ -15,9 +18,9 @@ endfunction
 function! matchup#transmute#enable() " {{{1
   augroup matchup_transmute
     autocmd!
-    autocmd InsertEnter * call s:transmute.setup()
-    autocmd InsertLeave * call s:transmute.commit()
-    autocmd TextChanged * call s:transmute.textchanged()
+    " autocmd InsertEnter * call s:transmute.setup()
+    " autocmd InsertLeave * call s:transmute.commit()
+    autocmd TextChanged,TextChangedI * call s:transmute.textchanged()
   augroup END
 endfunction
 
@@ -30,8 +33,29 @@ endfunction
 
 let s:transmute = {}
 
+function! matchup#transmute#tick(insertmode, entering_insert)
+
+  if changenr() > get(w:, 'matchup_transmute_last_changenr', 0)
+        \ && !empty('w:matchup_matchparen_context.prior')
+    let w:matchup_transmute_last_changenr = changenr()
+
+    return s:transmute.dochange(
+          \ w:matchup_matchparen_context.prior.corrlist,
+          \ w:matchup_matchparen_context.prior.current,
+          \ w:matchup_matchparen_context.normal.current)
+  endif
+
+    " \ changenr()
+
+    return 0
+
+endfunction
+
 " let s:cancel_next = 0
 function! s:transmute.textchanged() abort dict " {{{1
+
+  if !g:matchup_transmute_enabled | return | endif
+
   " if exists('w:matchparen_current')
   "   echo w:matchparen_current.links.close.match
   " endif
@@ -40,8 +64,18 @@ function! s:transmute.textchanged() abort dict " {{{1
   "   let s:cancel_next = 0
   " endif
 
-  call s:transmute.setup()
-  call s:transmute.commit()
+  " call s:transmute.setup()
+  " call s:transmute.commit()
+  
+  if !exists('w:matchup_matchparen_context')
+    return
+  endif
+
+  " echo w:matchup_matchparen_context.normal.singleton.match
+  "       \ w:matchup_matchparen_context.insert.singleton.match
+  " echo w:matchup_matchparen_context.counter
+  "   \ w:matchup_matchparen_context.normal.current.match
+  "       \ w:matchup_matchparen_context.prior.current.match
 
 endfunction
 
@@ -72,34 +106,38 @@ function! s:transmute.setup() abort dict " {{{1
 endfunction
 
 " }}}1
+
 function! s:transmute.commit() abort dict " {{{1
   "echo 'commit' reltime() | sleep 1
 
-  if !g:matchup_transmute_enabled | return | endif
-  if !exists('w:transmute_state') | return | endif
+endfunction
 
-  " TODO ensure cursor position
-  let l:current = matchup#delim#get_current('all', 'both_all')
+" }}} 1
 
-  let l:corrlist = w:transmute_state.corrlist
-  let l:prior = w:transmute_state.prior
+function! s:transmute.dochange(list, pri, cur) abort dict " {{{1
+  " if !g:matchup_transmute_enabled | return | endif
+  " echo 'doing change' a:pri.class a:cur.class
 
- " echo l:current.match l:prior.match
+  if empty(a:list) || empty(a:pri) || empty(a:cur) | return 0 | endif
 
-  if empty(l:current) | return | endif
-  "let l:threshold = l:prior.cnum + 
+  " so far only same-class changes are supported
+  if a:pri.class[0] != a:cur.class[0]
+    return 0
+  endif
 
-  let l:delta = strdisplaywidth(l:current.match)
-        \ - strdisplaywidth(l:prior.match)
+  let l:num_changes = 0
 
-  for l:i in range(len(l:corrlist))
-    if l:i == l:prior.match_index | continue | endif
+  let l:delta = strdisplaywidth(a:cur.match)
+        \ - strdisplaywidth(a:pri.match)
 
-    let l:corr = l:corrlist[l:i]
+  for l:i in range(len(a:list))
+    if l:i == a:pri.match_index | continue | endif
+
+    let l:corr = a:list[l:i]
     let l:line = getline(l:corr.lnum)
 
     let l:column = l:corr.cnum
-    if l:corr.lnum == l:current.lnum && l:i > l:prior.match_index
+    if l:corr.lnum == a:cur.lnum && l:i > a:pri.match_index
       let l:column += l:delta
     endif
 
@@ -108,38 +146,43 @@ function! s:transmute.commit() abort dict " {{{1
 
     let l:groups = copy(l:corr.groups)
     for l:grp in keys(l:groups)
-      let l:count = len(split(l:re_anchored, s:notslash.'\\'.l:grp))-1
+      let l:count = len(split(l:re_anchored,
+        \ g:matchup#re#not_bslash.'\\'.l:grp))-1
       if l:count == 0 | continue | endif
 
-      if l:current.groups[l:grp] ==# l:groups[l:grp]
+      if a:cur.groups[l:grp] ==# l:groups[l:grp]
         continue
       endif
 
       for l:dummy in range(len(l:count))
         let l:pattern = substitute(l:re_anchored,
-              \ s:notslash.'\\'.l:grp,
+              \ g:matchup#re#not_bslash.'\\'.l:grp,
               \ '\=''\zs'.(l:groups[l:grp]).'\ze''', '')
         let l:pattern = matchup#delim#fill_backrefs(l:pattern,
               \ l:groups)
-        let l:string = l:current.groups[l:grp]
+        let l:string = a:cur.groups[l:grp]
         let l:line = substitute(l:line, l:pattern,
               \ '\='''.l:string."'", '')
-
-        " echo l:current.cnum l:pattern
       endfor
 
-      let l:groups[l:grp] = l:current.groups[l:grp]
+      let l:groups[l:grp] = a:cur.groups[l:grp]
     endfor
+
     if getline(l:corr.lnum) !=# l:line
+      " TODO break undo option
+      " exe "normal! a\<c-g>u"
       call setline(l:corr.lnum, l:line)
+      let l:num_changes += 1
     endif
   endfor
 
+  return l:num_changes
+
 endfunction
 
-let s:notslash = '\\\@<!\%(\\\\\)*'
-
 " }}}1
+
+let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
 

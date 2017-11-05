@@ -10,7 +10,6 @@ set cpo&vim
 function! matchup#matchparen#init_module() " {{{1
   if !g:matchup_matchparen_enabled | return | endif
 
-  "XXX make buffer?
   call matchup#matchparen#enable()
 endfunction
 
@@ -20,11 +19,12 @@ function! matchup#matchparen#enable() " {{{1
   augroup matchup_matchparen
     autocmd!
     autocmd CursorMoved,CursorMovedI * call s:matchparen.highlight()
-    " autocmd WinEnter * call s:matchparen.highlight()
+    autocmd WinEnter * call s:matchparen.highlight(1)
     " autocmd TextChanged,TextChangedI * call s:matchparen.highlight()
     autocmd WinLeave * call s:matchparen.clear()
     " autocmd BufLeave * call s:matchparen.clear()
     " autocmd InsertEnter,InsertLeave  * call s:matchparen.highlight()
+    autocmd InsertEnter * call s:matchparen.highlight(1, 1)
   augroup END
 
   let s:pi_paren_sid = 0
@@ -80,7 +80,7 @@ function! s:matchparen.clear() abort dict " {{{1
 endfunction
 " }}}1
 
-function! s:matchparen.highlight() abort dict " {{{1
+function! s:matchparen.highlight(...) abort dict " {{{1
   if !g:matchup_matchparen_enabled | return | endif
 
   if !get(b:, 'matchup_matchparen_enabled', 1)
@@ -92,22 +92,39 @@ function! s:matchparen.highlight() abort dict " {{{1
 
   if pumvisible() | return | endif
 
+  let l:force_update    = a:0 >= 1 ? a:1 : 0
+  let l:entering_insert = a:0 >= 2 ? a:2 : 0
+
+  if !l:force_update
+        \ && exists('w:last_changedtick') && exists('w:last_cursor')
+        \ && matchup#pos#equal(w:last_cursor, matchup#pos#get_cursor())
+        \ && w:last_changedtick == b:changedtick
+    return
+  endif
+  let w:last_changedtick = b:changedtick
+  let w:last_cursor = matchup#pos#get_cursor()
+
   call matchup#perf#tic('matchparen.highlight')
 
   call self.clear()
 
-  " if matchup#util#in_comment() || matchup#util#in_string()
-  if matchup#delim#skip()
+  " in insert mode, cursor is treated as being one behind
+  let l:insertmode = l:entering_insert
+        \ || (mode() ==# 'i' || mode() ==# 'R')
+
+  " skip if inside string or comment (by default)
+  if matchup#delim#skip(line('.'), col('.') - l:insertmode)
     return
   endif
 
-  " start the timeout period XXX use effective mode
-  let l:timeout = (mode() ==# 'i')
+  " start the timeout period
+  let l:timeout = l:insertmode
         \ ? g:matchup_matchparen_insert_timeout
         \ : g:matchup_matchparen_timeout
   call matchup#perf#timeout_start(l:timeout)
 
-  let l:current = matchup#delim#get_current('all', 'both_all')
+  let l:current = matchup#delim#get_current('all', 'both_all',
+        \ { 'insertmode': l:insertmode })
   call matchup#perf#toc('matchparen.highlight', 'get_current')
   if empty(l:current) | return | endif
 
@@ -125,18 +142,52 @@ function! s:matchparen.highlight() abort dict " {{{1
   " echo 'vv' map(copy(l:corrlist), 'v:val.match')
   "   \ map(copy(l:corrlist), 'v:val.lnum')
 
-  let w:matchparen_current = l:current
+  if !exists('w:matchup_matchparen_context')
+    let w:matchup_matchparen_context = {
+          \ 'insert': {
+          \   'current':   {},
+          \   'corrlist':  [],
+          \  },
+          \ 'normal': {
+          \   'current':   {},
+          \   'corrlist':  [],
+          \  },
+          \ 'prior': {},
+          \ 'counter': 0,
+          \}
+  endif
+  
+  let w:matchup_matchparen_context.counter += 1
+  
+  let w:matchup_matchparen_context.prior
+        \ = deepcopy(w:matchup_matchparen_context.normal)
+
+  let l:mode_name = l:insertmode && !l:entering_insert
+        \ ? 'insert' : 'normal'
+
+  let w:matchup_matchparen_context[l:mode_name].current = l:current
+  let w:matchup_matchparen_context[l:mode_name].corrlist = l:corrlist
+
+  " echo w:matchup_matchparen_context.normal.current.match
+  "       \ w:matchup_matchparen_context.prior.current.match
+  "       \ b:changedtick 
+  " echo w:matchup_matchparen_context.counter
+
+  " if transmuted, highlight again (will reset timeout)
+  if matchup#transmute#tick(l:insertmode, l:entering_insert)
+    return s:matchparen.highlight(l:force_update, l:entering_insert)
+  endif
 
   if len(l:corrlist) <= 1 && !g:matchup_matchparen_singleton
     return
   endif
 
-  let w:matchparen_corrlist = l:corrlist
 
+"  if l:need_update
+"  endif
 
   " echo l:corrlist
   " echo map(deepcopy(l:corrlist), 'v:val.lnum')
-
   " for l:c in l:corrlist
   "   echom l:c.match
   " endfor
@@ -266,11 +317,12 @@ function! matchup#matchparen#offscreen(current) " {{{1
     let l:line = getline(l:offscreen.lnum)
 
     let l:lasthi = ''
-    for l:idx in range(min([winwidth(0), strchars(l:line)]))
-      let l:c = strlen(strcharpart(l:line, 0, l:idx))
+    "for l:idx in range(min([winwidth(0), strchars(l:line)]))
+    "  let l:c = strlen(strcharpart(l:line, 0, l:idx))
       " echo l:idx l:c | sleep 1
-    endfor
+    "endfor
 
+    " TODO use character indexing
     for l:c in range(min([winwidth(0), strlen(l:line)]))
       if l:offscreen.cnum <= l:c+1 && l:c+1 <= l:offscreen.cnum
             \ - 1 + strlen(l:offscreen.match)
@@ -299,6 +351,15 @@ function! matchup#matchparen#offscreen(current) " {{{1
     let &statusline = getline(l:offscreen.lnum)
   endif
 
+endfunction
+
+" }}}1
+function! s:format_statusline(offscreen) " {{{1
+
+endfunction
+
+function! s:char_virtpos(lnum, cnum)
+  return matchstr(getline(a:lnum), '\%'.a:cnum.'v.')
 endfunction
 
 " }}}1

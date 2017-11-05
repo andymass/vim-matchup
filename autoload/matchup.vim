@@ -71,8 +71,7 @@ function! s:init_default_mappings()
   function! s:map(mode, lhs, rhs, ...)
     if !hasmapto(a:rhs, a:mode)
           \ && ((a:0 > 0) || (maparg(a:lhs, a:mode) ==# ''))
-      silent execute a:mode . 'map ' a:lhs a:rhs      
-                            " <silent> XXX
+      silent execute a:mode . 'map <silent> ' a:lhs a:rhs
     endif
   endfunction
 
@@ -126,7 +125,7 @@ function! s:init_default_mappings()
   endif
 
   if get(g:, 'matchup_imap_enabled', 0)
-    call s:map('i', '<c-x><cr>',  '<plug>(matchup-delim-close)')
+    " call s:map('i', '<c-x><cr>',  '<plug>(matchup-delim-close)')
     " XXX other maps..?
   endif
 endfunction

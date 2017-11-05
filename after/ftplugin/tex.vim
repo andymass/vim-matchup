@@ -1,4 +1,3 @@
-
 " vim match-up - matchit replacement and more
 "
 " Maintainer: Andy Massimino

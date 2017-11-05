@@ -15,7 +15,7 @@ function! matchup#text_obj#init_module() " {{{1
         \]
     let l:p1 = 'noremap <silent> <plug>(matchup-'
     let l:p2 = l:map . ') :<c-u>call matchup#text_obj#' . l:name
-    let l:p3 = empty(l:opt) ? ')<cr>' : ',''' . l:opt . ''')<cr>'
+    let l:p3 = empty(l:opt) ? ')<cr>' : ', ''' . l:opt . ''')<cr>'
     execute 'x' . l:p1 . 'i' . l:p2 . '(1, 1' . l:p3
     execute 'x' . l:p1 . 'a' . l:p2 . '(0, 1' . l:p3
     execute 'o' . l:p1 . 'i' . l:p2 . '(1, 0' . l:p3

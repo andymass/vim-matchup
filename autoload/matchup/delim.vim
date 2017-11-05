@@ -8,13 +8,10 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! matchup#delim#init_module() " {{{1
-
-  " nnoremap <silent><buffer> <plug>(matchup-delim-delete)
+  " nnoremap <silent> <plug>(matchup-delim-delete)
   "       \ :call matchup#delim#delete()<cr>
-
-       " <silent> XXX
-  inoremap <plug>(matchup-delim-close)
-        \ <c-r>=matchup#delim#close()<cr>
+  " inoremap <silent> <plug>(matchup-delim-close)
+  "       \ <c-r>=matchup#delim#close()<cr>
 
   augroup matchup_filetype
     au!
@@ -22,7 +19,6 @@ function! matchup#delim#init_module() " {{{1
   augroup END
 
   call matchup#delim#init_buffer()
-
 endfunction
 
 " }}}1
@@ -40,11 +36,6 @@ function! matchup#delim#init_buffer() " {{{1
 
   " enable/disable for this buffer
   let b:matchup_delim_enabled = 1
-
-  " surround? XXX
-  " let b:surround_37 = b:matchup_delim_re.all.open
-  "   \ . '\r' . b:matchup_delim_re.all.close
-
 endfunction
 
 " }}}1
@@ -116,7 +107,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
   " get all the matching position(s)
   " *important*: in the case of mid, we search up before searching down
   " this gives us a context object which we use for the other side
-  " XXX: what if no open is found here?
+  " TODO: what if no open is found here?
   let l:matches = []
   for l:down in {'open': [1], 'close': [0], 'mid': [0,1]}[a:delim.side]
     let l:save_pos = matchup#pos#get_cursor()
@@ -196,8 +187,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
   if a:0 
     return l:matching_list
   else
-    " return a:delim.links.next
-    " XXX old syntax: open-close, close-open
+    " old syntax: open->close, close->open
     return a:delim.side ==# 'open' ? l:matching_list[-1]
        \ : l:matching_list[0]
   endif
@@ -324,20 +314,25 @@ function! s:get_delim(opts) " {{{1
   "     let c = c_before
 
   let l:cursorpos = col('.')
-  if l:cursorpos > 1 && (mode() ==# 'i' || mode() ==# 'R')
+  " if l:cursorpos > 1 && (mode() ==# 'i' || mode() ==# 'R')
+  let l:insertmode = get(a:opts, 'insertmode', 0)
+  if l:cursorpos > 1 && l:insertmode
     let l:cursorpos -= 1 
   endif 
+
+  " echo l:cursorpos
   " echo l:cursorpos mode() v:insertmode expand('<amatch>')
 
   let a:opts.cursorpos = l:cursorpos
 
   " TODO XXX does this even make any sense?
-  "
+
   " for current, we want to find matches that end after the cursor
   if a:opts.direction ==# 'current'
     let l:re .= '\%>'.(l:cursorpos).'c'
+  "  let l:re = '\%<'.(l:cursorpos+1).'c' . l:re
   endif
- 
+
   " let l:re .= '\%>'.(col('.')).'c'   
   " let g:re = l:re
 
@@ -347,6 +342,11 @@ function! s:get_delim(opts) " {{{1
 
   " use b:match_ignorecase
   call s:ignorecase_start()
+
+  " move cursor one left for searchpos if necessary
+  if l:insertmode
+    call matchup#pos#set_cursor(line('.'), col('.')-1)
+  endif
 
   " in the first pass, we get matching line and column numbers
   " this is intended to be as fast as possible, with no capture groups
@@ -370,7 +370,7 @@ function! s:get_delim(opts) " {{{1
     "     \ || matchup#util#in_string(l:lnum, l:cnum)
 
   " XXX get rid of this..
-  call matchup#pos#set_cursor([l:lnum, l:cnum])
+  "call matchup#pos#set_cursor([l:lnum, l:cnum])
 
     " note: this function should never be called 
     " in 'current' mode, but be explicit
@@ -473,7 +473,6 @@ endfunction
 "}}}1
 
 function! s:parser_delim_new(lnum, cnum, opts) " {{{1
-  let l:time_start = reltime()
 
   let l:cursorpos = a:opts.cursorpos
   " XXX TODO stuff this in opts instead
@@ -664,9 +663,9 @@ function! s:get_matching_delims(down) dict " {{{1
    " echo s:foo | sleep 1
    " let s:foo+= 1
 
-   " improves perceptual performance
+   " improves perceptual performance in insert mode
    " XXX use s: mode flag
-   if mode() ==# 'i'
+   if mode() ==# 'i' || mode() ==# 'R'
      sleep 1m
    endif
 
@@ -1242,10 +1241,6 @@ function! s:init_delim_regexes() " {{{1
     let l:re.all[l:k] = l:re.delim_all[l:k]
   endfor
 
-  " for l:type in values(l:re)
-  "   for l:side in keys(l:type)
-  " endfor
-
   " be explicit about regex mode (set magic mode)
   for l:type in values(l:re)
     for l:side in keys(l:type)
@@ -1391,26 +1386,23 @@ function! matchup#delim#skip(...) " {{{1
         \ || matchup#util#in_string(l:lnum, l:cnum)
   endif
 
-  " call s:set_effective_curpos(l:lnum, l:cnum)
-  " call matchup#pos#set_cursor([l:lnum, l:cnum])
-
+  let s:eff_curpos = [l:lnum, l:cnum]
   execute 'return (' b:matchup_delim_skip ')'
 endfunction
 
-function! s:set_effective_curpos(lnum, cnum)
-endfunction
+let s:eff_curpos = [1, 1]
 
 " effective column/line
-function! s:effcol(expr)
-  return col(a:expr)
+function! s:effline(expr)
+  return a:expr ==# '.' ? s:eff_curpos[0] : line(a:expr)
 endfunction
 
-function! s:effline(expr)
-  return line(a:expr)
+function! s:effcol(expr)
+  return a:expr ==# '.' ? s:eff_curpos[1] : col(a:expr)
 endfunction
 
 function! s:geteffline(expr)
-  return getline(a:expr)
+  return a:expr ==# '.' ? getline(s:effline(a:expr)) : getline(a:expr)
 endfunction
 
 " }}}1
@@ -1435,12 +1427,6 @@ endfunction
 
 " initialize script variables
 let s:stopline = get(g:, 'matchup_delim_stopline', 400)
-
-" whether we're behaving like in insert mode; changes
-"   1) effective cursor position for highlight
-"   2) which is timeout used
-"   XXX should really be in matchparen
-let s:insertmode = 0
 
 let s:sidedict = {
       \ 'open'     : ['open'],
