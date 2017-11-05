@@ -151,21 +151,11 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     let l:matching.match = l:match
     let l:matching.side = l:i == 0 ? 'open'
         \ : l:i == len(l:matches)-1 ? 'close' : 'mid'
+    let l:matching.is_open = !a:delim.is_open
     let l:matching.class[1] = 'FIXME'
     let l:matching.corr  = a:delim.match
     let l:matching.rematch = a:delim.regextwo[l:matching.side]
     let l:matching.match_index = l:i
-
-    " defunct, remove
-    let l:matching.is_open = !a:delim.is_open
-    " let l:matching.re.corr = a:delim.re.this
-    " let l:matching.re.this = a:delim.re.mids
-    if l:matching.type ==# 'delim'
-      " let l:matching.corr_delim = a:delim.delim
-      " let l:matching.corr_mod = a:delim.mod
-      " let l:matching.delim = a:delim.corr_delim
-    else
-    endif
 
     call add(l:matching_list, l:matching)
   endfor
@@ -276,24 +266,26 @@ function! s:get_delim(opts) " {{{1
   "     'type'        : 'delim_tex'
   "                   | 'delim_all'
   "                   | 'all'
-  "     'side'        : 'open'
-  "                   | 'close'
-  "                   | 'both'
-  "                   | 'mid'
-  "                   | 'both_all'
-  "     'syn_exclude' :  don't match in given syntax
+  "     'side'        : 'open'     | 'close'
+  "                   | 'both'     | 'mid'
+  "                   | 'both_all' | 'open_mid'
   "  }
   "  
   "  }}}2
   " Returns: {{{2
   "   delim = {
-  "     type    : 'delim'
-  "     lnum    : line number
-  "     cnum    : column number
-  "     match   : the actual text match
-  "     side    : 'open' | 'close' | 'mid'
-  "     regex  : regular expression which matched
-  "     regextwo : regular expressions for corresponding
+  "     type     : 'delim'
+  "     lnum     : line number
+  "     cnum     : column number
+  "     match    : the actual text match
+  "     augment  : how to match a corresponding open
+  "     groups   : dict of captured groups
+  "     side     : 'open' | 'close' | 'mid'
+  "     is_open  : side == 'open'
+  "     class    : [ c1, c2 ] identifies the kind of match_words
+  "     regexone : the regex item, like \1foo
+  "     regextwo : the regex_backref item, like \(group\)foo
+  "     rematch  : regular expression to use in match highlight
   "   }
   "
   " }}}2
@@ -386,7 +378,6 @@ function! s:get_delim(opts) " {{{1
       continue
     endif
 
-    " TODO support b:match_skip, syn_exclude 
     " if has_key(a:opts, 'syn_exclude')
     "       \ && matchup#util#in_syntax(a:opts.syn_exclude, l:lnum, l:cnum)
     "   call matchup#pos#set_cursor(matchup#pos#prev(l:lnum, l:cnum))
@@ -428,8 +419,8 @@ function! s:get_delim(opts) " {{{1
         \ 'augment'  : '',
         \ 'groups'   : '',
         \ 'side'     : '',
-        \ 'class'    : [],
         \ 'is_open'  : '',
+        \ 'class'    : [],
         \ 'regexone' : '',
         \ 'regextwo' : '',
         \ 'rematch'  : '',
@@ -584,19 +575,15 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
           \ 'augment'      : l:augment,
           \ 'groups'       : l:groups,
           \ 'side'         : l:side,
-          \ 'class'        : [(l:i / l:ns), l:id],
           \ 'is_open'      : (l:side ==# 'open') ? 1 : 0,
-          \ 'get_matching' : function('s:get_matching_delims'),
+          \ 'class'        : [(l:i / l:ns), l:id],
+          \ 'get_matching' : funcref('s:get_matching_delims'),
           \ 'regexone'     : l:thisre,
           \ 'regextwo'     : l:thisrebr,
           \ 'rematch'      : l:re,
           \}
 
-    " echo l:re
-    "echo l:matches 'lc' a:lnum a:cnum l:elapsed_time
-
     return l:result
-
   endif
 
   return {}
@@ -839,8 +826,7 @@ endfunction
 " }}}1
 
 function! s:init_delim_lists() " {{{1
-  let l:lists = { 'delim_tex': { 'name': [], 're': [],
-        \ 'regex': [], 'regex_backref': [] } }
+  let l:lists = { 'delim_tex': { 'regex': [], 'regex_backref': [] } }
 
   " very tricky examples:
   " good: let b:match_words = '\(\(foo\)\(bar\)\):\3\2:end\1'
@@ -1168,7 +1154,7 @@ function! s:init_delim_lists() " {{{1
     " endfor
 
     " this is the original set of words plus the set of augments
-    " XXX this should probably be renamed
+    " TODO this should probably be renamed
     call add(l:lists.delim_tex.regex, {
       \ 'open'     : l:words[0],
       \ 'close'    : l:words[-1],
@@ -1178,7 +1164,7 @@ function! s:init_delim_lists() " {{{1
       \})
 
     " this list has \(groups\) and we also stuff recapture data
-    " XXX this should probably be renamed
+    " TODO this should probably be renamed
     call add(l:lists.delim_tex.regex_backref, {
       \ 'open'     : l:words_backref[0],
       \ 'close'    : l:words_backref[-1],
@@ -1188,11 +1174,6 @@ function! s:init_delim_lists() " {{{1
       \ 'grp_renu' : l:group_renumber,
       \ 'aug_comp' : l:augment_comp,
       \})
-
-    " xxx deprecate
-    call add(l:lists.delim_tex.re, deepcopy(l:words)) " xxx deprecated
-    call add(l:lists.delim_tex.name,
-      \ map(l:words, '"m_".substitute(v:val, ''\\'', "", "g")'))
   endfor
 
   " get user defined lists
@@ -1209,9 +1190,9 @@ function! s:init_delim_lists() " {{{1
   " generate combined lists
   let l:lists.delim_all = {}
   let l:lists.all = {}
-  for k in ['name', 're', 'regex', 'regex_backref']
-    let l:lists.delim_all[k] = l:lists.delim_tex[k]
-    let l:lists.all[k] = l:lists.delim_all[k]
+  for l:k in ['regex', 'regex_backref']
+    let l:lists.delim_all[l:k] = l:lists.delim_tex[l:k]
+    let l:lists.all[l:k] = l:lists.delim_all[l:k]
   endfor
 
   return l:lists
@@ -1271,29 +1252,6 @@ function! s:init_delim_regexes_generator(list_name) " {{{1
     let l:regexes[l:key] = s:remove_capture_groups(
           \ '\%(' . join(l:relist, '\|') . '\)')
   endfor
-
-  " let l:open  = join(map(copy(l:list), 'v:val.open'), '\|')
-  " let l:close = join(map(copy(l:list), 'v:val.close'), '\|')
-  " let l:mids  = join(filter(map(copy(l:list), 'v:val.mid'),
-  "                       \ '!empty(v:val)'), '\|')
-  " let l:open = join(map(copy(l:list.re), 'v:val[0]'), '\|')
-  " let l:close = join(map(copy(l:list.re), 'v:val[-1]'), '\|')
-  " let l:mids = map(copy(l:list.re), 'join(v:val[1:-2], ''\|'')')
-  " call filter(l:mids, '!empty(v:val)')
-  " let l:mids = join(l:mids, '\|')
-
-        " \ 'open' : '\%(' . l:open . '\)',
-        " \ 'close' : '\%(' . l:close . '\)',
-        " \ 'both' : '\%(' . l:open . '\|' . l:close . '\)',
-        " \ 'mid' : strlen(l:mids) ? '\%(' . l:mids . '\)' : '',
-        " \}
-
-  " if strlen(l:mids)
-    " let l:regexes.both_all = '\%(' . l:open . '\|' . l:close
-        "                  \ . '\|' . l:mids . '\)'
-  " else
-    " let l:regexes.both_all = l:regexes.both
-  " endif
 
   return l:regexes
 endfunction

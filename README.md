@@ -414,7 +414,7 @@ _Options planned_.
 
   match-up uses matchit's filetype-specific data, which may not give
   enough information to create proper highlights.  To fix this, you may
-  need to add a highlight quirk.
+  need to modify `b:match_words`.
 
   For help, please open a new issue and be a specific as possible.
 
@@ -527,4 +527,5 @@ Convert between single-line and multi-line blocks.  Mappings undecided.
 - investigate whether `&selection`/`&virtualedit` options are important
 - can match-up be integrated with
   [vim-surround](https://github.com/tpope/vim-surround)?
+- make sure `b:match_ignorecase` works
 
