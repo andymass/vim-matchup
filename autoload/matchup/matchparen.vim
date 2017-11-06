@@ -4,6 +4,8 @@
 " Email:      a@normed.space
 "
 
+scriptencoding utf-8
+
 let s:save_cpo = &cpo
 set cpo&vim
 
@@ -235,7 +237,7 @@ function! s:format_statusline(offscreen) " {{{1
             \ synID(a:offscreen.lnum, l:c+1, 1), 'name')
     endif
     let l:sl .= (l:curhi !=# l:lasthi ? '%#'.l:curhi.'#' : '')
-    if l:line[l:c] == "\t"
+    if l:line[l:c] ==# "\t"
       let l:sl .= repeat(' ', strdisplaywidth(strpart(l:line, 0, 1+l:c))
             \ - strdisplaywidth(strpart(l:line, 0, l:c)))
     else
