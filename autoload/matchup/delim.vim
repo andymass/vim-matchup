@@ -132,8 +132,6 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     call add(l:matches, [])
   endif
 
-"  echo '$' l:matches
-
   " create the match result(s)
   let l:matching_list = []
   for l:i in range(len(l:matches))
@@ -159,8 +157,6 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
 
     call add(l:matching_list, l:matching)
   endfor
- 
- " PP l:matching_list 
 
   " set up links between matches
   for l:i in range(len(l:matching_list))
@@ -174,7 +170,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     let l:c.links.close = l:matching_list[-1]
   endfor
 
-  if a:0 
+  if a:0
     return l:matching_list
   else
     " old syntax: open->close, close->open
@@ -260,7 +256,7 @@ endfunction
 " }}}1
 
 function! s:get_delim(opts) " {{{1
-  " Arguments: {{{2
+  " arguments: {{{2
   "   opts = {
   "     'direction'   : 'next' | 'prev' | 'current'
   "     'type'        : 'delim_tex'
@@ -270,9 +266,9 @@ function! s:get_delim(opts) " {{{1
   "                   | 'both'     | 'mid'
   "                   | 'both_all' | 'open_mid'
   "  }
-  "  
+  "
   "  }}}2
-  " Returns: {{{2
+  " returns: {{{2
   "   delim = {
   "     type     : 'delim'
   "     lnum     : line number
@@ -301,23 +297,19 @@ function! s:get_delim(opts) " {{{1
   " this contains all the patterns for the specified type and side
   let l:re = b:matchup_delim_re[a:opts.type][a:opts.side]
 
-  "   if c_col > 1 && (mode() == 'i' || mode() == 'R')
-  "     let before = strlen(c_before)
-  "     let c = c_before
-
   let l:cursorpos = col('.')
-  " if l:cursorpos > 1 && (mode() ==# 'i' || mode() ==# 'R')
+
   let l:insertmode = get(a:opts, 'insertmode', 0)
   if l:cursorpos > 1 && l:insertmode
-    let l:cursorpos -= 1 
-  endif 
+    let l:cursorpos -= 1
+  endif
 
-  " echo l:cursorpos
-  " echo l:cursorpos mode() v:insertmode expand('<amatch>')
+  if a:opts.direction ==# 'current'
+        \ && matchup#delim#skip(line('.'), l:cursorpos)
+    return {}
+  endif
 
   let a:opts.cursorpos = l:cursorpos
-
-  " TODO XXX does this even make any sense?
 
   " for current, we want to find matches that end after the cursor
   if a:opts.direction ==# 'current'
@@ -325,12 +317,9 @@ function! s:get_delim(opts) " {{{1
   "  let l:re = '\%<'.(l:cursorpos+1).'c' . l:re
   endif
 
-  " let l:re .= '\%>'.(col('.')).'c'   
-  " let g:re = l:re
-
   " use the 'c' cpo flag to allow overlapping matches
   let l:save_cpo = &cpo
-  noautocmd set cpo-=c 
+  noautocmd set cpo-=c
 
   " use b:match_ignorecase
   call s:ignorecase_start()
@@ -353,38 +342,17 @@ function! s:get_delim(opts) " {{{1
           \   : searchpos(l:re, 'bcnW', line('.'))
     if l:lnum == 0 | break | endif
 
-  "  echo l:re l:lnum l:cnum | sleep 1
-" echo l:lnum l:cnum line('.')-s:stopline a:opts.direction | sleep 1
-"echo l:lnum l:re a:opts.direction ==# 'prev' | sleep 1
-"  echo l:lnum l:cnum | sleep 1
-
-    " if matchup#util#in_comment(l:lnum, l:cnum)
-    "     \ || matchup#util#in_string(l:lnum, l:cnum)
-
-  " XXX get rid of this..
-  "call matchup#pos#set_cursor([l:lnum, l:cnum])
-
-    " note: this function should never be called 
+    " note: the skip here should not be needed
     " in 'current' mode, but be explicit
     if a:opts.direction !=# 'current'
           \ && matchup#delim#skip(l:lnum, l:cnum)
 
-      " echo 'rejct'
-
-      " if invalid match, move cursor and keep looking
+      " invalid match, move cursor and keep looking
       call matchup#pos#set_cursor(a:opts.direction ==# 'next'
             \ ? matchup#pos#next(l:lnum, l:cnum)
             \ : matchup#pos#prev(l:lnum, l:cnum))
       continue
     endif
-
-    " if has_key(a:opts, 'syn_exclude')
-    "       \ && matchup#util#in_syntax(a:opts.syn_exclude, l:lnum, l:cnum)
-    "   call matchup#pos#set_cursor(matchup#pos#prev(l:lnum, l:cnum))
-    "   continue
-    " endif
-  " we prefer matches containing the cursor
-  " loop through all the 
 
     break
   endwhile
@@ -464,129 +432,113 @@ endfunction
 "}}}1
 
 function! s:parser_delim_new(lnum, cnum, opts) " {{{1
-
   let l:cursorpos = a:opts.cursorpos
-  " XXX TODO stuff this in opts instead
-  " let l:cursorpos = col('.') - (mode() ==# 'i' ? 1 : 0) 
+  let l:found = 0
 
-  if 1 " a:opts.direction ==# 'current'
-    let l:found = 0
+  let l:sides = s:sidedict[a:opts.side]
+  let l:rebrs = b:matchup_delim_lists[a:opts.type].regex_backref
 
-    let l:sides = s:sidedict[a:opts.side]
-    let l:rebrs = b:matchup_delim_lists[a:opts.type].regex_backref
+  " loop through all (index, side) pairs,
+  let l:ns = len(l:sides)
+  let l:found = 0
+  for l:i in range(len(l:rebrs)*l:ns)
+    let l:side = l:sides[ l:i % l:ns ]
 
-    " loop through all (index, side) pairs,
-    let l:ns = len(l:sides)
-    let l:found = 0
-    for l:i in range(len(l:rebrs)*l:ns)
-      let l:side = l:sides[ l:i % l:ns ]
+    if l:side ==# 'mid'
+      let l:res = l:rebrs[l:i / l:ns].mid_list
+      if empty(l:res) | continue | end
+    else
+      let l:res = [ l:rebrs[l:i / l:ns][l:side] ]
+      if empty(l:res[0]) | continue | end
+    endif
 
-      if l:side ==# 'mid'
-        let l:res = l:rebrs[l:i / l:ns].mid_list
-        if empty(l:res) | continue | end
-      else
-        let l:res = [ l:rebrs[l:i / l:ns][l:side] ]
-        if empty(l:res[0]) | continue | end
+    let l:mid_id = 0
+    for l:re in l:res
+      let l:mid_id += 1
+
+      " prepend the column number and append the cursor column
+      " to anchor the match; we don't use {start} for matchlist
+      " because there may be zero-width look behinds
+
+      " TODO does \%<Nc work properly with tabs?
+      let l:re_anchored = '\%'.a:cnum.'c\%(' . l:re .'\)'
+
+      " for current we want the first match which the cursor is inside
+      if a:opts.direction ==# 'current'
+        let l:re_anchored .= '\%>'.(l:cursorpos).'c'
       endif
 
-      let l:mid_id = 0
-      for l:re in l:res
-        let l:mid_id += 1
+      let l:matches = matchlist(getline(a:lnum), l:re_anchored)
+      if empty(l:matches) | continue | endif
 
-        " prepend the column number and append the cursor column 
-        " to anchor the match; we don't use {start} for matchlist
-        " because there may be zero-width look behinds
-
-        " XXX TODO does \%<Nc work properly with tabs?
-        let l:re_anchored = '\%'.a:cnum.'c\%(' . l:re .'\)'
-
-    " for current we want the first match which the cursor is inside
-        if a:opts.direction ==# 'current'
-          let l:re_anchored .= '\%>'.(l:cursorpos).'c'
-        endif
-
-
-        let l:matches = matchlist(getline(a:lnum), l:re_anchored)
-        if empty(l:matches) | continue | endif
-
-       " echo l:re_anchored l:matches
-
-        let l:found = 1
-        break
-      endfor
-
-      if !l:found | continue | endif
-
+      let l:found = 1
       break
     endfor
 
-    if !l:found
-        return {}
-    endif
+    if !l:found | continue | endif
 
-    let l:match = l:matches[0]
+    break
+  endfor
 
-    let l:list = b:matchup_delim_lists[a:opts.type]
-    let l:thisre   = l:list.regex[l:i / l:ns]
-    let l:thisrebr = l:list.regex_backref[l:i / l:ns]
-
-    let l:augment = {}
-
-    " these are the capture groups indexed by their 'open' id
-    let l:groups = {}
-    let l:id = 0
-
-    if l:side ==# 'open'
-      " XXX we might as well store all the groups...
-      "for l:br in keys(l:thisrebr.need_grp)
-      for l:br in range(1,9)
-        if empty(l:matches[l:br]) | continue | endif
-        let l:groups[l:br] = l:matches[l:br]
-      endfor
-    else
-      let l:id = (l:side ==# 'close')
-            \ ? len(l:thisrebr.mid_list)+1
-            \ : l:mid_id
-
-      for [l:br, l:to] in items(l:thisrebr.grp_renu[l:id])
-        let l:groups[l:to] = l:matches[l:br]
-      endfor
-
-      " echo l:groups l:thisrebr.grp_renu[l:id]
-      " echo l:thisrebr.aug_comp[l:id][0]
-
-      " fill in augment pattern
-      " TODO all the augment patterns should match,
-      " but checking might be too slow
-      let l:aug = l:thisrebr.aug_comp[l:id][0]
-      let l:augment.str = substitute(l:aug.str,
-            \ g:matchup#re#backref,
-            \ '\=l:groups[submatch(1)]', 'g')
-      let l:augment.unresolved = deepcopy(l:aug.outputmap)
-    endif
-
-    " echo l:re l:groups 
-    " echo l:thisrebr.aug_comp[l:id]
-    " echo l:re l:augment l:groups l:thisrebr.need_grp
-
-    let l:result = {
-          \ 'type'         : 'delim',
-          \ 'match'        : l:match,
-          \ 'augment'      : l:augment,
-          \ 'groups'       : l:groups,
-          \ 'side'         : l:side,
-          \ 'is_open'      : (l:side ==# 'open') ? 1 : 0,
-          \ 'class'        : [(l:i / l:ns), l:id],
-          \ 'get_matching' : funcref('s:get_matching_delims'),
-          \ 'regexone'     : l:thisre,
-          \ 'regextwo'     : l:thisrebr,
-          \ 'rematch'      : l:re,
-          \}
-
-    return l:result
+  if !l:found
+      return {}
   endif
 
-  return {}
+  let l:match = l:matches[0]
+
+  let l:list = b:matchup_delim_lists[a:opts.type]
+  let l:thisre   = l:list.regex[l:i / l:ns]
+  let l:thisrebr = l:list.regex_backref[l:i / l:ns]
+
+  let l:augment = {}
+
+  " these are the capture groups indexed by their 'open' id
+  let l:groups = {}
+  let l:id = 0
+
+  if l:side ==# 'open'
+    " XXX we might as well store all the groups...
+    "for l:br in keys(l:thisrebr.need_grp)
+    for l:br in range(1,9)
+      if empty(l:matches[l:br]) | continue | endif
+      let l:groups[l:br] = l:matches[l:br]
+    endfor
+  else
+    let l:id = (l:side ==# 'close')
+          \ ? len(l:thisrebr.mid_list)+1
+          \ : l:mid_id
+
+    for [l:br, l:to] in items(l:thisrebr.grp_renu[l:id])
+      let l:groups[l:to] = l:matches[l:br]
+    endfor
+
+    " fill in augment pattern
+    " TODO all the augment patterns should match,
+    " but checking might be too slow
+    let l:aug = l:thisrebr.aug_comp[l:id][0]
+    " let l:augment.str = substitute(l:aug.str,
+    "       \ g:matchup#re#backref,
+    "       \ '\=l:groups[submatch(1)]', 'g')
+    let l:augment.str = matchup#delim#fill_backrefs(
+          \ l:aug.str, l:groups)
+    let l:augment.unresolved = deepcopy(l:aug.outputmap)
+  endif
+
+  let l:result = {
+        \ 'type'         : 'delim',
+        \ 'match'        : l:match,
+        \ 'augment'      : l:augment,
+        \ 'groups'       : l:groups,
+        \ 'side'         : l:side,
+        \ 'is_open'      : (l:side ==# 'open') ? 1 : 0,
+        \ 'class'        : [(l:i / l:ns), l:id],
+        \ 'get_matching' : funcref('s:get_matching_delims'),
+        \ 'regexone'     : l:thisre,
+        \ 'regextwo'     : l:thisrebr,
+        \ 'rematch'      : l:re,
+        \}
+
+  return l:result
 endfunction
 " }}}1
 
@@ -605,7 +557,7 @@ function! s:get_matching_delims(down) dict " {{{1
       \ : [self.regextwo.open, 'zbW', max([line('.') - s:stopline, 1])]
 
   " these are the anchors for searchpairpos
-  let l:open = self.regexone.open     " XXX is this right? BADLOGIC
+  let l:open = self.regexone.open     " TODO is this right? BADLOGIC
   let l:close = self.regexone.close
 
   " if we're searching up, we anchor by the augment, if it exists
@@ -613,9 +565,7 @@ function! s:get_matching_delims(down) dict " {{{1
     let l:open = self.augment.str
   endif
 
-  "echo '% op' l:open 'cl' l:close 're' l:re '|' self.groups 'a' self.augment
-
-  " XXX temporary workaround for BADLOGIC
+  " TODO temporary workaround for BADLOGIC
   if a:down && self.side ==# 'mid'
     let l:open = self.regextwo.open
   endif
@@ -625,57 +575,29 @@ function! s:get_matching_delims(down) dict " {{{1
   let l:close = s:remove_capture_groups(l:close)
 
   " fill in backreferences
-  " let l:re = matchup#delim#fill_backrefs(l:re, self.groups)
+  " TODO: escaping (or nomagic)
   let l:open = matchup#delim#fill_backrefs(l:open, self.groups)
   let l:close = matchup#delim#fill_backrefs(l:close, self.groups)
 
-  " XXX echo l:open l:re l:close self.augment
-" echo l:open l:re l:close self.augment self.groups
-
-  " TODO: support match_skip
-  " let l:skip = 'matchup#util#in_comment() || matchup#util#in_string()'
-  " let l:skip = b:matchup_delim_skip
   let l:skip = 'matchup#delim#skip()'
-
-  " XXX timeout
-   " XXX use s: mode flag
-  " let l:timeout = (mode() ==# 'i')
-  "       \ ? g:matchup_matchparen_insert_timeout
-  "       \ : g:matchup_matchparen_timeout
 
   if matchup#perf#timeout_check() | return [['', 0, 0]] | endif
 
-  " this is the corresponding part of an open:close pair
-   " if !exists('s:foo') | let s:foo = 1 | endif
-   " echo s:foo | sleep 1
-   " let s:foo+= 1
-
-   " improves perceptual performance in insert mode
-   " XXX use s: mode flag
-   if mode() ==# 'i' || mode() ==# 'R'
-     sleep 1m
-   endif
+  " improves perceptual performance in insert mode
+  if mode() ==# 'i' || mode() ==# 'R'
+    sleep 1m
+  endif
 
   " use b:match_ignorecase
   call s:ignorecase_start()
 
-
-"  call matchup#perf#tic('q7')
-"  TODO support timeout
   let [l:lnum_corr, l:cnum_corr] = searchpairpos(l:open, '', l:close,
         \ 'n'.l:flags, l:skip, l:stopline, matchup#perf#timeout())
-"  call matchup#perf#toc('q7', 'q8')
+
   call matchup#perf#toc('get_matching_delims', 'initial_pair')
 
   " reset ignorecase
   call s:ignorecase_end()
-
-  " echo l:lnum_corr l:open l:close self.groups self.regexone.close
-  " echo self.regexone.open self.regextwo.open
-  " if a:down
-  "   echo '^^' a:down l:lnum_corr l:cnum_corr l:open
-  "         \ l:close l:stopline " self.augment.str
-  " endif
 
   " if nothing found, bail immediately
   if l:lnum_corr == 0 | return [['', 0, 0]] | endif
@@ -684,8 +606,6 @@ function! s:get_matching_delims(down) dict " {{{1
   let l:re_anchored = '\%'.l:cnum_corr.'c\%(' . l:re .'\)'
   let l:matches = matchlist(getline(l:lnum_corr), l:re_anchored)
   let l:match_corr = l:matches[0]
-
-  " echo a:down self.groups | sleep 1
 
   " store these in these groups
   if a:down
@@ -707,81 +627,23 @@ function! s:get_matching_delims(down) dict " {{{1
   let l:mids = s:remove_capture_groups(self.regexone.mid)
   let l:mids = matchup#delim#fill_backrefs(l:mids, self.groups)
 
-  " echo a:down self.regexone self.groups
-  " echo a:down self.groups l:matches | sleep 1
-
   " if there are no mids, we're done
   if empty(l:mids)
     return [[l:match_corr, l:lnum_corr, l:cnum_corr]]
   endif
 
-  let l:re = l:mids 
+  let l:re = l:mids
 
-  " if !a:down
-  "   " echo l:re
-  " endif
-
-  " echo 'x' self.regexone self.regextwo
-  " echo 'x' l:re
-  " let l:match = matchstr(getline(l:lnum_corr), '^' . l:re, l:cnum_corr-1)
-
-  " echo self.groups | sleep 1
-
-  " XXX XXX!
-  " there may be backrefs that need to be filled out
-  " let l:re = s:fill_backrefs(l:re, self.groups)
-  " XXX
-
-  " echo self.side
-  " return [['', 0, 0]]
-
-  " if !a:down
-  "   echo self.regexone | sleep 1
-  " endif
-
-  " turn \(\) into \%(\)
-  " let l:open  = s:remove_capture_groups(self.regexone.open) 
-  " let l:close = s:remove_capture_groups(self.regexone.close) 
-
-  " " fill out backreferences
-  " let l:open  = s:fill_backrefs(l:open,  self.groups)
-  " let l:close = s:fill_backrefs(l:close, self.groups)
-
-  " XXX XXX XXX we need to distinguish between
-  " filled (resolved) and unfilled
-  " capture groups, interpolating without valid data won't work
-  " XXX also need to escape to form regex, or \V...\m
-  " if !a:down
-  "   " echo l:re '|' l:open '|' l:close | sleep 1
-  " endif
-
-  " xxx spin off function
-  " insert captured groups
-  " XXX do this
-
-  " l:re might have back references
-  " let l:match = l:matches[0]
-
-  " echo self.regextwo
-  " echo l:open l:close
-  " echo a:down ? 'down' : 'up' l:lnum_corr l:cnum_corr l:match
-  " echo l:re
-  
   " use b:match_ignorecase
   call s:ignorecase_start()
 
   let l:list = []
   while 1
-
     if matchup#perf#timeout_check() | break | endif
 
     let [l:lnum, l:cnum] = searchpairpos(l:open, l:mids, l:close,
       \ l:flags, l:skip, l:lnum_corr, matchup#perf#timeout())
     if l:lnum <= 0 | break | endif
-
-    " echo '>' l:lnum l:cnum | sleep 500m
-
-    " if stridx(l:flags, 'b') >= 0
 
     if a:down
       if l:lnum >= l:lnum_corr && l:cnum >= l:cnum_corr | break | endif
@@ -789,21 +651,9 @@ function! s:get_matching_delims(down) dict " {{{1
       if l:lnum <= l:lnum_corr && l:cnum <= l:cnum_corr | break | endif
     endif
 
-    " XXX check lnum cnum vs lnum_corr cnum_corr
-
-    " TODO: can this step be removed?
-    " XXX
-
-   let l:re_anchored = '\%'.l:cnum.'c\%(' . l:re .'\)'
-   let l:matches = matchlist(getline(l:lnum), l:re_anchored)
-   let l:match = l:matches[0]
-
-
-    " echo '%' a:down l:lnum l:matches l:re_anchored | sleep 600m
-    " echo '%' self.regexone.mid self.groups l:re_anchored
-
-    " let l:match = matchstr(getline(l:lnum), '^' . l:re, l:cnum-1)
-    " echo l:lnum l:match | sleep 1
+    let l:re_anchored = '\%'.l:cnum.'c\%(' . l:re .'\)'
+    let l:matches = matchlist(getline(l:lnum), l:re_anchored)
+    let l:match = l:matches[0]
 
     call add(l:list, [l:match, l:lnum, l:cnum])
   endwhile
@@ -813,13 +663,9 @@ function! s:get_matching_delims(down) dict " {{{1
 
   call add(l:list, [l:match_corr, l:lnum_corr, l:cnum_corr])
 
- " if empty(l:list) | return [['', 0, 0]] | endif
-
   if !a:down
     call reverse(l:list)
   endif
-
-  " echo a:down l:list | sleep 1
 
   return l:list
 endfunction
@@ -908,10 +754,9 @@ function! s:init_delim_lists() " {{{1
       let l:augments[l:j] = l:curaug
     endfor
 
-    " XXX todo this logic might be bad BADLOGIC
+    " TODO this logic might be bad BADLOGIC
     " should we not fill groups that aren't needed?
-"    echo l:order l:augments
-    " l:words[0] should never be used
+    " l:words[0] should never be used?
 
     " the last element in the order gives the most augmented string
     " this includes groups that might not actually be needed elsewhere
@@ -919,11 +764,14 @@ function! s:init_delim_lists() " {{{1
       let l:words[0] = l:augments[l:order[-1]]
     endif
 
+    " dragons: create the augmentation operators from the
+    " open pattern- this is all super tricky!!
+    " TODO we should be building the augment later, so
+    " we can remove augments that can never be filled
+
     " as a concrete example,
     " l:augments = { '0': '\<\(wh\%[ile]\|for\)\>', '1': '\<\1\>'}
     " l:words[0] = \<\1\>
-
-  " echo l:augments l:words[0]
 
     " now for the rest of the words...
     for l:i in range(1, len(l:words)-1)
@@ -963,14 +811,10 @@ function! s:init_delim_lists() " {{{1
         let l:words_backref[l:i] = substitute(l:words_backref[l:i],
               \ g:matchup#re#backref,
               \ '\='''.l:cg[l:bref].str."'", '')    " not global!!
-        " \ s:notslash.'\\'.l:bref,
 
-        " echo '#'.l:i '%' '\'.l:bref l:words_backref[l:i] l:cg[l:bref]
-
+        " complicated: need to count the number of inserted groups
         let l:prev_max = max(keys(l:cg2))
         let l:cg2 = matchup#delim#get_capture_groups(l:words_backref[l:i])
-
-        " echo l:i '%' l:bref l:words_backref[l:i] l:cg2
 
         for l:cg2_i in sort(keys(l:cg2), 'N')
           if l:cg2_i > l:prev_max
@@ -986,11 +830,8 @@ function! s:init_delim_lists() " {{{1
               \ '\\\=l:group_renumber[l:i][submatch(1)]', 'g')
       endfor
 
-    " echo ' ->' l:words[l:i] l:words_backref[l:i] l:group_renumber[l:i]
-    " echo l:words[l:i] '->' l:words_backref[l:i]
-
-      if len(uniq(sort(values(l:group_renumber[l:i]))))
-            \ != len(l:group_renumber[l:i])
+      " mostly a sanity check
+      if matchup#util#has_duplicate_str(values(l:group_renumber[l:i]))
           echohl ErrorMsg
           echom 'match-up: duplicate bref in set ' l:s ':' l:i
           echohl None
@@ -1006,8 +847,6 @@ function! s:init_delim_lists() " {{{1
         " the in group is the local number from this word pattern
         let l:in_grp = keys(filter(
               \ deepcopy(l:group_renumber[l:i]), 'v:val == l:j'))
-
-        " echo '!' l:i l:in_grp l:group_renumber[l:i]
 
         if empty(l:in_grp) | continue | endif
         let l:in_grp = l:in_grp[0]
@@ -1033,10 +872,6 @@ function! s:init_delim_lists() " {{{1
       if !empty(l:resolvable)
         call add(l:instruct, copy(l:resolvable))
       endif
-
-      " echo l:augments
-      " echo '[' l:words[0] l:words_backref[l:i] l:instruct
-      " echo l:instruct
 
       " *note*: recall that l:augments[2] is the result of augments
       " up to and including 2
@@ -1065,9 +900,6 @@ function! s:init_delim_lists() " {{{1
           endif
         endfor
 
-        " echo l:words[l:i] l:instr l:augment_comp[l:i][0].inputmap
-        " echo l:words[l:i] l:words[0] l:remaining_out
-
         " output map turns remaining group numbers into 'open' numbers
         let l:counter = 1
         for l:out_grp in sort(keys(l:remaining_out), 'N')
@@ -1075,15 +907,6 @@ function! s:init_delim_lists() " {{{1
           let l:counter += 1
         endfor
       endfor
-
-      " echo l:augment_comp
-      " echo l:order l:i l:words_backref[l:i]
-      " echo 'q' l:words[l:i] l:words_backref[l:i] l:augment_comp[l:i]
-
-        " echo l:instr
-      " echo ']' l:words[0] l:words_backref[l:i] l:augment_comp[l:i]
-      "       \ l:needed_groups
-      " echo l:instr l:augment_comp[l:i]
 
       " if l:instruct was empty, there are no constraints
       if empty(l:instruct) && !empty(l:augments)
@@ -1098,10 +921,6 @@ function! s:init_delim_lists() " {{{1
       endif
     endfor
 
-    " remove augments that can never be filled
-   " echo l:words l:augments l:order l:all_needed_groups
-    " XXX should really be building augment here?
-
     " strip out unneeded groups in output maps
     for l:i in keys(l:augment_comp)
       for l:aug in l:augment_comp[l:i]
@@ -1109,49 +928,6 @@ function! s:init_delim_lists() " {{{1
               \ 'has_key(l:all_needed_groups, v:key)')
       endfor
     endfor
-
-    " echo l:words
-    " echo l:augment_comp
-    " echo l:augment_comp
-    " echo l:order l:augment_comp[l:i]
-    " echo l:words[l:i] l:instruct l:augment_comp[l:i]
-
-      " for l:bref in sort(values(l:group_renumber[l:i]))
-      " let l:breakpoints = []
-        " let l:bref = l:augments[l:j]
-
-      " keys(l:group_renumber[l:i])[l:cg2_i] = l:bref
-      " let l:aug_comp = []
-
-      " xxx verify (ref-1)
-      " function! s:process_recapture(cg, sm)
-      "   return get(get(a:cg, a:sm, {}), "str")', 'g')
-      " endfunction
-
-      " let l:words_backref[l:i] = substitute(l:words_backref[l:i],
-      "       \ s:notslash.'\\'.'\(\d\)',
-      "       \ 's:process_recapture(l:cg, submatch(1)), 'g')
-
-        " \ '\=get(get(l:cg, submatch(1), {}), "str")', 'g')
-
-      " for l:ng in l:needed_groups
-        " if has_key(l:seen_group, l:ng)
-          " let l:group_enforce[l:i] = 
-        " else
-          " let l:seen_group[l:ng] = 1
-        " endif
-      " endfor
-      " let l:group_renumber[l:i] = {}
-
-      " dragons: create the augmentation operators from the 
-      " open pattern- this is all super tricky!!
-      " for all the mentioned \2, \3, etc 
-      " call add(l:capture_groups, l:cg)
-    " now replace the original capture groups with equivalent \1
-    " for l:i in range(len(l:words)-1)
-    "   let l:cg = l:capture_groups[l:i]
-    "   if empty(l:cg) | continue | end
-    " endfor
 
     " this is the original set of words plus the set of augments
     " TODO this should probably be renamed
@@ -1175,17 +951,6 @@ function! s:init_delim_lists() " {{{1
       \ 'aug_comp' : l:augment_comp,
       \})
   endfor
-
-  " get user defined lists
-  " call extend(l:lists, get(g:, 'matchup_delim_list', {}))
-
-  " generate corresponding regexes if necessary
-  " for l:type in values(l:lists)
-  "   if !has_key(l:type, 're') && has_key(l:type, 'name')
-  "     let l:type.re = map(deepcopy(l:type.name),
-  "           \ 'map(v:val, ''escape(v:val, ''''\$[]'''')'')')
-  "   endif
-  " endfor
 
   " generate combined lists
   let l:lists.delim_all = {}
@@ -1217,7 +982,7 @@ function! s:init_delim_regexes() " {{{1
 
   let l:re.delim_tex = s:init_delim_regexes_generator('delim_tex')
 
-  for l:k in keys(s:sidedict) 
+  for l:k in keys(s:sidedict)
     let l:re.delim_all[l:k] = l:re.delim_tex[l:k]
     let l:re.all[l:k] = l:re.delim_all[l:k]
   endfor
@@ -1373,7 +1138,18 @@ endfunction
 "}}}1
 function! matchup#delim#fill_backrefs(re, groups) " {{{
   return substitute(a:re, g:matchup#re#backref,
-        \ '\=get(a:groups, submatch(1), "")', 'g')
+        \ '\=s:get_backref(a:groups, submatch(1))', 'g')
+        " \ '\=get(a:groups, submatch(1), "")', 'g')
+endfunction
+
+function! s:get_backref(groups, bref)
+  if !has_key(a:groups, a:bref)
+    echohl WarningMsg
+    echo 'match-up: requested invalid backreference \'.a:bref
+    echohl None
+    return ''
+  endif
+  return '\V'.escape(get(a:groups, a:bref), '\').'\m'
 endfunction
 
 "}}}
@@ -1394,7 +1170,7 @@ let s:sidedict = {
       \ 'both_all' : ['close', 'mid', 'open'],
       \ 'open_mid' : ['mid', 'open'],
       \}
-  
+
 let s:basetypes = {
       \ 'delim_tex': {
       \   'parser' : function('s:parser_delim_new'),

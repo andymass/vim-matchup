@@ -76,6 +76,19 @@ function! matchup#util#uniq_unsorted(list) " {{{1
 endfunction
 
 " }}}1
+function! matchup#util#has_duplicate_str(list) " {{{1
+  if len(a:list) <= 1 | return 0 | endif
+  let l:seen = {}
+  for l:elem in a:list
+    if has_key(l:seen, l:elem)
+      return 1
+    endif
+    let l:seen[l:elem] = 1
+  endfor
+  return 0
+endfunction
+
+" }}}1
 
 let &cpo = s:save_cpo
 
