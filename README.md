@@ -1,4 +1,4 @@
-# matchup.vim
+# vim match-up
 
 :warning: warning :warning: this plugin is under heavy
 active development.  There are probably bugs!
@@ -169,10 +169,10 @@ in the `matchpairs` setting.
 
 #### (c.2) highlight _all_ matches          
 
-To disable match highlighting `let g:matchup_matchparen_enabled = 0`.
+To disable match highlighting, `let g:matchup_matchparen_enabled = 0`.
 If this option is set before the plugin is loaded, it will not disable
-the matchparen plugin (_Planned_).  To disable highlighting entirely
-do not load matchparen.
+the built-in matchparen plugin.  See [here](#module-matchparen) for
+other related options.
 
 #### (c.3) display matches off screen
 
@@ -528,4 +528,5 @@ Convert between single-line and multi-line blocks.  Mappings undecided.
 - can match-up be integrated with
   [vim-surround](https://github.com/tpope/vim-surround)?
 - make sure `b:match_ignorecase` works
+- support python (like python_match.vim)
 
