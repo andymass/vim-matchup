@@ -159,7 +159,7 @@ function! s:transmute.dochange(list, pri, cur) abort dict " {{{1
               \ g:matchup#re#not_bslash.'\\'.l:grp,
               \ '\=''\zs'.(l:groups[l:grp]).'\ze''', '')
         let l:pattern = matchup#delim#fill_backrefs(l:pattern,
-              \ l:groups)
+              \ l:groups, 0)
         let l:string = a:cur.groups[l:grp]
         let l:line = substitute(l:line, l:pattern,
               \ '\='''.l:string."'", '')

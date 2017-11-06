@@ -411,12 +411,16 @@ endfunction
 
 function! s:ignorecase_start() " {{{1
   " enforce b:match_ignorecase, if necessary
-  if !exists('s:save_ic')
+  if exists('s:save_ic') || exists('s:save_scs')
     return
   endif
   if exists('b:match_ignorecase') && b:match_ignorecase !=# &ignorecase
-    let l:save_ic = &ignorecase
+    let s:save_ic = &ignorecase
     noautocmd let &ignorecase = b:match_ignorecase
+  endif
+  if &smartcase
+    let s:save_scs = &smartcase
+    noautocmd let &smartcase = 0
   endif
 endfunction
 
@@ -426,6 +430,10 @@ function! s:ignorecase_end() " {{{1
   if exists('s:save_ic')
     noautocmd let &ignorecase = s:save_ic
     unlet s:save_ic
+  endif
+  if exists('s:save_scs')
+    noautocmd let &smartcase = s:save_scs
+    unlet s:save_scs
   endif
 endfunction
 
@@ -520,7 +528,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
     "       \ g:matchup#re#backref,
     "       \ '\=l:groups[submatch(1)]', 'g')
     let l:augment.str = matchup#delim#fill_backrefs(
-          \ l:aug.str, l:groups)
+          \ l:aug.str, l:groups, 0)
     let l:augment.unresolved = deepcopy(l:aug.outputmap)
   endif
 
@@ -574,10 +582,11 @@ function! s:get_matching_delims(down) dict " {{{1
   let l:open  = s:remove_capture_groups(l:open)
   let l:close = s:remove_capture_groups(l:close)
 
-  " fill in backreferences
-  " TODO: escaping (or nomagic)
-  let l:open = matchup#delim#fill_backrefs(l:open, self.groups)
-  let l:close = matchup#delim#fill_backrefs(l:close, self.groups)
+  " fill in back-references
+  " TODO: BADLOGIC2: when going up we don't have these groups yet..
+  " the second anchor needs to be mid/self for mid self
+  let l:open = matchup#delim#fill_backrefs(l:open, self.groups, 0)
+  let l:close = matchup#delim#fill_backrefs(l:close, self.groups, 0)
 
   let l:skip = 'matchup#delim#skip()'
 
@@ -625,7 +634,7 @@ function! s:get_matching_delims(down) dict " {{{1
 
   " fill in additional groups
   let l:mids = s:remove_capture_groups(self.regexone.mid)
-  let l:mids = matchup#delim#fill_backrefs(l:mids, self.groups)
+  let l:mids = matchup#delim#fill_backrefs(l:mids, self.groups, 1)
 
   " if there are no mids, we're done
   if empty(l:mids)
@@ -1136,17 +1145,19 @@ function! s:remove_capture_groups(re) "{{{1
 endfunction
 
 "}}}1
-function! matchup#delim#fill_backrefs(re, groups) " {{{
+function! matchup#delim#fill_backrefs(re, groups, warn) " {{{
   return substitute(a:re, g:matchup#re#backref,
-        \ '\=s:get_backref(a:groups, submatch(1))', 'g')
+        \ '\=s:get_backref(a:groups, submatch(1), a:warn)', 'g')
         " \ '\=get(a:groups, submatch(1), "")', 'g')
 endfunction
 
-function! s:get_backref(groups, bref)
+function! s:get_backref(groups, bref, warn)
   if !has_key(a:groups, a:bref)
-    echohl WarningMsg
-    echo 'match-up: requested invalid backreference \'.a:bref
-    echohl None
+    if a:warn
+      echohl WarningMsg
+      echo 'match-up: requested invalid backreference \'.a:bref
+      echohl None
+    endif
     return ''
   endif
   return '\V'.escape(get(a:groups, a:bref), '\').'\m'
