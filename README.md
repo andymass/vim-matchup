@@ -3,7 +3,7 @@
 :warning: warning :warning: this plugin is under heavy
 active development.  There are probably bugs!
 
-match-up is a replacement for the venerable vim plugin [matchit.vim]
+match-up is a replacement for the venerable vim plugin [matchit.vim].
 match-up aims to replicate all of matchit's features, fix a number of its
 deficiencies and bugs, and add a few totally new features.  It also
 replaces the standard plugin [matchparen], allowing all of matchit's words
@@ -203,7 +203,9 @@ Changing `pre` to `div` and leaving insert mode will produce:
 Note: this currently only works for match words which define a backref
 relation like `\1`.  A wider set of transmutations are planned.
 
-_Planned_: `g:matchup_auto_transmute`, `CTRL-G %` mapping.  A
+Parallel transmutation requires the matchparen module to be enabled.
+
+_Planned_: `g:matchup_transmute_auto`, `CTRL-G %` mapping.  A
 corresponding normal mode command is also planned.
 
 ### Inclusive and exclusive motions

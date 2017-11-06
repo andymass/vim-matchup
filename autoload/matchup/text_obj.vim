@@ -132,8 +132,8 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
 
       " special case for delete operator
       if v:operator ==# 'd'
-            \ && strpart(getline(l:l2), l:c2) =~# '\s*$'
-            \ && strpart(getline(l:l2), 0, l:c1-1) =~# '^\s'
+            \ && strpart(getline(l:l2), l:c2) =~# '^\s*$'
+            \ && strpart(getline(l:l2), 0, l:c1-1) =~# '^\s*$'
         let l:c1 = 1
         let l:c2 = strlen(getline(l:l2))+1
       endif
