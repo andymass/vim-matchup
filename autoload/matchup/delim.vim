@@ -200,12 +200,15 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
           \ l:local ? 'open_mid' : 'open')
     if empty(l:open) | break | endif
 
-    let l:match = matchup#delim#get_matching(l:open, 1)
-    let l:close = l:local ? l:open.links.next : l:open.links.close
+    let l:matches = matchup#delim#get_matching(l:open, 1)
 
-    let l:pos_val_try = matchup#pos#val(l:close)
-        \ + strdisplaywidth(l:close.match) - 1
-    if l:pos_val_try >= l:pos_val_cursor
+    if len(l:matches)
+      let l:close = l:local ? l:open.links.next : l:open.links.close
+      let l:pos_val_try = matchup#pos#val(l:close)
+          \ + strdisplaywidth(l:close.match) - 1
+    endif
+
+    if len(l:matches) && l:pos_val_try >= l:pos_val_cursor
       if l:counter <= 1
         " restore cursor and accept
         call matchup#pos#set_cursor(l:save_pos)
@@ -765,22 +768,10 @@ function! s:init_delim_lists() " {{{1
 
     " TODO this logic might be bad BADLOGIC
     " should we not fill groups that aren't needed?
-    " l:words[0] should never be used?
-
-    " the last element in the order gives the most augmented string
-    " this includes groups that might not actually be needed elsewhere
-    if !empty(l:order)
-      let l:words[0] = l:augments[l:order[-1]]
-    endif
-
     " dragons: create the augmentation operators from the
     " open pattern- this is all super tricky!!
     " TODO we should be building the augment later, so
     " we can remove augments that can never be filled
-
-    " as a concrete example,
-    " l:augments = { '0': '\<\(wh\%[ile]\|for\)\>', '1': '\<\1\>'}
-    " l:words[0] = \<\1\>
 
     " now for the rest of the words...
     for l:i in range(1, len(l:words)-1)
@@ -936,6 +927,20 @@ function! s:init_delim_lists() " {{{1
         call filter(l:aug.outputmap,
               \ 'has_key(l:all_needed_groups, v:key)')
       endfor
+    endfor
+
+    " TODO should l:words[0] actually be used? BADLOGIC
+    " the last element in the order gives the most augmented string
+    " this includes groups that might not actually be needed elsewhere
+    " as a concrete example,
+    " l:augments = { '0': '\<\(wh\%[ile]\|for\)\>', '1': '\<\1\>'}
+    " l:words[0] = \<\1\> (bad)
+    " instead, get the furthest out needed augment.. Heuristic TODO
+    for l:g in add(reverse(copy(l:order)), 0)
+      if has_key(l:all_needed_groups, l:g)
+        let l:words[0] = l:augments[l:g]
+        break
+      endif
     endfor
 
     " this is the original set of words plus the set of augments
