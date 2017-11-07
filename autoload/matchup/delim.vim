@@ -174,6 +174,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     return l:matching_list
   else
     " old syntax: open->close, close->open
+    if !len(l:matching_list) | return {} | endif
     return a:delim.side ==# 'open' ? l:matching_list[-1]
        \ : l:matching_list[0]
   endif
