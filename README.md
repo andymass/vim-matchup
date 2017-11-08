@@ -114,8 +114,8 @@ words are `else` and `elseif`.  The `if`/`endif` pair is called an
   - `%` go forwards to next matching word.  If at a close word,
   cycle back to the corresponding open word.
   - `{count}%` forwards `{count}` times.  Requires
-  `let g:matchup_override_Npercent = 1`.
-  By default, `{count}%` goes to the `{count}` percentage in the file.
+  `{count} <= g:matchup_motion_override_Npercent`.  For larger
+  `{count}`, `{count}%` goes to the `{count}` percentage in the file.
   - `g%` go backwards to `[count]`th previous matching word.  If at an
   open word, cycle around to the corresponding close word.
 
@@ -373,11 +373,17 @@ default: 300, 60
 
 ### Module motion
 
-To allow `{count}%`,
+In vim, `{count}%` goes to the `{count}` percentage in the file.
+match-up overrides this motion for small `{count}` (by default, anything
+less than 7).  To allow `{count}%` for `{count}` up to 11,
 ```vim
-g:matchup_motion_override_Npercent = 1
+g:matchup_motion_override_Npercent = 11
 ```
-default: 0
+To disable this feature, and restore vim's default `{count}%`,
+```vim
+g:matchup_motion_override_Npercent = 0
+```
+default: 6
 
 If enabled, cursor will land on the end of mid and close words while
 moving downwards (`%`/`]%`).  While moving upwards (`g%`, `[%`) the cursor
