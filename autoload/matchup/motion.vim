@@ -35,13 +35,15 @@ function! matchup#motion#init_module() " {{{1
         \ :<c-u>call matchup#motion#find_matching_pair(1, 1)<cr>
   xmap     <silent> <plug>(matchup-%) <sid>(matchup-%)
   onoremap <plug>(matchup-%)
-        \ :<c-u>call <sid>oper("normal \<sid>(v)\<sid>(matchup-%)")<cr>
+        \ :<c-u>call <sid>oper("normal \<sid>(v)"
+        \ . (v:count > 0 ? v:count : '') . "\<sid>(matchup-%)")<cr>
 
   xnoremap <silent> <sid>(matchup-g%)
         \ :<c-u>call matchup#motion#find_matching_pair(1, 0)<cr>
   xmap     <silent> <plug>(matchup-g%) <sid>(matchup-g%)
   onoremap <plug>(matchup-g%)
-        \ :<c-u>call <sid>oper("normal \<sid>(v)\<sid>(matchup-g%)")<cr>
+        \ :<c-u>call <sid>oper("normal \<sid>(v)"
+        \ . (v:count > 0 ? v:count : '') . "\<sid>(matchup-g%)")<cr>
 
   " ]% and [%
   nnoremap <silent> <plug>(matchup-]%)
@@ -83,15 +85,17 @@ endfunction
 " }}}1
 
 function! matchup#motion#find_matching_pair(visual, down) " {{{1
-  if v:count && a:down && !g:matchup_motion_override_Npercent
-    exe 'normal!' v:count.'%'
-    return
-  endif
+  let [l:count, l:count1] = [v:count, v:count1]
 
   if a:visual
     normal! gv
   endif
 
+  if a:down && l:count > g:matchup_motion_override_Npercent
+    exe 'normal!' l:count.'%'
+    return
+  endif
+  
   let [l:start_lnum, l:start_cnum] =  matchup#pos#get_cursor()[1:2]
 
   " disable the timeout
@@ -106,7 +110,7 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
   endif
 
   " loop count number of times
-  for l:dummy in range(v:count1)
+  for l:dummy in range(l:count1)
     let l:matches = matchup#delim#get_matching(l:delim)
     if !len(l:matches) | return | endif
     let l:delim = get(l:delim.links, a:down ? 'next' : 'prev', {})
