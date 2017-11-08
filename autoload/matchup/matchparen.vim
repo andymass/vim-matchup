@@ -222,12 +222,6 @@ function! s:format_statusline(offscreen) " {{{1
   endif
 
   let l:lasthi = ''
-  "for l:idx in range(min([winwidth(0), strchars(l:line)]))
-  "  let l:c = strlen(strcharpart(l:line, 0, l:idx))
-    " echo l:idx l:c | sleep 1
-  "endfor
-
-  " TODO use character indexing
   for l:c in range(min([winwidth(0), strlen(l:line)]))
     if a:offscreen.cnum <= l:c+1 && l:c+1 <= a:offscreen.cnum
           \ - 1 + strlen(a:offscreen.match)
@@ -245,6 +239,7 @@ function! s:format_statusline(offscreen) " {{{1
     endif
     let l:lasthi = l:curhi
   endfor
+  let l:sl .= '%#Normal#'
 
   return l:sl
 endfunction
