@@ -140,9 +140,9 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
   normal! m`
  
  " XXX spin off 
-  let l:eom = l:delim.cnum + strdisplaywidth(l:delim.match) - 1
+  let l:eom = l:delim.cnum + strlen(l:delim.match) - 1
 
-  " special handling for d%/dg% XXX unfinished
+  " special handling for d%
   if get(s:, 'v_operator', '') ==# 'd' && l:start_lnum != l:delim.lnum
     let l:tl = [l:start_lnum, l:start_cnum]
     let l:br = [l:delim.lnum, l:eom]
@@ -150,19 +150,18 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
           \ ? [l:tl, l:br, 0]
           \ : [l:br, l:tl, 1]
 
-    if getline(l:tl[0]) =~# '^[ \t]\+\%'.l:tl[1].'c'
-          \ && getline(l:br[0]) =~# '\%'.(l:br[1]+1).'c[ \t]\+$'
+    if getline(l:tl[0]) =~# '^[ \t]*\%'.l:tl[1].'c'
+          \ && getline(l:br[0]) =~# '\%'.(l:br[1]+1).'c[ \t]*$'
       if l:swap
         normal! o
-        call matchup#pos#set_cursor(l:br[0],
-              \ strdisplaywidth(getline(l:br[0])))
+        call matchup#pos#set_cursor(l:br[0], strlen(getline(l:br[0]))+1)
         normal! o
         let l:column = 1
       else
         normal! o
         call matchup#pos#set_cursor(l:tl[0], 1)
         normal! o
-        let l:column = strdisplaywidth(getline(l:br[0]))
+        let l:column = strlen(getline(l:br[0]))+1
       endif
     endif
   endif
