@@ -15,6 +15,9 @@ function! matchup#motion#init_module() " {{{1
   nnoremap <sid>(V) V
   " c-v
 
+  nnoremap <silent><expr> <sid>(wise)
+        \ empty(g:v_motion_force) ? 'v' : g:v_motion_force
+
   " jump between matching pairs
        " TODO XXX add "forced" omap: dV% (must make v,V,C-V)
 
@@ -51,15 +54,13 @@ function! matchup#motion#init_module() " {{{1
         \ :<c-u>call matchup#motion#find_unmatched(1, 0)<cr>
   xmap     <plug>(matchup-]%) <sid>(matchup-]%)
   xmap     <plug>(matchup-[%) <sid>(matchup-[%)
+
   onoremap <plug>(matchup-]%)
-        \ :<c-u>call <sid>oper("normal \<sid>(v)"
+        \ :<c-u>call <sid>oper("normal \<sid>(wise)"
         \ . v:count1 . "\<sid>(matchup-]%)")<cr>
-
   onoremap <plug>(matchup-[%)
-        \ :<c-u>call <sid>oper("normal \<sid>(v)"
+        \ :<c-u>call <sid>oper("normal \<sid>(wise)"
         \ . v:count1 . "\<sid>(matchup-[%)")<cr>
-
-  " xxx va Va c-va
 
   " jump inside z% 
   nnoremap <silent> <plug>(matchup-z%)
@@ -72,29 +73,10 @@ function! matchup#motion#init_module() " {{{1
         \ . v:count1 . "\<sid>(matchup-z%)")<cr>
 endfunction
 
-" }}}1
-
-function! matchup#motion#force(wise) " {{{1
-  let s:v_motion_force = a:wise
-endfunction
-
-" :help o_v
-let s:v_motion_force = ''
-
-function! s:wise(default)
-  return s:v_motion_force !=# '' ? s:v_motion_force : a:default
-endfunction
-
-function! s:clearforce()
-  let s:v_motion_force = ''
-endfunction
-
-" }}}1
-function! s:oper(expr) " {{{1
+function! s:oper(expr)
   let s:v_operator = v:operator
   execute a:expr
   unlet s:v_operator
-  call s:clearforce()
 endfunction
 
 " }}}1
@@ -189,6 +171,8 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
   call matchup#perf#tic('motion#find_unmatched')
 
   let l:count = v:count1
+  let l:exclusive = !empty(get(s:, 'v_operator', ''))
+        \ && g:v_motion_force !=# 'v' && g:v_motion_force !=# "\<c-v>"
 
   if a:visual
     normal! gv
@@ -213,11 +197,11 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
  
     " this is an exclusive motion, ]%
     if l:delim.side ==# 'close'
-      if empty(get(s:, 'v_operator', ''))
+      if l:exclusive
+        let l:new_pos[1] -= 1
+      else
         "XXX spin this off
         let l:new_pos[1] += strdisplaywidth(l:delim.match) - 1
-      else
-        let l:new_pos[1] -= 1
       endif
     endif 
 
@@ -232,7 +216,7 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
   endfor
 
   " this is an exclusive motion, [%
-  if !a:down && !empty(get(s:, 'v_operator', ''))
+  if !a:down && l:exclusive
     normal! o
     call matchup#pos#set_cursor(matchup#pos#prev(
           \ matchup#pos#get_cursor()))
