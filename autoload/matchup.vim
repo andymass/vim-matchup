@@ -98,13 +98,14 @@ function! s:init_default_mappings()
 
     call s:map('n', 'z%', '<plug>(matchup-z%)')
     call s:map('x', 'z%', '<plug>(matchup-z%)')
-    call s:map('o', 'z%', '<plug>(matchup-z%)')
 
     for l:opforce in ['', 'v', 'V', '<c-v>']
       call s:map('o', l:opforce.']%',
             \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-]%)')
       call s:map('o', l:opforce.'[%',
             \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-[%)')
+      call s:map('o', l:opforce.'z%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-z%)')
     endfor
   endif
 

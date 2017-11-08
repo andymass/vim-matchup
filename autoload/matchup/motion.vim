@@ -68,8 +68,9 @@ function! matchup#motion#init_module() " {{{1
   xnoremap <silent> <sid>(matchup-z%)
         \ :<c-u>call matchup#motion#jump_inside(1)<cr>
   xmap     <silent> <plug>(matchup-z%) <sid>(matchup-z%)
+
   onoremap <silent> <plug>(matchup-z%)
-        \ :<c-u>call <sid>oper("normal \<sid>(v)"
+        \ :<c-u>call <sid>oper("normal \<sid>(wise)"
         \ . v:count1 . "\<sid>(matchup-z%)")<cr>
 endfunction
 
@@ -231,8 +232,6 @@ endfunction
 
 " }}}1
 function! matchup#motion#jump_inside(visual) " {{{1
-  " TODO handle count
-
   let l:count = v:count1
 
   let l:save_pos = matchup#pos#get_cursor()
@@ -241,8 +240,15 @@ function! matchup#motion#jump_inside(visual) " {{{1
     normal! gv
   endif
 
-  for l:dummy in range(l:count)
-    let l:delim = matchup#delim#get_next('all', 'open')
+  for l:counter in range(l:count)
+    if l:counter
+      let l:delim = matchup#delim#get_next('all', 'open')
+    else
+      let l:delim = matchup#delim#get_current('all', 'open')
+      if empty(l:delim)
+        let l:delim = matchup#delim#get_next('all', 'open')
+      endif
+    endif
     if empty(l:delim)
       call matchup#pos#set_cursor(l:save_pos)
       return
@@ -262,6 +268,7 @@ function! matchup#motion#jump_inside(visual) " {{{1
 
   " this is an exclusive motion except when dealing with whitespace
   if !empty(get(s:, 'v_operator', ''))
+        \ && g:v_motion_force !=# 'v' && g:v_motion_force !=# "\<c-v>"
     while matchup#util#in_whitespace(l:new_pos[1], l:new_pos[2])
       let l:new_pos = matchup#pos#next(l:new_pos)
     endwhile
