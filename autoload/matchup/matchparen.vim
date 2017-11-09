@@ -211,20 +211,21 @@ function! s:format_statusline(offscreen) " {{{1
 
     let l:sl = printf('%'.(l:nw).'s', l:linenr)
     if l:linenr < line('.')
-      let l:sl = '%#Search#' . l:sl . '∆%*'
+      let l:sl = '%#Search#' . l:sl . '∆%#Normal#'
     else
-      let l:sl .= ' '
+      let l:sl = '%#LineNr#' . l:sl . '%#Normal# '
     endif
   endif
 
   if !&number && a:offscreen.lnum < line('.')
-    let l:sl = '%#Search#∆%*'
+    let l:sl = '%#Search#∆%#Normal#'
   endif
 
   let l:lasthi = ''
   for l:c in range(min([winwidth(0), strlen(l:line)]))
     if a:offscreen.cnum <= l:c+1 && l:c+1 <= a:offscreen.cnum
           \ - 1 + strlen(a:offscreen.match)
+      " TODO: we can't overlap groups, this might not be totally correct
       let l:curhi = 'MatchParen'
     else
       let l:curhi = synIDattr(
