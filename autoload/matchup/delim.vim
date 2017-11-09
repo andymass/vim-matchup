@@ -712,6 +712,12 @@ function! s:init_delim_lists() " {{{1
   " do not duplicate whole groups of match words
   let l:seen = {}
   for l:s in l:sets
+    " very special case, escape bare [:]
+    " TODO: the bare [] bug might show up in other places too
+    if l:s ==# '[:]'
+      let l:s = '\[:\]'
+    endif
+
     if has_key(l:seen, l:s) | continue | endif
     let l:seen[l:s] = 1
 
