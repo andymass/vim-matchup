@@ -91,7 +91,11 @@ Legend: :thumbsup: supported. :construction: TODO, planned, or in progress.
 
 ### Detailed feature documentation
 
-What do we mean by open, close, mid?  Here is a vim-script example:
+What do we mean by open, close, mid?  This depends on the specific file
+type and is configured through the variable `b:match_words`.  Here are a
+couple examples:
+
+#### vim-script
 
 ```vim
 if l:x == 1
@@ -103,12 +107,37 @@ elseif
 endif
 ```
 
-match-up understands the words `if`, `else`, `elseif`, `endif` and that
-they form a sequential construct in the vim-script language.  The
+For the vim-script language, match-up understands the words `if`,
+`else`, `elseif`, `endif` and that they form a sequential construct.  The
 "open" word is `if`, the "close" word is `endif`, and the "mid"
 words are `else` and `elseif`.  The `if`/`endif` pair is called an
 "open-to-close" block and the `if`/`else`, `else`/`elsif`, and
 `elseif`/`endif` are called "any" blocks.
+
+#### C, C++
+```c
+#if 0
+#else
+#endif
+
+void some_func() {
+    if (true) {
+      one();
+    } else if (false && false) {
+      two();
+    } else {
+      three();
+    }
+}
+```
+
+Since in C and C++, blocks are delimited using braces (`{` & `}`),
+match-up will recognize `{` as the open word and `}` as the close word.
+It will ignore the `if` and `else if` because they are not defined in
+vim's C file type plugin.
+
+On the other hand, match-up will recognize the `#if`, `#else`, `#endif`
+preprocessor directives.
 
 #### (a.1) jump between matching words
   - `%` go forwards to next matching word.  If at a close word,
@@ -120,11 +149,11 @@ words are `else` and `elseif`.  The `if`/`endif` pair is called an
   open word, cycle around to the corresponding close word.
 
 #### (a.2) jump to open and close words
-  - `[%` go to `[count]`th previous unmatched open word.  Allows
-  navigation to the start of surrounding blocks.  This is similar to vim's
-  built-in `[(` and `[{` and is an [exclusive] motion.
-  - `]%` go to `[count]`th next unmatched close word.  This is an
-  [exclusive] motion.
+- `[%` go to `[count]`th previous outer open word.  Allows navigation
+to the start of blocks surrounding the cursor.  This is similar to vim's
+built-in `[(` and `[{` and is an [exclusive] motion.
+- `]%` go to `[count]`th next surrounding close word.  This is an
+[exclusive] motion.
 
 #### (a.3) jump inside
 - `z%` go to inside `[count]`th nearest inner contained block.  This
