@@ -111,8 +111,10 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
 
       " check for the line-wise special case
       if l:is_multiline && l:linewise_op && strlen(l:close.match) > 1
-        let l:l1 += 1
-        let l:c1 = 1
+        if l:c1 != 1
+          let l:l1 += 1
+          let l:c1 = 1
+        endif
         let l:c2 = strlen(getline(l:l2))+1
       endif
   
