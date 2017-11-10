@@ -21,7 +21,7 @@ if exists('g:loaded_matchit')
 endif
 let g:loaded_matchit = 1
 
-if !get(g:, 'matchup_matchparen_enabled', 1)
+if get(g:, 'matchup_matchparen_enabled', 1)
   if !exists('g:loaded_matchparen')
     runtime plugin/matchparen.vim
   endif
