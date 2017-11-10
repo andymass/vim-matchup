@@ -721,6 +721,8 @@ function! s:init_delim_lists() " {{{1
     if has_key(l:seen, l:s) | continue | endif
     let l:seen[l:s] = 1
 
+    if l:s =~# '^\s*$' | continue | endif
+
     let l:words = split(l:s, g:matchup#re#not_bslash.':')
 
     " we will resolve backrefs to produce two sets of words,
