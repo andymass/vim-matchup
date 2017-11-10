@@ -725,6 +725,8 @@ function! s:init_delim_lists() " {{{1
 
     let l:words = split(l:s, g:matchup#re#not_bslash.':')
 
+    if len(l:words) < 2 | continue | endif
+
     " we will resolve backrefs to produce two sets of words,
     " one with \(foo\)s and one with \1s, along with a set of
     " bookkeeping structures
