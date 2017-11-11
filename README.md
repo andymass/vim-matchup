@@ -39,11 +39,6 @@ This plugin
   and highlights matching symbols and words.  Now you can easily tell
   where `%` will jump to.
 
-Planned features:
-
-- Add auto-completion for words and symbols- for example you could 
-  automatically insert corresponding a `)` or `endif`.
-
 ## Installation
 
 If you use vim-plug, then add the following line to your vimrc file:
@@ -514,44 +509,6 @@ Feature requests are also welcome.
 
 Please read the [contribution guidelines](CONTRIBUTING.md) before
 contributing.
-
-### Planned feature wish-list
-
-This is a set of features planned for "version 1" but require a bit more
-research before they can be properly tackled.
-
-|         | feature                          | __match-up__   | matchit       | matchparen    |
-| ------- | -------------------------------- | -------------- | ------------- | ------------- |
-| ([d.2]) | auto-insert open, close, & mid   | :construction: | :x:           | :x:           |
-| ([d.3]) | completion                       | :construction: | :x:           | :x:           |
-| ([d.4]) | split & join                     | :construction: | :x:           | :x:           |
-
-[d.2]: #d2-auto-insert-open-close-and-mid
-[d.3]: #d3-completion
-[d.4]: #d4-split-and-join
-
-#### (d.2) auto-insert open, close, and mid
-
-_Planned_.
-
-- end-wise style completion: typing `CTRL-X <cr>` will insert the 
-corresponding end word (mapping subject to change).
-
-- automatic block insertion: typing `CTRL-X CTRL-B` to produce
-block skeletons (mapping subject to change).
-
-#### (d.3) completion
-
-_Planned_. 
-
-Typing `CTRL-X O`/`CTRL-X W` will give a menu of possible words (mapping
-subject to change).
-
-#### (d.4) split and join
-
-_Planned_.
-
-Convert between single-line and multi-line blocks.  Mappings undecided.
 
 ### Todo list
 
