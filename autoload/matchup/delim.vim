@@ -450,6 +450,9 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
   let l:sides = s:sidedict[a:opts.side]
   let l:rebrs = b:matchup_delim_lists[a:opts.type].regex_backref
 
+  " use b:match_ignorecase
+  call s:ignorecase_start()
+
   " loop through all (index, side) pairs,
   let l:ns = len(l:sides)
   let l:found = 0
@@ -471,8 +474,6 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
       " prepend the column number and append the cursor column
       " to anchor the match; we don't use {start} for matchlist
       " because there may be zero-width look behinds
-
-      " TODO does \%<Nc work properly with tabs?
       let l:re_anchored = '\%'.a:cnum.'c\%(' . l:re .'\)'
 
       " for current we want the first match which the cursor is inside
@@ -491,6 +492,9 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
 
     break
   endfor
+
+  " reset ignorecase
+  call s:ignorecase_end()
 
   if !l:found
       return {}
@@ -609,16 +613,21 @@ function! s:get_matching_delims(down) dict " {{{1
 
   call matchup#perf#toc('get_matching_delims', 'initial_pair')
 
-  " reset ignorecase
-  call s:ignorecase_end()
-
   " if nothing found, bail immediately
-  if l:lnum_corr == 0 | return [['', 0, 0]] | endif
+  if l:lnum_corr == 0
+    " reset ignorecase
+    call s:ignorecase_end()
+
+    return [['', 0, 0]]
+  endif
 
   " get the match and groups
   let l:re_anchored = '\%'.l:cnum_corr.'c\%(' . l:re .'\)'
   let l:matches = matchlist(getline(l:lnum_corr), l:re_anchored)
   let l:match_corr = l:matches[0]
+
+  " reset ignorecase
+  call s:ignorecase_end()
 
   " store these in these groups
   if a:down
