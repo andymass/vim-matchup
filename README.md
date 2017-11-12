@@ -207,6 +207,8 @@ close match is preferred.
 
 #### (d.1) parallel transmutation
 
+To enable, use `let g:matchup_transmute_enabled = 1`.
+
 In insert mode, after changing text inside a word, matching words will
 be changed in parallel.  As an example,
 
@@ -225,12 +227,9 @@ Changing `pre` to `div` and leaving insert mode will produce:
 ```
 
 Note: this currently only works for match words which define a backref
-relation like `\1`.  A wider set of transmutations are planned.
+relation like `\1`.
 
 Parallel transmutation requires the matchparen module to be enabled.
-
-_Planned_: `g:matchup_transmute_auto`, `CTRL-G %` mapping.  A
-corresponding normal mode command is also planned.
 
 ### Inclusive and exclusive motions
 
