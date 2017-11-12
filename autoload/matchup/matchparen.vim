@@ -112,8 +112,10 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
   " start the timeout period
   let l:timeout = l:insertmode
-        \ ? g:matchup_matchparen_insert_timeout
-        \ : g:matchup_matchparen_timeout
+        \ ? get(b:, 'matchup_matchparen_insert_timeout',
+        \           g:matchup_matchparen_insert_timeout)
+        \ : get(b:, 'matchup_matchparen_timeout',
+        \           g:matchup_matchparen_timeout)
   call matchup#perf#timeout_start(l:timeout)
 
   let l:current = matchup#delim#get_current('all', 'both_all',
@@ -167,10 +169,8 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   endif
 
   for l:corr in l:corrlist
-    call add(w:matchup_match_id_list, matchadd('MatchParen',
-       \   '\%' . l:corr.lnum . 'l'
-       \ . '\%' . l:corr.cnum . 'c'
-       \ . '\%(' . l:corr.rematch . '\)'))
+    call add(w:matchup_match_id_list, matchaddpos('MatchParen',
+       \   [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]]))
   endfor
 
   call matchup#perf#toc('matchparen.highlight', 'end')
