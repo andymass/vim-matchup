@@ -111,8 +111,8 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
 
   " loop count number of times
   for l:dummy in range(l:count1)
-    let l:matches = matchup#delim#get_matching(l:delim)
-    if !len(l:matches) | return | endif
+    let l:match = matchup#delim#get_matching(l:delim)
+    if !has_key(l:delim, 'links') | return | endif
     let l:delim = get(l:delim.links, a:down ? 'next' : 'prev', {})
     if empty(l:delim) | return | endif
   endfor
