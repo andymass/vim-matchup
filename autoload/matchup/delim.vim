@@ -706,6 +706,10 @@ function! s:init_delim_lists() " {{{1
   " we don't explicitly check this, but the behavior might
   " be unpredictable if such groups are encountered.. (ref-1)
 
+  if exists('g:matchup_hotfix_'.&filetype)
+    call call(g:matchup_hotfix_{&filetype}, [])
+  endif
+
   " parse matchpairs and b:match_words
   let l:mps = escape(&matchpairs, '[$^.*~\\/?]')
   let l:match_words = get(b:, 'match_words', '')
@@ -1068,7 +1072,7 @@ function! matchup#delim#get_capture_groups(str, ...) " {{{1
   let l:stack = []
   let l:counter = 0
   while 1
-    let l:match = matchstrpos(a:str, l:pat, l:start)
+    let l:match = s:matchstrpos(a:str, l:pat, l:start)
     if l:match[1] < 0 | break | endif
     let l:start = l:match[2]
 
@@ -1093,6 +1097,17 @@ function! matchup#delim#get_capture_groups(str, ...) " {{{1
   call filter(l:brefs, 'has_key(v:val, "str")')
 
   return l:brefs
+endfunction
+
+" compatibility
+function! s:matchstrpos(expr, pat, start) abort
+  if exists('*matchstrpos')
+    return matchstrpos(a:expr, a:pat, a:start)
+  else
+    return [matchstr(a:expr, a:pat, a:start),
+          \ match(a:expr, a:pat, a:start),
+          \ matchend(a:expr, a:pat, a:start)]
+  endif
 endfunction
 
 " }}}1
