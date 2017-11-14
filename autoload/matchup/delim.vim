@@ -569,8 +569,8 @@ function! s:get_matching_delims(down) dict " {{{1
   " first, we figure out what the furthest match is, which will be
   " either the open or close depending on the direction
   let [l:re, l:flags, l:stopline] = a:down
-      \ ? [self.regextwo.close, 'zW', line('.') + s:stopline]
-      \ : [self.regextwo.open, 'zbW', max([line('.') - s:stopline, 1])]
+      \ ? [self.regextwo.close, 'W', line('.') + s:stopline]
+      \ : [self.regextwo.open, 'bW', max([line('.') - s:stopline, 1])]
 
   " these are the anchors for searchpairpos
   let l:open = self.regexone.open     " TODO is this right? BADLOGIC
