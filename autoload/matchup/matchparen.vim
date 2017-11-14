@@ -18,9 +18,13 @@ endfunction
 " }}}1
 
 function! matchup#matchparen#enable() " {{{1
+  if !has('timers')
+    let g:matchup_matchparen_deferred = 0
+  endif
+
   augroup matchup_matchparen
     autocmd!
-    autocmd CursorMoved,CursorMovedI * call s:matchparen.highlight()
+    autocmd CursorMoved,CursorMovedI * call s:matchparen.highlight_deferred()
     autocmd WinEnter * call s:matchparen.highlight(1)
     " autocmd TextChanged,TextChangedI * call s:matchparen.highlight()
     autocmd WinLeave * call s:matchparen.clear()
@@ -39,7 +43,7 @@ function! matchup#matchparen#enable() " {{{1
       let s:pi_paren_sid = 0
     endif
   endif
-  if s:pi_paren_sid 
+  if s:pi_paren_sid
     let s:pi_paren_fcn = function('<SNR>'.s:pi_paren_sid
       \ .'_Highlight_Matching_Pair')
   endif
@@ -64,6 +68,7 @@ function! matchup#matchparen#toggle(...) " {{{1
     call s:matchparen.clear()
   endif
 endfunction
+
 " }}}1
 
 let s:matchparen = {}
@@ -80,7 +85,72 @@ function! s:matchparen.clear() abort dict " {{{1
     let &statusline = w:matchup_oldstatus
     unlet w:matchup_oldstatus
   endif
+
+  let w:matchup_need_clear = 0
 endfunction
+
+" }}}1
+
+function! s:timer_callback(win_id, timer_id) abort " {{{1
+  if a:win_id != win_getid()
+    call timer_pause(a:timer_id, 1)
+    return
+  endif
+
+  " if we timed out, do a highlight and pause the timer
+  let l:elapsed = 1000*s:reltimefloat(reltime(w:matchup_pulse_time))
+  if l:elapsed >= s:show_delay
+    let w:matchup_timer_paused = 1
+    call timer_pause(a:timer_id, 1)
+    call s:matchparen.highlight()
+  elseif w:matchup_need_clear && exists('w:matchup_hi_time')
+    " if highlighting becomes too stale, clear it
+    let l:elapsed = 1000*s:reltimefloat(reltime(w:matchup_hi_time))
+    if l:elapsed >= s:hide_delay
+      call s:matchparen.clear()
+    endif
+  endif
+endfunction
+
+function! s:reltimefloat(time)
+  if s:exists_reltimefloat
+    return reltimefloat(a:time)
+  else
+    return str2float(reltimestr(a:time))
+  endif
+endfunction
+let s:exists_reltimefloat = exists('*reltimefloat')
+
+" }}}1
+function! s:matchparen.highlight_deferred() abort dict " {{{1
+  if !g:matchup_matchparen_deferred
+    return s:matchparen.highlight()
+  endif
+
+  if !exists('w:matchup_timer')
+    let s:show_delay = g:matchup_matchparen_deferred_show_delay
+    let s:hide_delay = g:matchup_matchparen_deferred_hide_delay
+    let w:matchup_timer = timer_start(s:show_delay,
+          \ function('s:timer_callback', [ win_getid() ]),
+          \ {'repeat': -1})
+    if !exists('w:matchup_need_clear')
+      let w:matchup_need_clear = 0
+    endif
+  endif
+
+  " keep the timer alive with a heartbeat
+  let w:matchup_pulse_time = reltime()
+
+  " if the timer is paused, some time has passed
+  if timer_info(w:matchup_timer)[0].paused
+    " unpause the timer
+    call timer_pause(w:matchup_timer, 0)
+
+    " set the hi time to the pulse time
+    let w:matchup_hi_time = w:matchup_pulse_time
+  endif
+endfunction
+
 " }}}1
 
 function! s:matchparen.highlight(...) abort dict " {{{1
@@ -168,6 +238,9 @@ function! s:matchparen.highlight(...) abort dict " {{{1
     return
   endif
 
+  " store flag meaning highlighting is active
+  let w:matchup_need_clear = 1
+
   " show off-screen matches
   if g:matchup_matchparen_status_offscreen
     call matchup#matchparen#offscreen(l:current)
@@ -192,7 +265,7 @@ function! matchup#matchparen#offscreen(current) " {{{1
 
   if !has_key(a:current, 'links') | return | endif
 
-  " prefer to show close 
+  " prefer to show close
   if a:current.links.open.lnum < line('w0')
     let l:offscreen = a:current.links.open
   endif
