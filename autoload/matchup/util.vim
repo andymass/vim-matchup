@@ -7,6 +7,18 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
+function! matchup#util#command(cmd) " {{{1
+  let l:lines = ''
+  try
+    silent! redir => l:lines
+      silent! execute a:cmd
+    redir END
+  finally
+    return split(l:lines, "\n")
+  endtry
+endfunction
+
+" }}}1
 function! matchup#util#in_comment(...) " {{{1
   return call('matchup#util#in_syntax', ['Comment'] + a:000)
 endfunction

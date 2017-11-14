@@ -31,11 +31,10 @@ function! matchup#matchparen#enable() " {{{1
 
   let s:pi_paren_sid = 0
   if get(g:, 'loaded_matchparen')
-    let l:pat = ','.expand('$VIM').'.\+matchparen\.vim,'
-    redir => l:lines
-      silent execute 'filter' l:pat 'scriptnames'
-    redir END
-    let s:pi_paren_sid = matchstr(l:lines, '\d\+\ze: ')
+    let l:pat = expand('$VIM').'.\+matchparen\.vim'
+    let l:lines = matchup#util#command('scriptnames')
+    call filter(l:lines, 'v:val =~# l:pat')
+    let s:pi_paren_sid = matchstr(get(l:lines, 0), '\d\+\ze: ')
     if !exists('*<SNR>'.s:pi_paren_sid.'_Highlight_Matching_Pair')
       let s:pi_paren_sid = 0
     endif
