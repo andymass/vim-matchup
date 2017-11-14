@@ -4,9 +4,10 @@ Most issues are related to bugs or problems. In these cases, you should
 include a minimal working example and a minimal vimrc file (see below), as
 well as:
 
-1. Steps to reproduce
-2. Expected behavior
-3. Observed behavior
+1. What vim version are you using?
+2. Steps to reproduce
+3. Expected behavior
+4. Observed behavior
 
 If your issue is instead a feature request or anything else, please
 consider if minimal examples and vimrc files might still be relevant.
