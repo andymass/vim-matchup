@@ -35,8 +35,8 @@ following should often suffice:
 set nocompatible
 
 " load match-up
-let &rtp  = '~/.vim/bundle/matchup.vim,' . &rtp
-let &rtp .= ',~/.vim/bundle/matchup.vim/after'
+let &rtp  = '~/.vim/bundle/vim-matchup,' . &rtp
+let &rtp .= ',~/.vim/bundle/vim-matchup/after'
 
 " load other plugins, if necessary
 " let &rtp = '~/path/to/other/plugin,' . &rtp
