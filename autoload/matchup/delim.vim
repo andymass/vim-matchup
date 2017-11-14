@@ -548,7 +548,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
         \ 'side'         : l:side,
         \ 'is_open'      : (l:side ==# 'open') ? 1 : 0,
         \ 'class'        : [(l:i / l:ns), l:id],
-        \ 'get_matching' : funcref('s:get_matching_delims'),
+        \ 'get_matching' : function('s:get_matching_delims'),
         \ 'regexone'     : l:thisre,
         \ 'regextwo'     : l:thisrebr,
         \ 'rematch'      : l:re,
