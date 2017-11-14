@@ -4,19 +4,23 @@
 " Email:      a@normed.space
 "
 
-if !get(g:, 'matchup_enabled', 1)
+if !get(g:, 'matchup_enabled', 1) || &cp
   finish
 endif
 
-if exists('g:loaded_matchup') || &cp
+if !get(g:, 'matchup_no_version_check', 0)
+      \ && !(v:version >= 704 || has('nvim-0.1.7'))
+  echoerr 'match-up does not support this version of vim'
+  finish
+endif
+
+if exists('g:loaded_matchup')
   finish
 endif
 let g:loaded_matchup = 1
 
 if exists('g:loaded_matchit')
-  echohl WarningMsg
-  echo 'matchup must be loaded before matchit'
-  echohl NONE
+  echoerr 'match-up must be loaded before matchit'
   finish
 endif
 let g:loaded_matchit = 1
