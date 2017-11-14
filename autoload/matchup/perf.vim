@@ -36,7 +36,7 @@ endfunction
 
 let s:timeout = 0 
 let s:timeout_enabled = 0
-let s:timeout_pulse_time = 0
+let s:timeout_pulse_time = reltime()
 
 function! matchup#perf#timeout() " {{{1
   return float2nr(s:timeout)
