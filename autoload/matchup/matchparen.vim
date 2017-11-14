@@ -168,12 +168,21 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   endif
 
   for l:corr in l:corrlist
-    call add(w:matchup_match_id_list, matchaddpos('MatchParen',
-       \   [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]]))
+    if s:use_matchaddpos
+      call add(w:matchup_match_id_list, matchaddpos('MatchParen',
+         \   [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]]))
+    else
+      call add(w:matchup_match_id_list, matchadd('MatchParen',
+         \   '\%' . l:corr.lnum . 'l'
+         \ . '\%' . l:corr.cnum . 'c'
+         \ . '\%(' . l:corr.rematch . '\)'))
+    endif
   endfor
 
   call matchup#perf#toc('matchparen.highlight', 'end')
 endfunction
+
+let s:use_matchaddpos = exists('*matchaddpos')
 
 " }}}1
 function! matchup#matchparen#offscreen(current) " {{{1
