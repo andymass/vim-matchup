@@ -33,6 +33,8 @@ function! s:init_options()
 
   call s:init_option('matchup_transmute_enabled', 0)
 
+  call s:init_option('matchup_surround_enabled', 1)
+
   call s:init_option('matchup_imap_enabled', 0)
   
   call s:init_option('matchup_complete_enabled', 0)
@@ -118,6 +120,10 @@ function! s:init_default_mappings()
       call s:map('o', l:opforce.'a%',
             \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-a%)')
     endfor
+  endif
+
+  if get(g:, 'matchup_surround_enabled', 0)
+    call s:map('n', 'ds%', '<plug>(matchup-ds%)')
   endif
 
   if get(g:, 'matchup_imap_enabled', 0)
