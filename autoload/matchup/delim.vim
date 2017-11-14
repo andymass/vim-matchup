@@ -869,11 +869,11 @@ function! s:init_delim_lists() " {{{1
       let l:instruct = []
       for l:j in l:order
         " the in group is the local number from this word pattern
-        let l:in_grp = keys(filter(
+        let l:in_grp_l = keys(filter(
               \ deepcopy(l:group_renumber[l:i]), 'v:val == l:j'))
 
-        if empty(l:in_grp) | continue | endif
-        let l:in_grp = l:in_grp[0]
+        if empty(l:in_grp_l) | continue | endif
+        let l:in_grp = l:in_grp_l[0]
 
         " if anything depends on this, flush out the current resolvable
         if has_key(l:dependency, l:j)
