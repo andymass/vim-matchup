@@ -102,6 +102,16 @@ endfunction
 
 " }}}1
 
+function! matchup#util#patch_match_words(from, to) " {{{1
+  if !exists('b:match_words') | return | endif
+  let b:match_words = substitute(b:match_words,
+        \ '\V'.escape(a:from, '\'),
+        \ escape(a:to, '\'),
+        \ '')
+endfunction
+
+" }}}1
+
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
