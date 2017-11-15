@@ -14,6 +14,11 @@ if !get(g:, 'matchup_no_version_check', 0)
   finish
 endif
 
+if !has('reltime')
+  echoerr 'match-up requires reltime()'
+  finish
+endif
+
 if exists('g:loaded_matchup')
   finish
 endif
