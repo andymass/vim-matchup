@@ -1154,8 +1154,7 @@ function! matchup#delim#skip(...) " {{{1
   endif
 
   if empty(get(b:, 'matchup_delim_skip', ''))
-    return matchup#util#in_comment(l:lnum, l:cnum)
-        \ || matchup#util#in_string(l:lnum, l:cnum)
+    return matchup#util#in_comment_or_string(l:lnum, l:cnum)
   endif
 
   let s:eff_curpos = [l:lnum, l:cnum]

@@ -20,29 +20,29 @@ endfunction
 
 " }}}1
 function! matchup#util#in_comment(...) " {{{1
-  return call('matchup#util#in_syntax', ['Comment'] + a:000)
+  return call('matchup#util#in_syntax', ['^Comment$'] + a:000)
 endfunction
 
 " }}}1
 function! matchup#util#in_string(...) " {{{1
-  return call('matchup#util#in_syntax', ['String'] + a:000)
+  return call('matchup#util#in_syntax', ['^String$'] + a:000)
+endfunction
+
+" }}}1
+function! matchup#util#in_comment_or_string(...) " {{{1
+  return call('matchup#util#in_syntax',
+        \ ['^\%(String\|Comment\)$'] + a:000)
 endfunction
 
 " }}}1
 function! matchup#util#in_syntax(name, ...) " {{{1
   " usage: matchup#util#in_syntax(name, [line, col])
-
-  " get position and correct it if necessary
   let l:pos = a:0 > 0 ? [a:1, a:2] : [line('.'), col('.')]
-  if mode() ==# 'i'
-    let l:pos[1] -= 1
-  endif
-  call map(l:pos, 'max([v:val, 1])')
 
   " check syntax at position
   let l:syn = map(synstack(l:pos[0], l:pos[1]),
          \  "synIDattr(synIDtrans(v:val), 'name')")
-  return match(l:syn, '^' . a:name) >= 0
+  return match(l:syn, a:name) >= 0
 endfunction
 
 " }}}1
