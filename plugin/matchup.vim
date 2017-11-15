@@ -35,6 +35,8 @@ if get(g:, 'matchup_matchparen_enabled', 1)
     runtime plugin/matchparen.vim
   endif
   au! matchparen
+  command! NoMatchParen call matchup#matchparen#toggle(0)
+  command! DoMatchParen call matchup#matchparen#toggle(1)
 endif
 
 call matchup#init()

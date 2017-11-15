@@ -54,6 +54,17 @@ function! matchup#matchparen#disable() " {{{1
 endfunction
 
 " }}}1
+function! matchup#matchparen#toggle(...) " {{{1
+  let g:matchup_matchparen_enabled = a:0 > 0
+        \ ? a:1
+        \ : !g:matchup_matchparen_enabled
+  if g:matchup_matchparen_enabled
+    call s:matchparen.highlight(1)
+  else
+    call s:matchparen.clear()
+  endif
+endfunction
+" }}}1
 
 let s:matchparen = {}
 
