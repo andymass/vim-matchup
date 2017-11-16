@@ -596,7 +596,7 @@ function! s:get_matching_delims(down) dict " {{{1
   let l:open = matchup#delim#fill_backrefs(l:open, self.groups, 0)
   let l:close = matchup#delim#fill_backrefs(l:close, self.groups, 0)
 
-  let l:skip = 'matchup#delim#skip()'
+  let l:skip = 'matchup#delim#skip0()'
 
   if matchup#perf#timeout_check() | return [['', 0, 0]] | endif
 
@@ -1158,6 +1158,15 @@ function! matchup#delim#skip(...) " {{{1
   endif
 
   let s:eff_curpos = [l:lnum, l:cnum]
+  execute 'return (' b:matchup_delim_skip ')'
+endfunction
+
+function! matchup#delim#skip0()
+  if empty(b:matchup_delim_skip)
+    return matchup#util#in_comment_or_string(line('.'), col('.'))
+  endif
+
+  let s:eff_curpos = [line('.'), col('.')]
   execute 'return (' b:matchup_delim_skip ')'
 endfunction
 
