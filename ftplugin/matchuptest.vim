@@ -25,6 +25,8 @@ if exists("loaded_matchit")
   " bad: let b:match_words = '\(foo\)\(bar\):more\1:and\2:end\1\2' 
   " good:
   let b:match_words = '\<\(\(foo\)\(bar\)\):\3\2:end\1'
+  let b:match_words .= ',\<baz\zebar\>:\<barbaz\>'
+  let b:match_words .= ',\<zab\zsrab\>:\<rabzab\>'
 
   let b:match_skip = 'synIDattr(synID(line("."),col("."),1),"name")
         \ =~? "comment\\|string\\|vimSynReg\\|vimSet"'
