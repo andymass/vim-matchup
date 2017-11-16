@@ -12,9 +12,18 @@ function! matchup#pos#set_cursor(...) " {{{1
 endfunction
 
 " }}}1
-function! matchup#pos#get_cursor() " {{{1
-  return exists('*getcurpos') ? getcurpos() : getpos('.')
-endfunction
+" function! matchup#pos#get_cursor() {{{1
+if exists('*getcurpos')
+  function! matchup#pos#get_cursor()
+    return getcurpos()
+  endfunction
+else
+  function! matchup#pos#get_cursor()
+    return getpos('.')
+  endfunction
+endif
+
+" }}}1
 
 " }}}1
 function! matchup#pos#get_cursor_line() " {{{1
