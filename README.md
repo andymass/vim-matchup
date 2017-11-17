@@ -387,12 +387,27 @@ let g:matchup_matchparen_status_offscreen = 0
 ```
 default: 1
 
-Adjust timeouts in milliseconds for matchparen highlighting
-```
+Adjust timeouts in milliseconds for matchparen highlighting:
+```vim
 let g:matchup_matchparen_timeout = 300
-let g:matchparen_insert_timeout = 60
+let g:matchup_matchparen_insert_timeout = 60
 ```
 default: 300, 60
+
+Deferred highlighting improves cursor movement performance (for example,
+when using `hjkl`) by delaying highlighting for a short time and waiting
+to see if the cursor continues moving;
+```vim
+let g:matchup_matchparen_deferred = 1
+```
+default: 0 (disabled)
+
+Adjust timeouts in milliseconds for deferred highlighting:
+```vim
+let g:matchparen_matchparen_deferred_show_time = 50
+let g:matchparen_matchparen_deferred_hide_time = 700
+```
+default: 50, 700
 
 ### Module motion
 
