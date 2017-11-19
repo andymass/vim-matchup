@@ -28,6 +28,10 @@ if exists("loaded_matchit")
   let b:match_words .= ',\<baz\zebar\>:\<barbaz\>'
   let b:match_words .= ',\<zab\zsrab\>:\<rabzab\>'
   let b:match_words .= ',\<where\>:\<wh\zeen\>'
+  let b:match_words .= ',\%(end\)\@<!むめ:endむめも'
+  let b:match_words .= ',ぽ:も'
+  let b:match_words .= ',\\begin{\([^}]\+\)}:\\end{\1}'
+  let b:match_words .= ',one😀🐑one:two😐🐑two:three🙁🐑'
 
   let b:match_skip = 'synIDattr(synID(line("."),col("."),1),"name")
         \ =~? "comment\\|string\\|vimSynReg\\|vimSet"'

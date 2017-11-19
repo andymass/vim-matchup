@@ -235,14 +235,16 @@ endfunction
 function! matchup#delim#jump_target(delim) "{{{1
   let l:save_pos = matchup#pos#get_cursor()
 
+  " unicode note: technically wrong, but works in practice
+  " since the cursor snaps back to start of multi-byte chars
   let l:column = a:delim.cnum
-  let l:column += strdisplaywidth(a:delim.match) - 1
+  let l:column += strlen(a:delim.match) - 1
 
-  if strdisplaywidth(a:delim.match) <= 2
+  if strlen(a:delim.match) < 2
     return l:column
   endif
 
-  for l:tries in range(strdisplaywidth(a:delim.match)-2)
+  for l:tries in range(strlen(a:delim.match)-1)
     call matchup#pos#set_cursor(a:delim.lnum, l:column)
 
     let l:delim_test = matchup#delim#get_current('all', a:delim.side)
