@@ -1212,7 +1212,7 @@ function! s:remove_capture_groups(re) "{{{1
 endfunction
 
 "}}}1
-function! matchup#delim#fill_backrefs(re, groups, warn) " {{{
+function! matchup#delim#fill_backrefs(re, groups, warn) " {{{1
   return substitute(a:re, g:matchup#re#backref,
         \ '\=s:get_backref(a:groups, submatch(1), a:warn)', 'g')
         " \ '\=get(a:groups, submatch(1), "")', 'g')
@@ -1230,9 +1230,9 @@ function! s:get_backref(groups, bref, warn)
   return '\V'.escape(get(a:groups, a:bref), '\').'\m'
 endfunction
 
-"}}}
+"}}}1
 
-function! s:anchor_regex(re, cnum, method)
+function! s:anchor_regex(re, cnum, method) " {{{1
   if a:method
     " trick to re-match at a particular column
     " handles the case where pattern contains \ze, \zs, and assertions
@@ -1243,6 +1243,8 @@ function! s:anchor_regex(re, cnum, method)
     return '\%'.(a:cnum).'c\%('.a:re.'\)'
   endif
 endfunction
+
+" }}}1
 
 function! s:mod(i, n) " {{{1
     return ((a:i % a:n) + a:n) % a:n
