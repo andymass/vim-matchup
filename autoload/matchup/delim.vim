@@ -467,6 +467,9 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
       if empty(l:res[0]) | continue | end
     endif
 
+    " if pattern may contain \zs, extra processing is required
+    let l:has_zs = l:rebrs[l:i / l:ns].has_zs
+
     let l:mid_id = 0
     for l:re in l:res
       let l:mid_id += 1
@@ -474,7 +477,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
       " prepend the column number and append the cursor column
       " to anchor the match; we don't use {start} for matchlist
       " because there may be zero-width look behinds
-      let l:re_anchored = '\%'.a:cnum.'c\%(' . l:re .'\)'
+      let l:re_anchored = s:anchor_regex(l:re, a:cnum, l:has_zs)
 
       " for current we want the first match which the cursor is inside
       if a:opts.direction ==# 'current'
@@ -483,6 +486,18 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
 
       let l:matches = matchlist(getline(a:lnum), l:re_anchored)
       if empty(l:matches) | continue | endif
+
+      " reject matches which the cursor is outside of
+      " this matters only for \ze
+      if a:opts.direction ==# 'current'
+          \ && a:cnum + strlen(l:matches[0]) <= l:cursorpos
+        continue
+      endif
+
+      " if pattern contains \zs we need to re-check the starting column
+      if l:has_zs && match(getline(a:lnum), l:re_anchored) != a:cnum-1
+        continue
+      endif
 
       let l:found = 1
       break
@@ -622,7 +637,8 @@ function! s:get_matching_delims(down) dict " {{{1
   endif
 
   " get the match and groups
-  let l:re_anchored = '\%'.l:cnum_corr.'c\%(' . l:re .'\)'
+  let l:has_zs = self.regextwo.has_zs
+  let l:re_anchored = s:anchor_regex(l:re, l:cnum_corr, l:has_zs)
   let l:matches = matchlist(getline(l:lnum_corr), l:re_anchored)
   let l:match_corr = l:matches[0]
 
@@ -673,7 +689,7 @@ function! s:get_matching_delims(down) dict " {{{1
       if l:lnum <= l:lnum_corr && l:cnum <= l:cnum_corr | break | endif
     endif
 
-    let l:re_anchored = '\%'.l:cnum.'c\%(' . l:re .'\)'
+    let l:re_anchored = s:anchor_regex(l:re, l:cnum, l:has_zs)
     let l:matches = matchlist(getline(l:lnum), l:re_anchored)
     let l:match = l:matches[0]
 
@@ -987,6 +1003,7 @@ function! s:init_delim_lists() " {{{1
       \ 'need_grp' : l:all_needed_groups,
       \ 'grp_renu' : l:group_renumber,
       \ 'aug_comp' : l:augment_comp,
+      \ 'has_zs'   : match(l:words_backref, g:matchup#re#zs) >= 0,
       \})
   endfor
 
@@ -1212,6 +1229,18 @@ function! s:get_backref(groups, bref, warn)
 endfunction
 
 "}}}
+
+function! s:anchor_regex(re, cnum, method)
+  if a:method
+    " trick to re-match at a particular column
+    " handles the case where pattern contains \ze, \zs, and assertions
+    " but doesn't work with overlapping matches and is possibly slower
+    return '\%<'.(a:cnum+1).'c\%('.a:re.'\)\%>'.(a:cnum).'c'
+  else
+    " fails to match with \zs
+    return '\%'.(a:cnum).'c\%('.a:re.'\)'
+  endif
+endfunction
 
 function! s:mod(i, n) " {{{1
     return ((a:i % a:n) + a:n) % a:n
