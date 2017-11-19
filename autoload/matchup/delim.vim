@@ -858,7 +858,7 @@ function! s:init_delim_lists() " {{{1
         let l:prev_max = max(keys(l:cg2))
         let l:cg2 = matchup#delim#get_capture_groups(l:words_backref[l:i])
 
-        for l:cg2_i in sort(keys(l:cg2), 'N')
+        for l:cg2_i in sort(keys(l:cg2), s:Nsort)
           if l:cg2_i > l:prev_max
             " maps capture groups to 'open' back reference numbers
             let l:group_renumber[l:i][l:cg2_i] = l:bref
@@ -944,7 +944,7 @@ function! s:init_delim_lists() " {{{1
 
         " output map turns remaining group numbers into 'open' numbers
         let l:counter = 1
-        for l:out_grp in sort(keys(l:remaining_out), 'N')
+        for l:out_grp in sort(keys(l:remaining_out), s:Nsort)
           let l:augment_comp[l:i][0].outputmap[l:counter] = l:out_grp
           let l:counter += 1
         endfor
@@ -1025,7 +1025,7 @@ function! s:capture_group_sort(a, b) dict
 endfunction
 
 function! matchup#delim#capture_group_replacement_order(cg)
-  let l:order = reverse(sort(keys(a:cg), 'N'))
+  let l:order = reverse(sort(keys(a:cg), s:Nsort))
   call sort(l:order, 's:capture_group_sort', a:cg)
   return l:order
 endfunction
@@ -1246,6 +1246,14 @@ endfunction
 
 " }}}1
 
+function! s:Nsort_func(a, b) " {{{1
+  let l:a = type(a:a) == type('') ? str2nr(a:a) : a:a
+  let l:b = type(a:b) == type('') ? str2nr(a:b) : a:b
+  return l:a == l:b ? 0 : l:a > l:b ? 1 : -1
+endfunction
+
+" }}}1
+
 function! s:mod(i, n) " {{{1
     return ((a:i % a:n) + a:n) % a:n
 endfunction
@@ -1274,6 +1282,9 @@ let s:types = {
       \ 'delim_all' : [ s:basetypes.delim_tex ],
       \ 'delim_tex' : [ s:basetypes.delim_tex ],
       \}
+
+" in case the 'N' sort flag is not available (compatibility for 7.4.898)
+let s:Nsort = has('patch-7.4.951') ? 'N' : 's:Nsort_func'
 
 let &cpo = s:save_cpo
 
