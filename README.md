@@ -1,7 +1,6 @@
 # vim match-up
 
-:warning: warning :warning: this plugin is under heavy
-active development.  There are probably bugs!
+[screenshot](https://raw.githubusercontent.com/wiki/andymass/vim-matchup/images/match-up-hl1.gif)
 
 match-up is a replacement for the venerable vim plugin [matchit.vim].
 match-up aims to replicate all of matchit's features, fix a number of its
@@ -32,7 +31,18 @@ Contributions are welcome!
 
 This plugin
 
-- Extends vim's `%` motion to language-words like `if`, `else`, `endif`.
+- Extends vim's `%` motion to language-specific words.  The following vim
+  file type plugins currently provide support for match-up:
+
+  ```
+  abaqus, ada, aspvbs, c, clojure, cobol, config, context, csc, csh,
+  dtd, dtrace, eiffel, eruby, falcon, fortran, framescript, haml,
+  hamster, hog, html, ishd, j, jsp, kconfig, liquid, lua, make, matlab,
+  mf, mp, ocaml, pascal, pdf, perl, php, plaintex, postscr, ruby, sh,
+  spec, sql, tex, vb, verilog, vhdl, vim, xhtml, xml, zimbu, zsh
+  ```
+
+  Note: match-up uses the same `b:match_words` as matchit.
 - Adds motions `g%`, `[%`, `]%`, and `z%`.
 - Combines these motions into convenient text objects `i%` and `a%`.
 - Highlights symbols and words under the cursor which `%` can work on,
