@@ -499,6 +499,7 @@ heavily influenced by vimtex. :beers:
 
 - [matchit](http://ftp.vim.org/pub/vim/runtime/macros/matchit.txt)
 - [matchparen](http://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt)
+- [MatchTag](https://github.com/gregsexton/MatchTag)
 - [MatchTagAlways](https://github.com/Valloric/MatchTagAlways)
 - [vim-endwise](https://github.com/tpope/vim-endwise)
 - [auto-pairs](https://github.com/jiangmiao/auto-pairs)
