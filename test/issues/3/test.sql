@@ -24,3 +24,16 @@ SELECT @MedianScore=
 RETURN(@MedianScore);
 END;
 
+drop function if exists another_function;
+create or replace function another_function()
+returns setof text as
+$$
+begin
+	if 1=0 then
+		return 'impossible!';
+	end if;
+  return next 'something';
+  return;
+end
+$$ language 'plpgsql';
+
