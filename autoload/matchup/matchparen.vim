@@ -13,6 +13,9 @@ function! matchup#matchparen#init_module() " {{{1
   if !g:matchup_matchparen_enabled | return | endif
 
   call matchup#matchparen#enable()
+
+  nnoremap <silent> <plug>(matchup-hi-surround)
+        \ :<c-u>call matchup#matchparen#highlight_surrounding()<cr>
 endfunction
 
 " }}}1
@@ -281,6 +284,19 @@ function! matchup#matchparen#offscreen(current) " {{{1
 endfunction
 
 " }}}1
+function! matchup#matchparen#highlight_surrounding() " {{{1
+  call matchup#perf#timeout_start(0)
+  let l:delims = matchup#delim#get_surrounding('delim_all', 1)
+  if empty(l:delims[0]) | return | endif
+
+  let l:save_pos = matchup#pos#get_cursor()
+  call matchup#pos#set_cursor(l:delims[0])
+  call s:matchparen.highlight(1)
+
+  call matchup#pos#set_cursor(l:save_pos)
+endfunction
+
+"}}}1
 function! s:format_statusline(offscreen) " {{{1
   let l:line = getline(a:offscreen.lnum)
 
