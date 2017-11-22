@@ -296,7 +296,7 @@ function! s:format_statusline(offscreen) " {{{1
     if l:linenr < line('.')
       let l:sl = '%#Search#' . l:sl . '∆%#Normal#'
     else
-      let l:sl = '%#LineNr#' . l:sl . '%#Normal# '
+      let l:sl = '%#LineNr#' . l:sl . ' %#Normal#'
     endif
   endif
 
