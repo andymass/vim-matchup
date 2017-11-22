@@ -396,12 +396,16 @@ let g:matchup_matchparen_status_offscreen = 0
 ```
 default: 1
 
+#### highlighting timeouts
+
 Adjust timeouts in milliseconds for matchparen highlighting:
 ```vim
 let g:matchup_matchparen_timeout = 300
 let g:matchup_matchparen_insert_timeout = 60
 ```
 default: 300, 60
+
+#### deferred highlighting
 
 Deferred highlighting improves cursor movement performance (for example,
 when using `hjkl`) by delaying highlighting for a short time and waiting
@@ -417,6 +421,15 @@ let g:matchparen_matchparen_deferred_show_time = 50
 let g:matchparen_matchparen_deferred_hide_time = 700
 ```
 default: 50, 700
+
+#### highlight surrounding
+
+To highlight the surrounding delimiters until the cursor moves, use a map
+such as the following
+```vim
+nmap <silent> <F7> <plug>(matchup-hi-surround)
+```
+There is no default map for this feature.
 
 ### Module motion
 
@@ -457,9 +470,12 @@ _Options planned_.
 
 - match-up doesn't work
 
-  The plugin requires a fairly recent version of vim.  Please tell me your
-  vim version and error messages.  Try updating vim and see if the problem
-  persists.
+  This plugin requires at least vim 7.4.  It should work in vim 7.4.898
+  but at least vim 7.4.1689 is better.  I recommend using the most recent
+  version of vim if possible.
+
+  If you have issues, please tell me your vim version and error messages.
+  Try updating vim and see if the problem persists.
 
 - Why does jumping not work for construct X in language Y?
 
@@ -475,8 +491,21 @@ _Options planned_.
 
 - I'm having performance problems
 
-  match-up aims to be as fast as possible.  If you see any performance
-  issues, please open a new issue and report `g:matchup#perf#times`.
+  match-up aims to be as fast as possible, but highlighting matching words
+  can be intensive and may be slow on less powerful machines.  There are a
+  few things you can try to improve performance:
+
+  1. Update to a recent version of vim.  Newer versions are faster, more
+  extensively tested, and better supported by match-up.
+  2. Try [deferred highlighting](#deferred-highlighting), which delays
+  highlighting until the cursor is stationary to improve cursor movement
+  performance.
+  3. Lower the [highlighting timeouts](#highlighting-timeouts).  Note that
+  if highlighting takes longer than the timeout, highlighting will not be
+  attempted again until the cursor moves.
+
+  If are having any other performance issues, please open a new issue and
+  report `g:matchup#perf#times`.
 
 - How can I contribute?
 
