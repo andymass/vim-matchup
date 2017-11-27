@@ -760,8 +760,8 @@ function! s:init_delim_lists() " {{{1
   for l:s in l:sets
     " very special case, escape bare [:]
     " TODO: the bare [] bug might show up in other places too
-    if l:s ==# '[:]'
-      let l:s = '\[:\]'
+    if l:s ==# '[:]' || l:s ==# '\[:\]'
+      let l:s = '\[:]'
     endif
 
     if has_key(l:seen, l:s) | continue | endif
