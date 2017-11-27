@@ -188,11 +188,6 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   let l:insertmode = l:entering_insert
         \ || (mode() ==# 'i' || mode() ==# 'R')
 
-  " skip if inside string or comment (by default)
-  if matchup#delim#skip(line('.'), col('.') - l:insertmode)
-    return
-  endif
-
   " start the timeout period
   let l:timeout = l:insertmode
         \ ? get(b:, 'matchup_matchparen_insert_timeout',

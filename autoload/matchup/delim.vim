@@ -205,6 +205,7 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
 
     if len(l:matches)
       let l:close = l:local ? l:open.links.next : l:open.links.close
+      " XXX need actual column position?
       let l:pos_val_try = matchup#pos#val(l:close)
           \ + strdisplaywidth(l:close.match) - 1
     endif
@@ -310,9 +311,17 @@ function! s:get_delim(opts) " {{{1
     let l:cursorpos -= 1
   endif
 
+  let s:invert_skip = 0
+
   if a:opts.direction ==# 'current'
-        \ && matchup#delim#skip(line('.'), l:cursorpos)
-    return {}
+    let l:check_skip = get(a:opts, 'check_skip', 0)
+    if l:check_skip && matchup#delim#skip(line('.'), l:cursorpos)
+      return {}
+    endif
+  else
+    " check skip if cursor is not currently in skip
+    let l:check_skip = get(a:opts, 'check_skip',
+          \ !matchup#delim#skip(line('.'), l:cursorpos))
   endif
 
   let a:opts.cursorpos = l:cursorpos
@@ -351,6 +360,7 @@ function! s:get_delim(opts) " {{{1
     " note: the skip here should not be needed
     " in 'current' mode, but be explicit
     if a:opts.direction !=# 'current'
+          \ && l:check_skip
           \ && matchup#delim#skip(l:lnum, l:cnum)
 
       " invalid match, move cursor and keep looking
@@ -381,6 +391,9 @@ function! s:get_delim(opts) " {{{1
     return {}
   endif
 
+  let l:skip_state = l:check_skip ? 0
+        \ : matchup#delim#skip(l:lnum, l:cnum)
+
   " now we get more data about the match in this position
   " there may be capture groups which need to be stored
 
@@ -398,6 +411,7 @@ function! s:get_delim(opts) " {{{1
         \ 'regexone' : '',
         \ 'regextwo' : '',
         \ 'rematch'  : '',
+        \ 'skip'     : l:skip_state,
         \}
 
   for l:type in s:types[a:opts.type]
@@ -613,6 +627,7 @@ function! s:get_matching_delims(down) dict " {{{1
   let l:open = matchup#delim#fill_backrefs(l:open, self.groups, 0)
   let l:close = matchup#delim#fill_backrefs(l:close, self.groups, 0)
 
+  let s:invert_skip = self.skip
   let l:skip = 'matchup#delim#skip0()'
 
   if matchup#perf#timeout_check() | return [['', 0, 0]] | endif
@@ -1174,21 +1189,24 @@ function! matchup#delim#skip(...) " {{{1
 
   if empty(get(b:, 'matchup_delim_skip', ''))
     return matchup#util#in_comment_or_string(l:lnum, l:cnum)
+          \ ? !s:invert_skip : s:invert_skip
   endif
 
   let s:eff_curpos = [l:lnum, l:cnum]
-  execute 'return (' b:matchup_delim_skip ')'
+  execute 'return' (s:invert_skip ? '!(' : '(') b:matchup_delim_skip ')'
 endfunction
 
 function! matchup#delim#skip0()
   if empty(b:matchup_delim_skip)
     return matchup#util#in_comment_or_string(line('.'), col('.'))
+          \ ? !s:invert_skip : s:invert_skip
   endif
 
   let s:eff_curpos = [line('.'), col('.')]
-  execute 'return (' b:matchup_delim_skip ')'
+  execute 'return' (s:invert_skip ? '!(' : '(') b:matchup_delim_skip ')'
 endfunction
 
+let s:invert_skip = 0
 let s:eff_curpos = [1, 1]
 
 " effective column/line
