@@ -1,0 +1,593 @@
+*matchup.txt*    modern matching words
+*matchup* *match-up*
+
+Author:  Andy Massimino <a@normed.space>
+Web:     https://github.com/andymass/vim-matchup
+License: MIT license {{{
+
+  Copyright (c) 2017 Andy Massimino
+
+  Copyright (c) 2016 Karl Yngve Lervåg
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this  software and  associated documentation  files (the  "Software"), to
+  deal in the  Software without restriction, including  without limitation the
+  rights to use, copy, modify,  merge, publish, distribute, sublicense, and/or
+  sell copies of the  Software, and to permit persons to  whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright  notice and this permission notice shall  be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS  PROVIDED "AS IS", WITHOUT WARRANTY OF  ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING  BUT NOT  LIMITED TO  THE WARRANTIES  OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+  AUTHORS  OR COPYRIGHT  HOLDERS BE  LIABLE FOR  ANY CLAIM,  DAMAGES OR  OTHER
+  LIABILITY,  WHETHER IN  AN ACTION  OF CONTRACT,  TORT OR  OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE.
+
+}}}
+
+==============================================================================
+CONTENTS                                                     *matchup-contents*
+
+  Introduction                                  |matchup-introduction|
+    Feature overview                            |matchup-features|
+  Usage                                         |matchup-usage|
+    Default mappings                            |matchup-default-mappings|
+    Customizing mappings                        |matchup-custom-mappings|
+    Features                                    |matchup-features|
+    Options                                     |matchup-options|
+  FAQ                                           |matchup-faq|
+  Interoperability                              |matchup-interoperability|
+  Acknowledgments                               |matchup-acknowledgments|
+  Development                                   |matchup-development|
+
+==============================================================================
+INTRODUCTION                                             *matchup-introduction*
+
+|match-up| is a plugin that lets you visualize, navigate, and operate on
+matching sets of text.  It is a replacement for the venerable vim plugin
+|matchit|.  match-up aims to replicate all of |matchit|'s features, fix a number
+of its deficiencies and bugs, and add a few totally new features.  It also
+replaces the standard plugin |matchparen|, allowing all of |matchit|'s words to be
+highlighted along with the 'matchpairs' symbols such as `()`, `{}`, and `[]`.
+
+------------------------------------------------------------------------------
+Feature overview~
+                                                             *matchup-features*
+
+This plugin:
+
+- Extends vim's |%| (see |matchup-%|) motion to language-specific words instead of
+  just single characters.  The words depend on the specific |filetype| plugin
+  (|ftplugin|).  The following built-in vim filetype plugins
+  currently provide support for match-up: >
+
+    abaqus, ada, aspvbs, c, clojure, cobol, config, context, csc, csh, dtd,
+    dtrace, eiffel, eruby, falcon, fortran, framescript, haml, hamster, hog,
+    html, ishd, j, jsp, kconfig, liquid, lua, make, matlab, mf, mp, ocaml,
+    pascal, pdf, perl, php, plaintex, postscr, ruby, sh, spec, sql, tex, vb,
+    verilog, vhdl, vim, xhtml, xml, zimbu, zsh
+<
+- Highlights symbols and words under the cursor along with their matches.
+
+- Display off-screen matches in the |status-line|.
+
+- Adds motions |g%|, |[%|, |]%|, and |z%|.
+
+- Provides analogous text objects |i%| and |a%|.
+
+==============================================================================
+USAGE                                                           *matchup-usage*
+
+------------------------------------------------------------------------------
+Default mappings~
+                                                     *matchup-default-mappings*
+
+For customization, see |matchup-custom-mappings|.
+
+                                                         *matchup-%*
+%                       Go forwards to next matching word.  If at a close word,
+                        cycle back to the corresponding open word.
+
+                                                         *matchup-N%*
+{count}%                If {count} is less than 6, go forwards {count} times.
+                        Otherwise, go to {count} percentage in the file (|N%|).
+                        See |g:matchup_motion_override_Npercent|
+
+                                                         *g%*
+g%                      Go backwards to [count]th previous matching word.  If
+                        at an open word, cycle around to the corresponding
+                        close word.
+
+                                                         *[%*
+[%                      go to [count]th previous outer open word.  Allows
+                        navigation to the start of blocks surrounding the
+                        cursor. This is similar to vim's built-in |[(| and |[{|
+                        and is an |exclusive| motion (|matchup-feat-exclusive|).
+
+                                                         *]%*
+]%                      go to [count]th next outer close word.  Allows
+                        navigation to the end of blocks surrounding the
+                        cursor. This is similar to vim's built-in |](| and |]{|
+                        and is an |exclusive| motion (|matchup-feat-exclusive|).
+
+                                                         *z%*
+z%                      go to inside [count]th nearest block.  This is an
+                        |exclusive| motion when used with operators,
+                        except it eats white-space.  For example, where `█` is
+                        the cursor position, >
+
+                        █ call somefunction(      param1, param2)
+<
+                        `dz%` produces >
+
+                        param1, param2)
+<
+                                                         *v_a%* *a%*
+a%                      select an |any| block.
+                        This closely matches match vim's built-in |ab|.
+
+                                                         *v_Na%* *Na%*
+{count}a%               select an open-to-close block.
+                        When {count} is greater than 1, select the {count}th
+                        surrounding open-to-close block.
+
+                                                         *v_i%* *i%*
+i%                      select the inside of an |any| block.
+                        This closely matches match vim's built-in |ib|.
+                        See also |matchup-feat-linewise|.
+
+                                                         *v_Ni%* *Ni%*
+{count}i%               select the inside of an open-to-close block.
+                        When {count} is greater than 1, select the inside of
+                        the {count}th surrounding open-to-close block.
+
+------------------------------------------------------------------------------
+Customizing mappings~
+                                                      *matchup-custom-mappings*
+
+|match-up| provides a number of default mappings.  Each right-hand side is
+provided as a <plug>-mapping (see |using-<plug>|).  For any given map, the
+default mapping will only be created if it does not already exist. This means
+that if a user defines a custom mapping, e.g., with >
+
+  nmap <leader>% <plug>(matchup-z%)
+<
+the corresponding default left-hand side will not be mapped.
+
+  ---------------------------------------------------------~
+   LHS              RHS                           Module
+  ---------------------------------------------------------~
+   %                |<plug>(matchup-%)|             motion
+   g%               |<plug>(matchup-g%)|            motion
+   [%               |<plug>(matchup-[%)|            motion
+   ]%               |<plug>(matchup-]%)|            motion
+   z%               |<plug>(matchup-z%)|            motion
+   a%               |<plug>(matchup-%)|             text_obj
+   i%               |<plug>(matchup-%)|             text_obj
+   (none)           |<plug>(matchup-hi-surround)|   matchparen
+
+------------------------------------------------------------------------------
+Features~
+                                                             *matchup-features*
+
+What do we mean by open, close, mid?  This depends on the specific file type
+and is configured through the variable |b:match_words|.  Here are a couple
+of examples: >
+
+  if l:x == 1
+    call one()
+  else
+    call two()
+  elseif
+    call three()
+  endif
+
+For the vim-script language, match-up understands the words `if`, `else`, `elseif`,
+`endif` and that they form a sequential construct.  The "open" word is `if`, the
+"close" word is `endif`, and the "mid" words are `else` and `elseif`.  The `if`/`endif`
+pair is called an "open-to-close" block and the `if`/`else`, `else`/`elsif`, and
+`elseif`/`endif` are called "any" blocks.
+
+C, C++: >
+
+  #if 0
+  #else
+  #endif
+
+  void some_func() {
+      if (true) {
+        one();
+      } else if (false && false) {
+        two();
+      } else {
+        three();
+      }
+  }
+<
+Since in C and C++, blocks are delimited using braces (`{` & `}`), match-up will
+recognize `{` as the open word and `}` as the close word. It will ignore the if
+and else if because they are not defined in vim's C file type plugin.
+
+On the other hand, match-up will recognize the `#if`, `#else`, `#endif` preprocessor
+directives.
+
+See |matchup-feat-exclusive| and |matchup-feat-linewise| for some examples and
+important special cases.
+
+Highlighting matches~
+
+To disable match highlighting, set |g:matchup_matchparen_enabled| to 0.
+If this option is set before the plugin is loaded, it will not disable
+the built-in |matchparen| plugin.  See |matchup-opts-matchparen| for other
+related options.
+
+Display matches off screen~
+
+If a open or close which would have been highlighted is on a line positioned
+outside the current window, the match is shown in the status line.  If both
+the open and close match are off-screen, the close match is preferred.
+
+                                                  *<plug>(matchup-hi-surround)*
+Highlight surrounding~
+
+To highlight the surrounding delimiters until the cursor moves, use a map such
+as the following >
+
+  nmap <silent> <F7> <plug>(matchup-hi-surround)
+<
+There is no default map for this feature.
+
+Parallel transmutation~
+
+In insert mode, after changing text inside a word, matching words will be
+changed in parallel.  As an example, >
+
+  <pre>
+    text
+  </pre>
+<
+Changing `pre` to `div` and leaving insert mode will produce: >
+
+  <div>
+    text
+  </div>
+<
+Note: this currently only works for match words which define a backref
+relation like `\1`.  A wider set of transmutations are planned.
+
+Parallel transmutation requires the matchparen module to be enabled.
+
+                                                       *matchup-feat-exclusive*
+Inclusive and exclusive motions~
+
+In vim, character motions following operators (such as `d` for delete
+and `c` for change) are either _inclusive_ or _exclusive_.  This means
+they either include the ending position or not.  match-up is designed so
+that `d]%` inside a set of parenthesis behaves exactly like `d])`.  For
+other words, exclusive motions will not include the close word.  In this
+example, where `█` is the cursor position, >
+
+  if █x | continue | endif
+<
+pressing `d]%` will produce >
+
+  if endif
+<
+To include the close word, use either `dv]%` or `vd]%`.  This is compatible with
+vim's `d])` and `d]}`.
+
+Unlike `]%`, `%` is an |inclusive| motion.  As a special case for the `d` (delete)
+operator, if `d%` leaves behind lines white-space, they will be deleted also.
+In effect, it will be operating line-wise.  As an example, pressing `d%` will
+leave behind nothing. >
+
+     █(
+
+     )
+<
+To operate character-wise in this situation, use `dv%` or `vd%`.  This is vim
+compatible with the built-in `d%` on items in 'matchpairs'.
+
+                                                        *matchup-feat-linewise*
+Line-wise operator/text-object combinations~
+
+Normally, the text objects |i%| and |a%| work character-wise.  However,
+there are some special cases.  For certain operators combined with |i%|,
+under certain conditions, match-up will effectively operate line-wise
+instead.  For example, in >
+
+  if condition
+   █call one()
+    call two()
+  endif
+<
+pressing `di%` will produce >
+
+  if condition
+  endif
+<
+even though deleting ` condition` would be suggested by the object `i%`.
+The intention is to make operators more useful in some cases.  The
+following rules apply:
+
+1. The operator must be listed in |g:matchup_text_obj_linewise_operators|.
+   By default this is |d| and |y| (e.g., `di%` and `ya%`).
+
+2. The outer block must span multiple lines.
+
+3. The open and close delimiters must be more than one character long.  In
+   particular, `di%` involving a `(`...`)` block will not be subject to
+   these special rules.
+
+To prevent this behavior for a particular sequence `dvi%` or `vdi%`.
+
+To disable this entirely, remove the operator from the following variable, >
+
+  let g:matchup_text_obj_linewise_operators = [ 'y' ]
+<
+Note: unlike vim's built-in |i)|, |ab|, etc., |i%| does not make an existing visual
+mode character-wise.
+
+A second special case involves `da%`.  In this example, >
+
+    if condition
+     █call one()
+      call two()
+    endif
+<
+pressing `da%` will delete all four lines and leave no white-space.  This is
+compatible with vim's `da(`, `dab`, etc.
+
+------------------------------------------------------------------------------
+Options~
+                                                              *matchup-options*
+
+*g:matchup_enabled*
+
+  Set to 0 to disable the plugin entirely.
+
+  Default: 1
+
+*g:matchup_matchparen_enabled*      highlighting
+*g:matchup_motion_enabled*          |matchup-%|, |%|, |[%|, |]%|
+*g:matchup_text_obj_enabled*        |a%|, |i%|
+
+  Set to 0 to disable a particular module.
+
+  Defaults: 1
+
+*g:matchup_transmute_enabled*
+
+  Set to 1 to enable the experimental transmute feature (|matchup-transmute|).
+
+  Default: 0
+
+Variables~
+
+*b:match_words*
+*b:match_skip*
+*b:match_ignorecase*
+
+  match-up understands these variables originally from matchit.  These are set
+  in the respective |ftplugin| files.  They may not exist for every file type.
+  To support a new file type, create a file `after/ftplugin/{filetype}.vim`
+  which sets them appropriately.
+
+                                                  *matchup-opts-matchparen*
+Module matchparen~
+
+*b:matchup_matchparen_enabled*
+
+  Set to 0 to disable highlighting on a per-buffer basis.
+
+  Default: undefined (equivalent to 1)
+
+*b:matchup_matchparen_fallback*
+
+  If highlighting is disabled on a particular buffer, match-up will fall back
+  to the vim standard plugin matchit, which will highlight 'matchpairs' such
+  as `()`, `[]`, & `{}`.  To disable this, set this option to 0.
+
+  Default: undefined (equivalent to 1)
+
+  A common usage is to automatically disable matchparen for particular file
+  types: >
+
+    augroup matchup_matchparen_disable_ft
+      autocmd!
+      autocmd FileType tex let [b:matchup_matchparen_fallback,
+          \ b:matchup_matchparen_enabled] = [0, 0]
+    augroup END
+<
+*g:matchup_matchparen_singleton*
+
+  Whether or not to highlight recognized words even if there is no match.
+
+  Default: 0
+
+*g:matchup_matchparen_status_offscreen*
+
+  Whether to replace the |statusline| for off-screen matches.
+
+  Default: 1
+
+*g:matchup_matchparen_timeout*
+*g:matchup_matchparen_insert_timeout*
+
+  Adjust the timeouts in milliseconds for highlighting.
+
+  Defaults: `g:matchparen_timeout`, `g:matchparen_insert_timeout`
+  (300, 60 respectively)
+
+*b:matchup_matchparen_timeout*
+*b:matchup_matchparen_insert_timeout*
+
+  Buffer local versions of the above.
+
+*g:matchup_matchparen_deferred*
+
+  Deferred highlighting improves cursor movement performance (for example, when
+  using |hjkl|) by delaying highlighting for a short time and waiting to see if
+  the cursor continues moving.
+
+  Default: 0 (disabled)
+
+*g:matchparen_matchparen_deferred_show_time*
+*g:matchparen_matchparen_deferred_hide_time*
+
+  Adjust timeouts in milliseconds for deferred highlighting.
+
+  Defaults: 50, 700
+
+Module motion~
+
+*g:matchup_motion_override_Npercent*
+
+  In vim, {count}% goes to the {count} percentage in the file (see |N%|).
+  match-up overrides this motion for small {count} (by default, anything less
+  than 7).  For example, to allow {count}% for {count} up to 11, >
+    let g:matchup_motion_override_Npercent = 11
+<
+  To disable this feature, and restore vim's default {count}%, >
+    let g:matchup_motion_override_Npercent = 0
+<
+*g:matchup_motion_cursor_end*
+
+  If enabled, cursor will land on the end of mid and close words while
+  moving downwards (|%|/|]%|).  While moving upwards (|g%|, |[%|) the cursor
+  will land on the beginning.  Set to 0 to disable.
+
+  Default: 1
+
+Module text_obj~
+
+*g:matchup_text_obj_linewise_operators*
+
+  Modifies the set of operators which may operate line-wise
+  (see |matchup-feat-linewise|)
+
+  Default: `['d', 'y']`
+
+==============================================================================
+FAQ                                                               *matchup-faq*
+
+Q match-up doesn't work
+
+A This plugin requires at least vim 7.4. It should work in vim 7.4.898 but at
+  least vim 7.4.1689 is better. I recommend using the most recent version of
+  vim if possible.
+
+  If you have issues, please tell me your vim version and error messages. Try
+  updating vim and see if the problem persists.
+
+Q Why does jumping not work for construct X in language Y?
+
+A Please open a new issue
+
+Q Highlighting is not correct for construct X
+
+A match-up uses matchit's filetype-specific data, which may not give
+  enough information to create proper highlights.  To fix this, you may
+  need to modify |b:match_words|.
+
+  For help, please open a new issue and be a specific as possible.
+
+Q I'm having performance problems
+
+A match-up aims to be as fast as possible, but highlighting matching words can
+  be intensive and may be slow on less powerful machines.  There are a few
+  things you can try to improve performance:
+
+  - Update to a recent version of vim.  Newer versions are faster, more
+    extensively tested, and better supported by match-up.
+
+  - Try deferred highlighting, which delays highlighting until the cursor is
+    stationary to improve cursor movement performance.
+    |g:matchup_matchparen_deferred|
+
+  - Lower the highlighting timeouts.  If highlighting takes longer than the
+    timeout, highlighting will not be attempted again until the cursor moves.
+    |g:matchup_matchparen_timeout|, |g:matchup_matchparen_insert_timeout|
+
+  If are having any other performance issues, please open a new issue and
+  report g:matchup#perf#times.
+
+Q How can I contribute?
+
+A Read the contribution guidelines (CONTRIBUTING.md) and issue template
+  (ISSUE_TEMPLATE.md).  Be as precise and detailed as possible when submitting
+  issues and pull requests.
+
+==============================================================================
+INTEROPERABILITY                                     *matchup-interoperability*
+
+match-up's match highlighting is not compatible with |vimtex|'s implementation
+and match-up highlighting will be disabled automatically when vimtex is
+detected.
+
+matchit.vim should not be loaded.  If it is loaded, it must be loaded before
+match-up (in this case, matchit will be disabled when match-up loads).
+
+Matchparen emulation~
+
+match-up loads |matchparen| if it is not already loaded.  Ordinarily, match-up
+disables matchparen's highlighting and emulates it to highlight the symbol
+contained in the 'matchpairs' option (by default `()`, `[]`, and `{}`).  If match-up
+is disabled per-buffer using |b:matchup_matchparen_enabled|, match-up will use
+matchparen instead of its own highlighting.  See |b:matchup_matchparen_fallback|
+for more information.
+
+Other plugins~
+
+match-up does not currently provide support for auto-completion or operating
+on surrounding delimiters.  The following plugins may be useful:
+
+- |vim-endwise|         https://github.com/tpope/vim-endwise
+- |auto-pairs|          https://github.com/jiangmiao/auto-pairs
+- |delimitMate|         https://github.com/Raimondi/delimitMate
+- |splitjoin.vim|       https://github.com/AndrewRadev/splitjoin.vim
+
+- |vim-surround|        https://github.com/tpope/vim-surround
+- |vim-sandwich|        https://github.com/machakann/vim-sandwich
+
+==============================================================================
+ACKNOWLEDGMENTS                                       *matchup-acknowledgments*
+
+Origins~
+
+|match-up| was originally based on Karl Yngve Lervåg's |vimtex|.  The concept
+and style of this plugin and its development are heavily influenced by vimtex.
+
+[vimtex]: https://github.com/lervag/vimtex
+
+Other inspirations~
+
+- |matchit|
+- |matchparen|
+- |MatchTag|            https://github.com/gregsexton/MatchTag
+- |MatchTagAlways|      https://github.com/Valloric/MatchTagAlways
+
+==============================================================================
+DEVELOPMENT                                                *matchup-development*
+
+Development is tracked at https://github.com/andymass/vim-matchup.
+
+Reporting problems~
+
+This is a brand new plugin and there are likely to be some bugs.  Thorough
+issue reports are encouraged.  Please read the issue template first
+(ISSUE_TEMPLATE.md).  Be as precise and detailed as possible when submitting
+issues.
+
+Feature requests are also welcome.
+
+Contributing~
+
+Please read the contribution guidelines (CONTRIBUTING.md) before contributing.
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:
