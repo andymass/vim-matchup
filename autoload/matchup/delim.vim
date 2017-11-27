@@ -1163,8 +1163,8 @@ function! s:init_delim_skip() "{{{1
     let l:skip = {
           \ 's': l:cursyn."=~?'".l:syn."'",
           \ 'S': l:cursyn."!~?'".l:syn."'",
-          \ 'r': l:cursyn."=~?'".l:syn."'",
-          \ 'R': l:cursyn."!~?'".l:syn."'",
+          \ 'r': l:preline."=~?'".l:syn."'",
+          \ 'R': l:preline."!~?'".l:syn."'",
           \}[l:skip[0]]
   endif
 
