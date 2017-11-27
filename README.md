@@ -34,7 +34,7 @@ more information.  This plugin:
 
 - Extends vim's `%` motion to language-specific words.  The following vim
   file type plugins currently provide support for match-up:
-  
+
   > abaqus, ada, aspvbs, c, clojure, cobol, config, context, csc, csh,
   > dtd, dtrace, eiffel, eruby, falcon, fortran, framescript, haml,
   > hamster, hog, html, ishd, j, jsp, kconfig, liquid, lua, make, matlab,
@@ -200,7 +200,7 @@ for some examples and important special cases.
 match-up emulates vim's matchparen to highlight the symbols contained
 in the `matchpairs` setting.
 
-#### (c.2) highlight _all_ matches          
+#### (c.2) highlight _all_ matches
 
 To disable match highlighting, `let g:matchup_matchparen_enabled = 0`.
 If this option is set before the plugin is loaded, it will not disable
@@ -244,25 +244,42 @@ Parallel transmutation requires the matchparen module to be enabled.
 
 In vim, character motions following operators (such as `d` for delete
 and `c` for change) are either _inclusive_ or _exclusive_.  This means
-they either include the ending position or not.  match-up is designed so
-that `d]%` inside a set of parenthesis behaves exactly like `d])`.  For
-other words, exclusive motions will not include the close word.  In this
-example, where `█` is the cursor position,
+they either include the ending position or not.  Here, "ending position"
+means the line and column closest to the end of the buffer of the region
+swept over by the motion.  match-up is designed so that `d]%` inside a set
+of parenthesis behaves exactly like `d])`, except generalized to words.
+
+Put differently, _forward_ exclusive motions will not include the close
+word.  In this example, where `█` is the cursor position,
 
 ```vim
 if █x | continue | endif
 ```
 
-pressing `d]%` will produce    
+pressing `d]%` will produce (cursor on the `e`)
 
 ```vim
 if endif
 ```
 
-To include the close word, use either `dv]%` or `vd]%`.  This is vim
-compatible with `d])` and `d]}`.
+To include the close word, use either `dv]%` or `vd]%`.  This is also
+compatible with vim's `d])` and `d]}`.
 
-Unlike `]%`, `%` is an _inclusive_ motion.  As a special case for the 
+Operators over _backward_ exclusive motions will instead exclude the
+position the cursor was on before the operator was invoked.  For example,
+in
+
+```vim
+  if █x | continue | endif
+```
+pressing `d[%` will produce
+
+```vim
+  █x | continue | endif
+```
+This is compatible with vim's `d[(` and `d[{`.
+
+Unlike `]%`, `%` is an _inclusive_ motion.  As a special case for the
 `d` (delete) operator, if `d%` leaves behind lines white-space, they will
 be deleted also.  In effect, it will be operating line-wise.  As an
 example, pressing `d%` will leave behind nothing.
@@ -346,7 +363,7 @@ let g:matchup_transmute_enabled = 1
 ```
 default: 0
 
-### Variables  
+### Variables
 
 matchup understands the following variables from matchit.
 - `b:match_words`
@@ -457,7 +474,7 @@ default: 1
 
 Modify the set of operators which may operate
 [line-wise](#line-wise-operatortext-object-combinations)
-```vim 
+```vim
 let g:matchup_text_obj_linewise_operators' = ['d', 'y']
 ```
 default: `['d', 'y']`
@@ -479,7 +496,7 @@ _Options planned_.
 
 - Why does jumping not work for construct X in language Y?
 
-  Please open a new issue 
+  Please open a new issue
 
 - Highlighting is not correct for construct X
 
@@ -523,7 +540,7 @@ _Options planned_.
   loads).
   - match-up loads matchparen if it is not already loaded.
 
-## Acknowledgments 
+## Acknowledgments
 
 ### Origins
 
@@ -554,7 +571,7 @@ heavily influenced by vimtex. :beers:
 This is a brand new plugin and there are likely to be many bugs.
 Thorough issue reports are encouraged.  Please read the [issue
 template](ISSUE_TEMPLATE.md) first.  Be as precise and detailed as
-possible when submitting issues.  
+possible when submitting issues.
 
 Feature requests are also welcome.
 

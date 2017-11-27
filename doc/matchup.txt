@@ -264,21 +264,35 @@ Parallel transmutation requires the matchparen module to be enabled.
                                                        *matchup-feat-exclusive*
 Inclusive and exclusive motions~
 
-In vim, character motions following operators (such as `d` for delete
-and `c` for change) are either _inclusive_ or _exclusive_.  This means
-they either include the ending position or not.  match-up is designed so
-that `d]%` inside a set of parenthesis behaves exactly like `d])`.  For
-other words, exclusive motions will not include the close word.  In this
-example, where `█` is the cursor position, >
+In vim, character motions following operators (such as `d` for delete and `c` for
+change) are either |inclusive| or |exclusive|.  This means they either include
+the ending position or not.  Here, "ending position" means the line and column
+closest to the end of the buffer of the region swept over by the motion.
+match-up is designed so that `d]%` inside a set of parenthesis behaves exactly
+like `d])`, except generalized to words.
+
+Put differently, forward exclusive motions will not include the close word.
+In this example, where `█` is the cursor position, >
 
   if █x | continue | endif
 <
-pressing `d]%` will produce >
+pressing `d]%` will produce (cursor on the `e`) >
 
   if endif
 <
-To include the close word, use either `dv]%` or `vd]%`.  This is compatible with
-vim's `d])` and `d]}`.
+To include the close word, use either `dv]%` or `vd]%`.  This is also
+compatible with vim's `dv])` and `dv]}`.
+
+Operators over backward exclusive motions will instead exclude the position
+the cursor was on before the operator was invoked.  For example, in >
+
+  if █x | continue | endif
+<
+pressing `d[%` will produce >
+
+  █x | continue | endif
+<
+This is compatible with vim's `d[(` and `d[{`.
 
 Unlike `]%`, `%` is an |inclusive| motion.  As a special case for the `d` (delete)
 operator, if `d%` leaves behind lines white-space, they will be deleted also.
