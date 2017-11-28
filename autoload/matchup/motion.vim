@@ -35,14 +35,14 @@ function! matchup#motion#init_module() " {{{1
         \ :<c-u>call matchup#motion#find_matching_pair(1, 1)<cr>
   xmap     <silent> <plug>(matchup-%) <sid>(matchup-%)
   onoremap <plug>(matchup-%)
-        \ :<c-u>call <sid>oper("normal \<sid>(v)"
+        \ :<c-u>call <sid>oper("normal \<sid>(wise)"
         \ . (v:count > 0 ? v:count : '') . "\<sid>(matchup-%)")<cr>
 
   xnoremap <silent> <sid>(matchup-g%)
         \ :<c-u>call matchup#motion#find_matching_pair(1, 0)<cr>
   xmap     <silent> <plug>(matchup-g%) <sid>(matchup-g%)
   onoremap <plug>(matchup-g%)
-        \ :<c-u>call <sid>oper("normal \<sid>(v)"
+        \ :<c-u>call <sid>oper("normal \<sid>(wise)"
         \ . (v:count > 0 ? v:count : '') . "\<sid>(matchup-g%)")<cr>
 
   " ]% and [%
@@ -64,7 +64,7 @@ function! matchup#motion#init_module() " {{{1
         \ :<c-u>call <sid>oper("normal \<sid>(wise)"
         \ . v:count1 . "\<sid>(matchup-[%)")<cr>
 
-  " jump inside z% 
+  " jump inside z%
   nnoremap <silent> <plug>(matchup-z%)
         \ :<c-u>call matchup#motion#jump_inside(0)<cr>
   xnoremap <silent> <sid>(matchup-z%)
@@ -95,8 +95,6 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
     exe 'normal!' l:count.'%'
     return
   endif
-  
-  let [l:start_lnum, l:start_cnum] =  matchup#pos#get_cursor()[1:2]
 
   " disable the timeout
   call matchup#perf#timeout_start(0)
@@ -117,32 +115,37 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
     if empty(l:delim) | return | endif
   endfor
 
+  let l:is_oper = !empty(get(s:, 'v_operator', ''))
+  let l:exclusive = l:is_oper && (g:v_motion_force ==# 'v')
+  let l:forward = ((a:down && l:delim.side !=# 'open')
+        \ || l:delim.side ==# 'close')
+
   " go to the end of the delimiter, if necessary
   let l:column = l:delim.cnum
-  if g:matchup_motion_cursor_end
-        \ && ((a:down && l:delim.side !=# 'open')
-        \       || l:delim.side ==# 'close')
-
-    " XXX spin this off into delim object
-    " let l:column += strdisplaywidth(l:delim.match) - 1
-
-  " XXX
+  if g:matchup_motion_cursor_end && !l:is_oper && l:forward
     let l:column = matchup#delim#jump_target(l:delim)
-
-    " TODO
-    " let l:test = matchup#delim#get_current('all', 'both_all')
-    " echo l:test.rematch l:delim.rematch
-    " if !empty(l:test) && l:test.rematch !=# l:delim.rematch
-    "   let l:column -= 1
-    " endif
   endif
 
+  let l:start_pos = matchup#pos#get_cursor()
+
   normal! m`
- 
- " XXX spin off 
-  let l:eom = l:delim.cnum + strlen(l:delim.match) - 1
+
+  " column position of last character in match
+  let l:eom = l:delim.cnum + matchup#delim#end_offset(l:delim)
+
+  if l:is_oper && l:forward
+    let l:column = l:exclusive ? (l:column - 1) : l:eom
+  endif
+
+  if l:is_oper && l:exclusive
+        \ && matchup#pos#smaller(l:delim, l:start_pos)
+    normal! o
+    call matchup#pos#set_cursor(matchup#pos#prev(l:start_pos))
+    normal! o
+  endif
 
   " special handling for d%
+  let [l:start_lnum, l:start_cnum] = l:start_pos[1:2]
   if get(s:, 'v_operator', '') ==# 'd' && l:start_lnum != l:delim.lnum
     let l:tl = [l:start_lnum, l:start_cnum]
     let l:br = [l:delim.lnum, l:eom]
@@ -167,7 +170,6 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
   endif
 
   call matchup#pos#set_cursor(l:delim.lnum, l:column)
-
 endfunction
 
 " }}}1
@@ -198,7 +200,7 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
 
     let l:save_pos = matchup#pos#get_cursor()
     let l:new_pos = [l:delim.lnum, l:delim.cnum]
- 
+
     " this is an exclusive motion, ]%
     if l:delim.side ==# 'close'
       if l:exclusive
@@ -207,7 +209,7 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
         "XXX spin this off
         let l:new_pos[1] += strdisplaywidth(l:delim.match) - 1
       endif
-    endif 
+    endif
 
     " if the cursor didn't move, increment count
     if matchup#pos#equal(l:save_pos, l:new_pos)
@@ -259,6 +261,7 @@ function! matchup#motion#jump_inside(visual) " {{{1
 
     let l:new_pos = [l:delim.lnum, l:delim.cnum]
     " XXX spin this off
+    " XXX very wrong for unicode
     let l:new_pos[1] += strdisplaywidth(l:delim.match) - 1
 
     call matchup#pos#set_cursor(matchup#pos#next(l:new_pos))
@@ -276,7 +279,7 @@ function! matchup#motion#jump_inside(visual) " {{{1
       let l:new_pos = matchup#pos#next(l:new_pos)
     endwhile
     let l:new_pos = matchup#pos#prev(l:new_pos)
-  endif 
+  endif
 
   normal! m`
   call matchup#pos#set_cursor(l:new_pos)

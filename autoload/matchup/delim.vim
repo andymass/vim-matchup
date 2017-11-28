@@ -233,7 +233,8 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
 endfunction
 
 " }}}1
-function! matchup#delim#jump_target(delim) "{{{1
+
+function! matchup#delim#jump_target(delim) " {{{1
   let l:save_pos = matchup#pos#get_cursor()
 
   " unicode note: technically wrong, but works in practice
@@ -258,6 +259,11 @@ function! matchup#delim#jump_target(delim) "{{{1
 
   call matchup#pos#set_cursor(l:save_pos)
   return l:column
+endfunction
+
+" }}}1
+function! matchup#delim#end_offset(delim) " {{{1
+  return max([0, match(a:delim.match, '.$')])
 endfunction
 
 " }}}1

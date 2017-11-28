@@ -90,8 +90,6 @@ function! s:init_default_mappings()
 
     call s:map('x', '%',  '<plug>(matchup-%)' )
     call s:map('x', 'g%', '<plug>(matchup-g%)')
-    call s:map('o', '%',  '<plug>(matchup-%)' )
-    call s:map('o', 'g%', '<plug>(matchup-g%)')
 
     call s:map('n', ']%', '<plug>(matchup-]%)')
     call s:map('n', '[%', '<plug>(matchup-[%)')
@@ -103,6 +101,10 @@ function! s:init_default_mappings()
     call s:map('x', 'z%', '<plug>(matchup-z%)')
 
     for l:opforce in ['', 'v', 'V', '<c-v>']
+      call s:map('o', l:opforce.'%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-%)')
+      call s:map('o', l:opforce.'g%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-g%)')
       call s:map('o', l:opforce.']%',
             \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-]%)')
       call s:map('o', l:opforce.'[%',
