@@ -147,11 +147,11 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
   " special handling for d%
   let [l:start_lnum, l:start_cnum] = l:start_pos[1:2]
   if get(s:, 'v_operator', '') ==# 'd' && l:start_lnum != l:delim.lnum
+        \ && g:v_motion_force ==# ''
     let l:tl = [l:start_lnum, l:start_cnum]
-    let l:br = [l:delim.lnum, l:eom]
-    let [l:tl, l:br, l:swap] = l:tl[0] <= l:br[0]
-          \ ? [l:tl, l:br, 0]
-          \ : [l:br, l:tl, 1]
+    let [l:tl, l:br, l:swap] = l:tl[0] <= l:delim.lnum
+          \ ? [l:tl, [l:delim.lnum, l:eom], 0]
+          \ : [[l:delim.lnum, l:delim.cnum], l:tl, 1]
 
     if getline(l:tl[0]) =~# '^[ \t]*\%'.l:tl[1].'c'
           \ && getline(l:br[0]) =~# '\%'.(l:br[1]+1).'c[ \t]*$'

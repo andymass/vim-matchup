@@ -294,6 +294,7 @@ pressing `d[%` will produce >
 <
 This is compatible with vim's `d[(` and `d[{`.
 
+                                                                 *d%* *dg%*
 Unlike `]%`, `%` is an |inclusive| motion.  As a special case for the `d` (delete)
 operator, if `d%` leaves behind lines white-space, they will be deleted also.
 In effect, it will be operating line-wise.  As an example, pressing `d%` will
