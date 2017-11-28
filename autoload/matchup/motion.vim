@@ -87,11 +87,17 @@ endfunction
 function! matchup#motion#find_matching_pair(visual, down) " {{{1
   let [l:count, l:count1] = [v:count, v:count1]
 
-  if a:visual
+  let l:is_oper = !empty(get(s:, 'v_operator', ''))
+
+  if a:visual && !l:is_oper
     normal! gv
   endif
 
   if a:down && l:count > g:matchup_motion_override_Npercent
+    " TODO: dv50% does not work properly
+    if a:visual && l:is_oper
+      normal! V
+    endif
     exe 'normal!' l:count.'%'
     return
   endif
@@ -109,13 +115,17 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
 
   " loop count number of times
   for l:dummy in range(l:count1)
-    let l:match = matchup#delim#get_matching(l:delim)
+    let l:matches = matchup#delim#get_matching(l:delim, 1)
+    if len(l:matches) <= 1 | return | endif
     if !has_key(l:delim, 'links') | return | endif
     let l:delim = get(l:delim.links, a:down ? 'next' : 'prev', {})
     if empty(l:delim) | return | endif
   endfor
 
-  let l:is_oper = !empty(get(s:, 'v_operator', ''))
+  if a:visual && l:is_oper
+    normal! gv
+  endif
+
   let l:exclusive = l:is_oper && (g:v_motion_force ==# 'v')
   let l:forward = ((a:down && l:delim.side !=# 'open')
         \ || l:delim.side ==# 'close')
