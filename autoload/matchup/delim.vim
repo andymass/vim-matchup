@@ -205,9 +205,8 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
 
     if len(l:matches)
       let l:close = l:local ? l:open.links.next : l:open.links.close
-      " XXX need actual column position?
       let l:pos_val_try = matchup#pos#val(l:close)
-          \ + strdisplaywidth(l:close.match) - 1
+          \ + matchup#delim#end_offset(l:close)
     endif
 
     if len(l:matches) && l:pos_val_try >= l:pos_val_cursor

@@ -19,10 +19,7 @@ function! matchup#motion#init_module() " {{{1
         \ empty(g:v_motion_force) ? 'v' : g:v_motion_force
 
   " jump between matching pairs
-       " TODO XXX add "forced" omap: dV% (must make v,V,C-V)
-
-       " <silent> XXX
-       " todo make % vi compatible wrt yank (:h quote_number)
+  " TODO can % be made vi compatible wrt yank (:h quote_number)?
 
   " the basic motions % and g%
   nnoremap <silent> <plug>(matchup-%)
