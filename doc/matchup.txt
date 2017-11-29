@@ -33,7 +33,7 @@ License: MIT license {{{
 CONTENTS                                                     *matchup-contents*
 
   Introduction                                  |matchup-introduction|
-    Feature overview                            |matchup-features|
+    Feature overview                            |matchup-overview|
   Usage                                         |matchup-usage|
     Default mappings                            |matchup-default-mappings|
     Customizing mappings                        |matchup-custom-mappings|
@@ -56,7 +56,7 @@ highlighted along with the 'matchpairs' symbols such as `()`, `{}`, and `[]`.
 
 ------------------------------------------------------------------------------
 Feature overview~
-                                                             *matchup-features*
+                                                             *matchup-overview*
 
 This plugin:
 
@@ -91,6 +91,7 @@ For customization, see |matchup-custom-mappings|.
                                                          *matchup-%*
 %                       Go forwards to next matching word.  If at a close word,
                         cycle back to the corresponding open word.
+                        This is an |inclusive| motion.
 
                                                          *matchup-N%*
 {count}%                If {count} is less than 6, go forwards {count} times.
@@ -158,17 +159,35 @@ that if a user defines a custom mapping, e.g., with >
 <
 the corresponding default left-hand side will not be mapped.
 
-  ---------------------------------------------------------~
-   LHS              RHS                           Module
-  ---------------------------------------------------------~
-   %                |<plug>(matchup-%)|             motion
-   g%               |<plug>(matchup-g%)|            motion
-   [%               |<plug>(matchup-[%)|            motion
-   ]%               |<plug>(matchup-]%)|            motion
-   z%               |<plug>(matchup-z%)|            motion
-   a%               |<plug>(matchup-%)|             text_obj
-   i%               |<plug>(matchup-%)|             text_obj
-   (none)           |<plug>(matchup-hi-surround)|   matchparen
+  -------------------------------------------------------------------------~
+   LHS         RHS                                       Mode   Module
+  -------------------------------------------------------------------------~
+   %           |<plug>(matchup-%)|                         nx     motion
+   g%          |<plug>(matchup-g%)|                        nx     motion
+   [%          |<plug>(matchup-[%)|                        nx     motion
+   ]%          |<plug>(matchup-]%)|                        nx     motion
+   z%          |<plug>(matchup-z%)|                        nx     motion
+   a%          |<plug>(matchup-%)|                         x      text_obj
+   i%          |<plug>(matchup-%)|                         x      text_obj
+   (none)      |<plug>(matchup-hi-surround)|               n      matchparen
+  -------------------------------------------------------------------------~
+   Operator pending maps~
+  -------------------------------------------------------------------------~
+   %           |<plug>(matchup-o_)||<plug>(matchup-%)|       o      motion
+   v%          |<plug>(matchup-o_v)||<plug>(matchup-%)|      o      motion
+   V%          |<plug>(matchup-o_V)||<plug>(matchup-%)|      o      motion
+   <c-v>%      |<plug>(matchup-o_<c-v>)||<plug>(matchup-%)|  o      motion
+     ... And so on for g%, [%, ]%, z%, a%, i% ...
+
+Key: (n) normal, (x) visual, (o) operator-pending (|omap-info|).
+
+Note: In order to support motion forcing (see |o_v|, |o_V|, |o_CTRL-V|), for each
+operator-pending map, match-up makes four maps corresponding to each motion
+type.  This means, for example, `d2v%` will work (meaning delete 2 matches
+forward, exclusively), but `dv2%` will not work as you would expect (behavior
+is undefined).  Unfortunately, this is a limitation of vim's operator-pending
+mapping capabilities and if a change is made to vim, match-up will modified
+to simplify these mappings.
 
 ------------------------------------------------------------------------------
 Features~
@@ -475,6 +494,8 @@ Module motion~
   If enabled, cursor will land on the end of mid and close words while
   moving downwards (|%|/|]%|).  While moving upwards (|g%|, |[%|) the cursor
   will land on the beginning.  Set to 0 to disable.
+  Note: this has no effect on operators: `d%` will delete |inclusive| of the
+  ending word (this is compatible with matchit).
 
   Default: 1
 
