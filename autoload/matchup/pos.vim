@@ -43,19 +43,25 @@ endfunction
 function! matchup#pos#next(...) " {{{1
   let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
 
-  return l:cnum < strlen(getline(l:lnum))
-        \ ? [0, l:lnum, l:cnum+1, 0]
-        \ : [0, l:lnum+1, 1, 0]
+  let l:line = getline(l:lnum)
+  let l:charlen = matchend(l:line[l:cnum-1:], '.')
+  if l:cnum + l:charlen <= strlen(l:line)
+    return [0, l:lnum, l:cnum + l:charlen, 0]
+  else
+    return [0, l:lnum+1, 1, 0]
+  endif
 endfunction
 
 " }}}1
 function! matchup#pos#prev(...) " {{{1
   let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
 
-  return l:cnum > 1
-        \ ? [0, l:lnum, l:cnum-1, 0]
-        \ : [0, max([l:lnum-1, 1]),
-        \     max([strlen(getline(l:lnum-1)), 1]), 0]
+  if l:cnum > 1
+    return [0, l:lnum, match(getline(l:lnum)[0:l:cnum-2], '.$') + 1, 0]
+  else
+    return [0, max([l:lnum-1, 1]),
+          \ max([strlen(getline(l:lnum-1)), 1]), 0]
+  endif
 endfunction
 
 " }}}1

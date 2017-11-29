@@ -216,8 +216,7 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
       if l:exclusive
         let l:new_pos[1] -= 1
       else
-        "XXX spin this off
-        let l:new_pos[1] += strdisplaywidth(l:delim.match) - 1
+        let l:new_pos[1] += matchup#delim#end_offset(l:delim)
       endif
     endif
 
@@ -270,10 +269,7 @@ function! matchup#motion#jump_inside(visual) " {{{1
     endif
 
     let l:new_pos = [l:delim.lnum, l:delim.cnum]
-    " XXX spin this off
-    " XXX very wrong for unicode
-    let l:new_pos[1] += strdisplaywidth(l:delim.match) - 1
-
+    let l:new_pos[1] += matchup#delim#end_offset(l:delim)
     call matchup#pos#set_cursor(matchup#pos#next(l:new_pos))
   endfor
 
