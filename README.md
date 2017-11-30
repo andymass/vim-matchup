@@ -53,7 +53,7 @@ more information.  This plugin:
 If you use vim-plug, then add the following line to your vimrc file:
 
 ```vim
-Plug 'andymass/matchup.vim'
+Plug 'andymass/vim-matchup'
 ```
 
 Or use some other plugin manager:
