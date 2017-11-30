@@ -23,10 +23,6 @@ function! matchup#text_obj#init_module() " {{{1
   endfor
 endfunction
 
-" MAXCOL is probably a lot bigger in actuality, but we don't want
-" to support such long lines XXX not used
-let s:MAXCOL = 0x7fff
-
 " }}}1
 function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   " get the current selection, move to end of range
@@ -86,7 +82,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
 
     " adjust the borders of the selection
     if a:is_inner
-      let l:c1 += strlen(l:open.match) - 1
+      let l:c1 += matchup#delim#end_offset(l:open)
       let [l:l1, l:c1] = matchup#pos#next(l:l1, l:c1)[1:2]
       let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
 
@@ -98,8 +94,8 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         let l:sol = 1
       endwhile
 
-      " in visual include a line break
-      if a:visual && l:sol
+      " include the line break if we had wrapped around
+      if l:sol
         let l:c2 = strlen(getline(l:l2))+1
       endif
 
@@ -130,7 +126,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         let l:c2 = 1
       endif
     else
-      let l:c2 += strlen(l:close.match) - 1
+      let l:c2 += matchup#delim#end_offset(l:close)
 
       " special case for delete operator
       if v:operator ==# 'd'
@@ -168,12 +164,21 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         \   ? l:forced
         \   : 'v'
 
+  if &selection ==# 'exclusive'
+    " TODO this should be a function similar to pos#next
+    let [l:l2, l:c2] = l:c2 > strlen(getline(l:l2))
+          \ ? [l:l2+1, 1]
+          \ : matchup#pos#next(l:l2, l:c2)[1] > l:l2
+          \   ? [l:l2, l:c2+1]
+          \   : matchup#pos#next(l:l2, l:c2)[1:2]
+  endif
+
   " apply selection
   execute 'normal!' l:select_mode
   normal! o
-  call matchup#pos#set_cursor(l1, c1)
+  call matchup#pos#set_cursor(l:l1, l:c1)
   normal! o
-  call matchup#pos#set_cursor(l2, c2)
+  call matchup#pos#set_cursor(l:l2, l:c2)
 endfunction
 
 " }}}1
