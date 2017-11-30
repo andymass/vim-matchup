@@ -10,11 +10,7 @@ set cpo&vim
 function! matchup#motion#init_module() " {{{1
   if !g:matchup_motion_enabled | return | endif
 
-  " utility maps to avoid conflict with "normal" command
-  nnoremap <sid>(v) v
-  nnoremap <sid>(V) V
-  " c-v
-
+  " gets the current forced motion type
   nnoremap <silent><expr> <sid>(wise)
         \ empty(g:v_motion_force) ? 'v' : g:v_motion_force
 
@@ -31,51 +27,52 @@ function! matchup#motion#init_module() " {{{1
   xnoremap <silent> <sid>(matchup-%)
         \ :<c-u>call matchup#motion#find_matching_pair(1, 1)<cr>
   xmap     <silent> <plug>(matchup-%) <sid>(matchup-%)
-  onoremap <plug>(matchup-%)
-        \ :<c-u>call <sid>oper("normal \<sid>(wise)"
-        \ . (v:count > 0 ? v:count : '') . "\<sid>(matchup-%)")<cr>
+  onoremap <silent> <plug>(matchup-%)
+        \ :<c-u>call matchup#motion#op('%')<cr>
 
   xnoremap <silent> <sid>(matchup-g%)
         \ :<c-u>call matchup#motion#find_matching_pair(1, 0)<cr>
   xmap     <silent> <plug>(matchup-g%) <sid>(matchup-g%)
-  onoremap <plug>(matchup-g%)
-        \ :<c-u>call <sid>oper("normal \<sid>(wise)"
-        \ . (v:count > 0 ? v:count : '') . "\<sid>(matchup-g%)")<cr>
+  onoremap <silent> <plug>(matchup-g%)
+        \ :<c-u>call matchup#motion#op('g%')<cr>
 
   " ]% and [%
   nnoremap <silent> <plug>(matchup-]%)
         \ :<c-u>call matchup#motion#find_unmatched(0, 1)<cr>
   nnoremap <silent> <plug>(matchup-[%)
         \ :<c-u>call matchup#motion#find_unmatched(0, 0)<cr>
+
   xnoremap <silent> <sid>(matchup-]%)
         \ :<c-u>call matchup#motion#find_unmatched(1, 1)<cr>
   xnoremap <silent> <sid>(matchup-[%)
         \ :<c-u>call matchup#motion#find_unmatched(1, 0)<cr>
   xmap     <plug>(matchup-]%) <sid>(matchup-]%)
   xmap     <plug>(matchup-[%) <sid>(matchup-[%)
-
-  onoremap <plug>(matchup-]%)
-        \ :<c-u>call <sid>oper("normal \<sid>(wise)"
-        \ . v:count1 . "\<sid>(matchup-]%)")<cr>
-  onoremap <plug>(matchup-[%)
-        \ :<c-u>call <sid>oper("normal \<sid>(wise)"
-        \ . v:count1 . "\<sid>(matchup-[%)")<cr>
+  onoremap <silent> <plug>(matchup-]%)
+        \ :<c-u>call matchup#motion#op(']%')<cr>
+  onoremap <silent> <plug>(matchup-[%)
+        \ :<c-u>call matchup#motion#op('[%')<cr>
 
   " jump inside z%
   nnoremap <silent> <plug>(matchup-z%)
         \ :<c-u>call matchup#motion#jump_inside(0)<cr>
+
   xnoremap <silent> <sid>(matchup-z%)
         \ :<c-u>call matchup#motion#jump_inside(1)<cr>
   xmap     <silent> <plug>(matchup-z%) <sid>(matchup-z%)
-
   onoremap <silent> <plug>(matchup-z%)
-        \ :<c-u>call <sid>oper("normal \<sid>(wise)"
-        \ . v:count1 . "\<sid>(matchup-z%)")<cr>
+        \ :<c-u>call matchup#motion#op('z%')<cr>
 endfunction
 
-function! s:oper(expr)
+function! s:snr()
+  return str2nr(matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_snr$'))
+endfunction
+let s:sid = printf("\<SNR>%d_", s:snr())
+
+function! matchup#motion#op(motion)
   let s:v_operator = v:operator
-  execute a:expr
+  execute 'normal' s:sid.'(wise)' . (v:count > 0 ? v:count : '')
+        \ . s:sid.'(matchup-'.a:motion.')'
   unlet s:v_operator
 endfunction
 
