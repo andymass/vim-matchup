@@ -173,7 +173,20 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
     endif
   endif
 
-  call matchup#pos#set_cursor(l:delim.lnum, l:column)
+  let l:lnum = l:delim.lnum
+
+  " make adjustments for selection option 'exclusive
+  if l:forward && a:visual && &selection ==# 'exclusive'
+    let [l:lnum, l:column] = matchup#pos#next_eol(l:lnum, l:column)[1:2]
+  endif
+  if !l:forward && l:is_oper && &selection ==# 'exclusive'
+    normal! o
+    call matchup#pos#set_cursor(matchup#pos#next_eol(
+          \ matchup#pos#get_cursor()))
+    normal! o
+  endif
+
+  call matchup#pos#set_cursor(l:lnum, l:column)
 endfunction
 
 " }}}1
@@ -181,7 +194,9 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
   call matchup#perf#tic('motion#find_unmatched')
 
   let l:count = v:count1
-  let l:exclusive = !empty(get(s:, 'v_operator', ''))
+
+  let l:is_oper = !empty(get(s:, 'v_operator', ''))
+  let l:exclusive = l:is_oper
         \ && g:v_motion_force !=# 'v' && g:v_motion_force !=# "\<c-v>"
 
   if a:visual
@@ -232,6 +247,19 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
     normal! o
   endif
 
+  " handle selection option 'exclusive' going backwards
+  if !a:down && l:is_oper && &selection ==# 'exclusive'
+    normal! o
+    call matchup#pos#set_cursor(matchup#pos#next_eol(
+          \ matchup#pos#get_cursor()))
+    normal! o
+  endif
+
+  " handle selection option 'exclusive' going forwards
+  if a:down && l:is_oper && &selection ==# 'exclusive'
+    let l:new_pos = matchup#pos#next_eol(l:new_pos)[1:2]
+  endif
+
   normal! m`
   call matchup#pos#set_cursor(l:new_pos)
 
@@ -279,6 +307,11 @@ function! matchup#motion#jump_inside(visual) " {{{1
       let l:new_pos = matchup#pos#next(l:new_pos)
     endwhile
     let l:new_pos = matchup#pos#prev(l:new_pos)
+  endif
+
+  " handle selection option 'exclusive' (motion only goes forwards)
+  if a:visual && &selection ==# 'exclusive'
+    let l:new_pos = matchup#pos#next_eol(l:new_pos)
   endif
 
   normal! m`

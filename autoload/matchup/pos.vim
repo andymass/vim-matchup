@@ -40,6 +40,21 @@ function! matchup#pos#val(...) " {{{1
 endfunction
 
 " }}}1
+function! matchup#pos#next_eol(...) " {{{1
+  let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
+
+  if l:cnum > strlen(getline(l:lnum))
+    return [0, l:lnum+1, 1, 0]
+  endif
+
+  let l:next = matchup#pos#next(l:lnum, l:cnum)
+  if l:next[1] > l:lnum
+    return [0, l:lnum, l:cnum+1, 0]
+  endif
+  return l:next
+endfunction
+
+" }}}1
 function! matchup#pos#next(...) " {{{1
   let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
 

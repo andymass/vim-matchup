@@ -165,12 +165,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         \   : 'v'
 
   if &selection ==# 'exclusive'
-    " TODO this should be a function similar to pos#next
-    let [l:l2, l:c2] = l:c2 > strlen(getline(l:l2))
-          \ ? [l:l2+1, 1]
-          \ : matchup#pos#next(l:l2, l:c2)[1] > l:l2
-          \   ? [l:l2, l:c2+1]
-          \   : matchup#pos#next(l:l2, l:c2)[1:2]
+    let [l:l2, l:c2] = matchup#pos#next_eol(l:l2, l:c2)[1:2]
   endif
 
   " apply selection
