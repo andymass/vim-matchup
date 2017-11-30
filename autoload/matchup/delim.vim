@@ -1277,11 +1277,6 @@ endfunction
 
 " }}}1
 
-function! s:mod(i, n) " {{{1
-    return ((a:i % a:n) + a:n) % a:n
-endfunction
-" }}}1
-
 " initialize script variables
 let s:stopline = get(g:, 'matchup_delim_stopline', 400)
 
