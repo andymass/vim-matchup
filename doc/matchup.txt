@@ -128,21 +128,21 @@ z%                      go to inside [count]th nearest block.  This is an
                         param1, param2)
 <
                                                          *v_a%* *a%*
-a%                      select an |any| block.
+a%                      select an |any-block|.
                         This closely matches match vim's built-in |ab|.
 
                                                          *v_Na%* *Na%*
-{count}a%               select an open-to-close block.
+{count}a%               select an |open-to-close-block|.
                         When {count} is greater than 1, select the {count}th
                         surrounding open-to-close block.
 
                                                          *v_i%* *i%*
-i%                      select the inside of an |any| block.
+i%                      select the inside of an |any-block|.
                         This closely matches match vim's built-in |ib|.
                         See also |matchup-feat-linewise|.
 
                                                          *v_Ni%* *Ni%*
-{count}i%               select the inside of an open-to-close block.
+{count}i%               select the inside of an |open-to-close-block|.
                         When {count} is greater than 1, select the inside of
                         the {count}th surrounding open-to-close block.
 
@@ -204,6 +204,8 @@ of examples: >
   elseif
     call three()
   endif
+<
+                                            *any-block* *open-to-close-block*
 
 For the vim-script language, match-up understands the words `if`, `else`, `elseif`,
 `endif` and that they form a sequential construct.  The "open" word is `if`, the
@@ -314,6 +316,7 @@ pressing `d[%` will produce >
 This is compatible with vim's `d[(` and `d[{`.
 
                                                                  *d%* *dg%*
+
 Unlike `]%`, `%` is an |inclusive| motion.  As a special case for the `d` (delete)
 operator, if `d%` leaves behind lines white-space, they will be deleted also.
 In effect, it will be operating line-wise.  As an example, pressing `d%` will

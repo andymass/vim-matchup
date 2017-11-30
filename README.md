@@ -365,7 +365,7 @@ default: 0
 
 ### Variables
 
-matchup understands the following variables from matchit.
+match-up understands the following variables from matchit.
 - `b:match_words`
 - `b:match_skip`
 - `b:match_ignorecase`
