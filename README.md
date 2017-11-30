@@ -29,7 +29,7 @@ Contributions are welcome!
 
 ## Overview
 
-See [detailed feature documentation](detailed-feature-documentation) for
+See [detailed feature documentation](#detailed-feature-documentation) for
 more information.  This plugin:
 
 - Extends vim's `%` motion to language-specific words.  The following vim
@@ -582,7 +582,6 @@ contributing.
 
 ### Todo list
 
-- write proper vim doc
 - thoroughly test with unicode, tabs
 - complete parallel transmutation in an efficient way.
 - add screenshots and animations
@@ -591,6 +590,5 @@ contributing.
 - investigate whether `&selection`/`&virtualedit` options are important
 - can match-up be integrated with
   [vim-surround](https://github.com/tpope/vim-surround)?
-- make sure `b:match_ignorecase` works
 - support python (like python_match.vim)
 
