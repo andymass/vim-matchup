@@ -1102,8 +1102,7 @@ endfunction
 
 function! matchup#delim#get_capture_groups(str, ...) " {{{1
   let l:allow_percent = a:0 ? a:1 : 0
-  let l:pat = g:matchup#re#not_bslash . '\zs\('
-        \ . (l:allow_percent ? '\\%(\|' : '') . '\\(\|\\)\)'
+  let l:pat = g:matchup#re#not_bslash . '\(\\%(\|\\(\|\\)\)'
 
   let l:start = 0
 
@@ -1115,18 +1114,22 @@ function! matchup#delim#get_capture_groups(str, ...) " {{{1
     if l:match[1] < 0 | break | endif
     let l:start = l:match[2]
 
-    if l:match[0] ==# '\(' || l:match[0] ==# '\%('
+    if l:match[0] ==# '\(' || (l:match[0] ==# '\%(' && l:allow_percent)
       let l:counter += 1
       call add(l:stack, l:counter)
+      let l:cgstack = filter(copy(l:stack), 'v:val > 0')
       let l:brefs[l:counter] = {
         \ 'str': '',
-        \ 'depth': len(l:stack),
-        \ 'parent': (len(l:stack) > 1 ? l:stack[-2] : 0),
+        \ 'depth': len(l:cgstack),
+        \ 'parent': (len(l:cgstack) > 1 ? l:cgstack[-2] : 0),
         \ 'pos': [l:match[1], 0],
         \}
+    elseif l:match[0] ==# '\%('
+      call add(l:stack, 0)
     else
       if empty(l:stack) | break | endif
       let l:i = remove(l:stack, -1)
+      if l:i < 1 | continue | endif
       let l:j = l:brefs[l:i].pos[0]
       let l:brefs[l:i].str = strpart(a:str, l:j, l:match[2]-l:j)
       let l:brefs[l:i].pos[1] = l:match[2]
