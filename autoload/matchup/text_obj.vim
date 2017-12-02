@@ -21,6 +21,9 @@ function! matchup#text_obj#init_module() " {{{1
     execute 'o' . l:p1 . 'i' . l:p2 . '(1, 0' . l:p3
     execute 'o' . l:p1 . 'a' . l:p2 . '(0, 0' . l:p3
   endfor
+
+  nnoremap <silent> <plug>(matchup-double-click)
+    \ :<c-u>call matchup#text_obj#double_click()<cr>
 endfunction
 
 " }}}1
@@ -174,6 +177,15 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   call matchup#pos#set_cursor(l:l1, l:c1)
   normal! o
   call matchup#pos#set_cursor(l:l2, l:c2)
+endfunction
+
+" }}}1
+function! matchup#text_obj#double_click() " {{{1
+  if empty(matchup#delim#get_current('all', 'both_all'))
+    execute "normal! \<2-LeftMouse>"
+  else
+    execute "normal v1\<plug>(matchup-a%)"
+  endif
 endfunction
 
 " }}}1

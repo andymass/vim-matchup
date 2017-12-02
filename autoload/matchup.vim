@@ -129,6 +129,10 @@ function! s:init_default_mappings()
     " call s:map('i', '<c-x><cr>',  '<plug>(matchup-delim-close)')
     " XXX other maps..?
   endif
+
+  if get(g:, 'matchup_mouse_enabled', 1)
+    call s:map('n', '<2-LeftMouse>', '<plug>(matchup-double-click)')
+  endif
 endfunction
 
 let s:modules = map(
