@@ -248,7 +248,7 @@ function! matchup#delim#jump_target(delim) " {{{1
   for l:tries in range(strlen(a:delim.match)-1)
     call matchup#pos#set_cursor(a:delim.lnum, l:column)
 
-    let l:delim_test = matchup#delim#get_current('all', a:delim.side)
+    let l:delim_test = matchup#delim#get_current('all', 'both_all')
     if l:delim_test.class[0] ==# a:delim.class[0]
       break
     endif
