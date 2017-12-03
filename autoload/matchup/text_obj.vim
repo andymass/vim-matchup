@@ -116,7 +116,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         endif
         let l:c2 = strlen(getline(l:l2))+1
       endif
-  
+
       " toggle exclusive: difference between di% and dvi%
       " TODO: &selection
       if l:forced ==# 'v'
@@ -151,7 +151,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
     " for visual line mode, only check line numbers
     " workaround for cases where the cursor might get fooled
     " into going into one of the inner blocks
-    if a:visual && (l:selection == [l:l1, l:c1, l:l2, l:c2] 
+    if a:visual && (l:selection == [l:l1, l:c1, l:l2, l:c2]
           \ || visualmode() ==# 'V'
           \    && [l:selection[0], l:selection[2]] == [l:l1, l:l2])
       continue
@@ -181,11 +181,32 @@ endfunction
 
 " }}}1
 function! matchup#text_obj#double_click() " {{{1
-  if empty(matchup#delim#get_current('all', 'both_all'))
-    execute "normal! \<2-LeftMouse>"
-  else
-    execute "normal v1\<plug>(matchup-a%)"
+  let [l:open, l:close] = [{}, {}]
+
+  call matchup#perf#timeout_start(0)
+  let l:delim = matchup#delim#get_current('all', 'both_all')
+  if !empty(l:delim)
+    let l:matches = matchup#delim#get_matching(l:delim, 1)
+    if len(l:matches) > 1 && has_key(l:delim, 'links')
+      let [l:open, l:close] = [l:delim.links.open, l:delim.links.close]
+    endif
   endif
+
+  if empty(l:open) || empty(l:close)
+    execute "normal! \<2-LeftMouse>"
+    return
+  endif
+
+  let [l:lnum, l:cnum] = [l:close.lnum, l:close.cnum]
+  let l:cnum += matchup#delim#end_offset(l:close)
+
+  if &selection ==# 'exclusive'
+    let [l:lnum, l:cnum] = matchup#pos#next_eol(l:lnum, l:cnum)[1:2]
+  endif
+
+  call matchup#pos#set_cursor(l:open)
+  normal! v
+  call matchup#pos#set_cursor(l:lnum, l:cnum)
 endfunction
 
 " }}}1
