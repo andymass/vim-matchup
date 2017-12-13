@@ -240,7 +240,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   let w:matchup_need_clear = 1
 
   " show off-screen matches
-  if g:matchup_matchparen_status_offscreen
+  if g:matchup_matchparen_status_offscreen && !l:current.skip
     call matchup#matchparen#offscreen(l:current)
   endif
 
