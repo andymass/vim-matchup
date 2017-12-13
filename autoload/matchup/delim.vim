@@ -706,9 +706,11 @@ function! s:get_matching_delims(down) dict " {{{1
     if l:lnum <= 0 | break | endif
 
     if a:down
-      if l:lnum >= l:lnum_corr && l:cnum >= l:cnum_corr | break | endif
+      if l:lnum > l:lnum_corr || l:lnum == l:lnum_corr
+          \ && l:cnum >= l:cnum_corr | break | endif
     else
-      if l:lnum <= l:lnum_corr && l:cnum <= l:cnum_corr | break | endif
+      if l:lnum < l:lnum_corr || l:lnum == l:lnum_corr
+          \ && l:cnum <= l:cnum_corr | break | endif
     endif
 
     let l:re_anchored = s:anchor_regex(l:re, l:cnum, l:has_zs)
