@@ -207,6 +207,9 @@ function! matchup#text_obj#double_click() " {{{1
   call matchup#pos#set_cursor(l:open)
   normal! v
   call matchup#pos#set_cursor(l:lnum, l:cnum)
+  if l:delim.side ==# 'close'
+    normal! o
+  endif
 endfunction
 
 " }}}1
