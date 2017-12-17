@@ -759,7 +759,9 @@ function! s:init_delim_lists() " {{{1
     echohl None
     let l:match_words = ''
   endif
-  let l:match_words .= ','.l:mps
+  if !get(b:, 'matchup_delim_nomatchpairs', 0) && !empty(l:mps)
+    let l:match_words .= ','.l:mps
+  endif
   let l:sets = split(l:match_words, g:matchup#re#not_bslash.',')
 
   " do not duplicate whole groups of match words
