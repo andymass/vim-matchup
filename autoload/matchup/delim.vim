@@ -196,9 +196,14 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
   " provided count == 0 refers to local any block
   let l:local = l:count == 0 ? 1 : 0
 
+  let l:opts = {}
+  if matchup#delim#skip() " TODO: check for insert mode
+    let l:opts.check_skip = 0
+  endif
+
   while l:pos_val_open < l:pos_val_last
     let l:open = matchup#delim#get_prev(a:type,
-          \ l:local ? 'open_mid' : 'open')
+          \ l:local ? 'open_mid' : 'open', l:opts)
     if empty(l:open) | break | endif
 
     let l:matches = matchup#delim#get_matching(l:open, 1)
