@@ -239,8 +239,14 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   " store flag meaning highlighting is active
   let w:matchup_need_clear = 1
 
+  " disable off-screen when scrolling with j/k
+  let l:scrolling = winheight(0) > 2*&scrolloff
+        \ && (line('.') == line('w$')-&scrolloff
+        \     || line('.') == line('w0')+&scrolloff)
+
   " show off-screen matches
   if g:matchup_matchparen_status_offscreen && !l:current.skip
+        \ && (!l:scrolling || g:matchup_matchparen_deferred)
     call matchup#matchparen#offscreen(l:current)
   endif
 
