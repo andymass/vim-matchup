@@ -197,6 +197,7 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
   let l:local = l:count == 0 ? 1 : 0
 
   let l:opts = {}
+  let s:invert_skip = 0
   if matchup#delim#skip() " TODO: check for insert mode
     let l:opts.check_skip = 0
   endif
