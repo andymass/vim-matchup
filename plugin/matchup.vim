@@ -39,6 +39,10 @@ if get(g:, 'matchup_matchparen_enabled', 1)
   command! DoMatchParen call matchup#matchparen#toggle(1)
 endif
 
+if get(g:, 'matchup_override_vimtex', 0)
+  let g:vimtex_matchparen_enabled = 0
+endif
+
 call matchup#init()
 
 " vim: fdm=marker sw=2
