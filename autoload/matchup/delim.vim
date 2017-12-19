@@ -338,21 +338,24 @@ function! s:get_delim(opts) " {{{1
   let a:opts.cursorpos = l:cursorpos
 
   " for current, we want to find matches that end after the cursor
+  " note: we expect this to give false-positives with \ze
   if a:opts.direction ==# 'current'
     let l:re .= '\%>'.(l:cursorpos).'c'
   "  let l:re = '\%<'.(l:cursorpos+1).'c' . l:re
   endif
 
-  " use the 'c' cpo flag to allow overlapping matches
-  let l:save_cpo = &cpo
-  noautocmd set cpo-=c
+  " allow overlapping delimiters (replaces cpo-=c)
+  " without this, the > in <tag> would not be found
+  let l:re .= '\&'
 
   " use b:match_ignorecase
   call s:ignorecase_start()
 
   " move cursor one left for searchpos if necessary
+  let l:need_restore_cursor = 0
   if l:insertmode
     call matchup#pos#set_cursor(line('.'), col('.')-1)
+    let l:need_restore_cursor = 1
   endif
 
   " in the first pass, we get matching line and column numbers
@@ -378,21 +381,20 @@ function! s:get_delim(opts) " {{{1
       call matchup#pos#set_cursor(a:opts.direction ==# 'next'
             \ ? matchup#pos#next(l:lnum, l:cnum)
             \ : matchup#pos#prev(l:lnum, l:cnum))
+      let l:need_restore_cursor = 1
       continue
     endif
 
     break
   endwhile
 
-  " restore cpo
-  " note: this messes with cursor position
-  noautocmd let &cpo = l:save_cpo
-
   " reset ignorecase
   call s:ignorecase_end()
 
   " restore cursor
-  call matchup#pos#set_cursor(l:save_pos)
+  if l:need_restore_cursor
+    call matchup#pos#set_cursor(l:save_pos)
+  endif
 
   call matchup#perf#toc('s:get_delim', 'first_pass')
 
