@@ -63,23 +63,28 @@ function! s:get_match_words()
   return l:match_words
 endfunction
 
-if get(g:, 'vimtex_enabled',
-      \ s:has_plugin('vimtex') || exists('*vimtex#init'))
-  if get(g:, 'matchup_override_vimtex', 0)
-    silent! nunmap <buffer> %
-    silent! xunmap <buffer> %
-    silent! ounmap <buffer> %
-
+function! s:setup_match_words()
     setlocal matchpairs=(:),{:},[:]
     let b:matchup_delim_nomatchpairs = 1
     let b:match_words = s:get_match_words()
 
     " the syntax method is too slow for latex
     let b:match_skip = 'r:\\\@<!\%(\\\\\)*%'
+endfunction
+
+if get(g:, 'vimtex_enabled',
+      \ s:has_plugin('vimtex') || exists('*vimtex#init'))
+  if get(g:, 'matchup_override_vimtex', 0)
+    silent! nunmap <buffer> %
+    silent! xunmap <buffer> %
+    silent! ounmap <buffer> %
+    call s:setup_match_words()
   else
     let b:matchup_matchparen_enabled = 0
     let b:matchup_matchparen_fallback = 0
   endif
+elseif get(g:, 'matchup_testing_issue_14', 0)
+  call s:setup_match_words()
 endif
 
 let &cpo = s:save_cpo
