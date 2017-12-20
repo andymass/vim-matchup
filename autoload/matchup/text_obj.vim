@@ -41,6 +41,22 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   let l:linewise_op = index(g:matchup_text_obj_linewise_operators,
         \ v:operator) >= 0
 
+  if v:operator ==# 'g@'
+    let l:spec = matchlist(g:matchup_text_obj_linewise_operators,
+          \ '^g@\%(,\(.\+\)\)\?')
+    if !empty(l:spec[0])
+      if empty(l:spec[1])
+        let l:linewise_op = 1
+      else
+        execute 'let l:linewise_op =' l:spec[1]
+      endif
+    endif
+  elseif v:operator ==# ':'
+        \ && index(g:matchup_text_obj_linewise_operators,
+        \          visualmode()) >= 0
+    let l:linewise_op = 1
+  endif
+
   " disable the timeout
   call matchup#perf#timeout_start(0)
 
