@@ -71,7 +71,37 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
     if empty(l:open)
       if a:visual
         normal! gv
+      else
+        " TODO: can this be simplified by making omaps <expr>?
+        " invalid text object, try to do nothing
+        " cause a drop into normal mode
+        call feedkeys("\<c-\>\<c-n>\<esc>", 'n')
+
+        " and undo the text vim enters if necessary
+        call feedkeys(":call matchup#text_obj#undo("
+              \ .undotree().seq_cur.")\<cr>:\<c-c>", 'n')
       endif
+      return
+    endif
+
+    " no way to specify an empty region so we need to use some tricks
+    let l:epos = [l:open.lnum, l:open.cnum]
+    let l:epos[1] += matchup#delim#end_offset(l:open)
+    if !a:visual && a:is_inner
+          \ && matchup#pos#equal(l:close, matchup#pos#next(l:epos))
+
+      " TODO: cpo-E
+      if v:operator ==# 'c'
+        " this is apparently the most reliable way to handle
+        " the 'c' operator, although it raises a TextChangedI
+        " and fills registers with a space (from targets.vim)
+        call matchup#pos#set_cursor(l:close)
+        silent! execute "normal! i \<esc>v"
+      elseif !count('<>', v:operator)
+        call feedkeys(l:close.lnum.'gg', 'n')
+        call feedkeys(l:close.cnum.'|', 'n')
+      endif
+
       return
     endif
 
@@ -193,6 +223,12 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   call matchup#pos#set_cursor(l:l1, l:c1)
   normal! o
   call matchup#pos#set_cursor(l:l2, l:c2)
+endfunction
+
+function! matchup#text_obj#undo(seq)
+  if undotree().seq_cur > a:seq
+    silent! undo
+  endif
 endfunction
 
 " }}}1
