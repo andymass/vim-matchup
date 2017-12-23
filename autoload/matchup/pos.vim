@@ -60,7 +60,7 @@ function! matchup#pos#next(...) " {{{1
 
   let l:line = getline(l:lnum)
   let l:charlen = matchend(l:line[l:cnum-1:], '.')
-  if l:cnum + l:charlen <= strlen(l:line)
+  if l:charlen >= 0 && l:cnum + l:charlen <= strlen(l:line)
     return [0, l:lnum, l:cnum + l:charlen, 0]
   else
     return [0, l:lnum+1, 1, 0]
