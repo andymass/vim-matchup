@@ -60,13 +60,13 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   " disable the timeout
   call matchup#perf#timeout_start(0)
 
-  " try up to three times (rarely)
-  for l:try_again in range(3)
+  " try up to four times
+  for l:try_again in range(4)
     " on the first try, we use v:count which may be zero
-    " on the next tries, use the previous count plus one
+    " on the next tries, use v:count1 and increment each time
     " TODO: make sure this logic is right
     let [l:open, l:close] = matchup#delim#get_surrounding(
-          \ a:type, l:try_again ? (v:count1 + l:try_again) : v:count)
+          \ a:type, l:try_again ? (v:count1 + l:try_again - 1) : v:count)
 
     if empty(l:open)
       if a:visual
@@ -119,8 +119,8 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
     let [l:l1, l:c1, l:l2, l:c2] = [l:open.lnum,  l:open.cnum,
           \ l:close.lnum, l:close.cnum]
 
-    " XXX should be > 0 or > 1?
-    let l:is_multiline = (l:l2 - l:l1) > 1 ? 1 : 0
+    " whether the pair has at least one line in between them
+    let l:line_count = l:l2 - l:l1 + 1
 
     " special case: if inner and the current selection coincides
     " with the open and close positions, try for a second time
@@ -133,10 +133,10 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
     if a:is_inner
       let l:c1 += matchup#delim#end_offset(l:open)
       let [l:l1, l:c1] = matchup#pos#next(l:l1, l:c1)[1:2]
+      let l:sol = (l:c2 <= 1)
       let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
 
       " don't select only indent at close
-      let l:sol = (l:c2 <= 1)
       while matchup#util#in_indent(l:l2, l:c2)
         let l:c2 = 1
         let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
@@ -144,18 +144,51 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
       endwhile
 
       " include the line break if we had wrapped around
-      if l:sol
+      if a:visual && l:sol
         let l:c2 = strlen(getline(l:l2))+1
       endif
 
-      " not visual, get rid of a single line-break-only line
-      if !a:visual && l:sol && strlen(getline(l:l2)) == 0
-            \ && (l:forced ==# '')
-        let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
+      if !a:visual
+        " otherwise adjust end pos
+        if l:sol
+          let [l:l2, l:c2] = matchup#pos#next(l:l2, l:c2)[1:2]
+        endif
+
+        " toggle exclusive: difference between di% and dvi%
+        let l:inclusive = 0
+        if !l:sol && matchup#pos#smaller_or_equal(
+              \ [l:l1, l:c1], [l:l2, l:c2])
+          let l:inclusive = 1
+        endif
+        if l:forced ==# 'v'
+          let l:inclusive = !l:inclusive
+        endif
+
+        " sometimes operate in visual line motion (re-purpose force)
+        " cf src/normal.c:1824
+        if empty(g:v_motion_force)
+              \ && l:c2 <= 1 && l:line_count > 1 && !l:inclusive
+          let l:l2 -= 1
+          if l:c1 <= 1 || matchup#util#in_indent(l:l1, l:c1-1)
+            let l:forced = 'V'
+            let l:inclusive = 1
+          else
+            " end_adjusted
+            let l:c2 = strlen(getline(l:l2)) + 1
+            if l:c2 > 1
+              let l:c2 -= 1
+              let l:inclusive = 1
+            endif
+          endif
+        endif
+
+        if !l:inclusive
+          let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
+        endif
       endif
 
       " check for the line-wise special case
-      if l:is_multiline && l:linewise_op && strlen(l:close.match) > 1
+      if l:line_count > 2 && l:linewise_op && strlen(l:close.match) > 1
         if l:c1 != 1
           let l:l1 += 1
           let l:c1 = 1
@@ -163,22 +196,22 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         let l:c2 = strlen(getline(l:l2))+1
       endif
 
-      " toggle exclusive: difference between di% and dvi%
-      " TODO: &selection
-      if l:forced ==# 'v'
-        let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
-      endif
-
-      " possible extra line with force
-      if l:sol && (l:forced =~# 'V' || l:forced ==# 'v')
-        let l:l2 += 1
-        let l:c2 = 1
+      " if this would be an empty selection..
+      if !a:visual && (l:l2 < l:l1 || l:l1 == l:l2 && l:c1 > l:c2)
+        if v:operator ==# 'c'
+          call matchup#pos#set_cursor(l:l1, l:c1)
+          silent! execute "normal! i \<esc>v"
+        elseif !count('<>', v:operator)
+          call feedkeys(l:l1.'gg', 'n')
+          call feedkeys(l:c1.'|', 'n')
+        endif
+        return
       endif
     else
       let l:c2 += matchup#delim#end_offset(l:close)
 
       " special case for delete operator
-      if v:operator ==# 'd'
+      if !a:visual && v:operator ==# 'd'
             \ && strpart(getline(l:l2), l:c2) =~# '^\s*$'
             \ && strpart(getline(l:l2), 0, l:c1-1) =~# '^\s*$'
         let l:c1 = 1
@@ -186,24 +219,23 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
       endif
     endif
 
-    " TODO: is there still a bug here in V mode?
     " in visual line mode, force new selection to not be smaller
+    " (only check line numbers)
     if a:visual && visualmode() ==# 'V'
           \ && (l:l1 > l:selection[0] || l:l2 < l:selection[2])
       continue
     endif
 
-    " try again if we reached the same selection
-    " for visual line mode, only check line numbers
-    " workaround for cases where the cursor might get fooled
-    " into going into one of the inner blocks
+    " in other visual modes, try again if we did not reach a
+    " `bigger' selection
+    " TODO this logic is vim compatible but is pretty weird
     if a:visual && (l:selection == [l:l1, l:c1, l:l2, l:c2]
-          \ || visualmode() ==# 'V'
-          \    && [l:selection[0], l:selection[2]] == [l:l1, l:l2])
+          \ || (!matchup#pos#smaller([l:l1, l:c1], l:selection[0:1])
+          \     && !matchup#pos#smaller(l:selection[2:3], [l:l2, l:c2])))
       continue
-    else
-      break
     endif
+
+    break
   endfor
 
   " set the proper visual mode for this selection
