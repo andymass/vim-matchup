@@ -44,7 +44,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   if v:operator ==# 'g@'
     let l:spec = matchlist(g:matchup_text_obj_linewise_operators,
           \ '^g@\%(,\(.\+\)\)\?')
-    if !empty(l:spec[0])
+    if !empty(l:spec)
       if empty(l:spec[1])
         let l:linewise_op = 1
       else
