@@ -568,8 +568,10 @@ match-up's match highlighting is not compatible with |vimtex|'s implementation
 and match-up highlighting will be disabled automatically when vimtex is
 detected.
 
-matchit.vim should not be loaded.  If it is loaded, it must be loaded before
-match-up (in this case, matchit will be disabled when match-up loads).
+matchit.vim should not be loaded.  If it is loaded, it must be loaded after
+match-up (in this case, matchit.vim will be disabled).  Note that some plugins,
+such as vim-sensible, load matchit.vim so these must also be initialized after
+match-up.
 
 Matchparen emulation~
 

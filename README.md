@@ -536,8 +536,9 @@ _Options planned_.
   implementation.  match-up highlighting and will be disabled
   automatically when vimtex is detected.
   - matchit.vim should not be loaded.  If it is loaded, it must be loaded
-  before match-up (in this case, matchit will be disabled when match-up
-  loads).
+  after match-up (in this case, matchit.vim will be disabled).  Note that
+  some plugins, such as [vim-sensible](https://github.com/tpope/vim-sensible),
+  load matchit.vim so these must also be initialized after match-up.
   - match-up loads matchparen if it is not already loaded.
 
 ## Acknowledgments
