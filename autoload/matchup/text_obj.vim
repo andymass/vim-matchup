@@ -193,6 +193,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
           let l:l1 += 1
           let l:c1 = 1
         endif
+        let l:l2 = l:close.lnum - 1
         let l:c2 = strlen(getline(l:l2))+1
       endif
 
