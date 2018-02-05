@@ -5,7 +5,7 @@ Author:  Andy Massimino <a@normed.space>
 Web:     https://github.com/andymass/vim-matchup
 License: MIT license {{{
 
-  Copyright (c) 2017 Andy Massimino
+  Copyright (c) 2018 Andy Massimino
 
   Copyright (c) 2016 Karl Yngve Lervåg
 
@@ -39,6 +39,7 @@ CONTENTS                                                     *matchup-contents*
     Customizing mappings                        |matchup-custom-mappings|
     Features                                    |matchup-features|
     Options                                     |matchup-options|
+    File type options                           |matchup-file-types|
   FAQ                                           |matchup-faq|
   Interoperability                              |matchup-interoperability|
   Acknowledgments                               |matchup-acknowledgments|
@@ -511,6 +512,64 @@ Module text_obj~
 
   Default: `['d', 'y']`
 
+------------------------------------------------------------------------------
+File type options~
+                                                           *matchup-file-types*
+
+                                                                *matchup-latex*
+LaTeX~
+
+  By default, match-up is disabled for tex files when the plugin |vimtex| is
+  detected.  To enable match-up for tex files, use the following in your vimrc: >
+
+    let g:matchup_override_vimtex = 1
+<
+  This will replace vimtex's built-in highlighting and `%` map.
+
+  Note: matching may be computationally intensive for complex LaTeX documents.
+  If you experience slowdowns, consider using the following option: >
+
+    let g:matchup_matchparen_deferred = 1
+<
+HTML~
+
+*g:matchup_matchpref_html_nolists*
+
+  When set to 1, this option disables matching and navigation between groups
+  of list items in HTML documents such as the following >
+
+    <ul>
+      <li>One</li>
+      <li>Two</li>
+    </ul>
+<
+  By default, `%` will navigate from `<ul>` to `<li>` to `<li>` to `</ul>`.
+
+  Default: 0
+
+Customization~
+
+*g:matchup_hotfix_{&filetype}*                                   *matchup-hotfix*
+
+  For each file type, this option can be set to the string name of a function
+  which will be called when loading files, prior to checking |b:match_words|
+  and |b:match_skip|.  This option can be used to quickly customize matching for
+  particular file types: >
+
+    function! VimHotfix()
+      " customization
+    endfunction
+    let g:matchup_hotfix_vim = 'VimHotfix'
+
+*matchup#util#patch_match_words*                                  *matchup-patch*
+>
+  call matchup#util#patch_match_words(before, after)
+<
+  This function replaces the literal string `before` contained in |b:match_words|
+  with the literal string `after`.  When placed in an autocommand or in the file
+  `after/ftplugin/{&filetype}.vim`, it can be used to customize the matching
+  regular expressions for a particular file type.
+
 ==============================================================================
 FAQ                                                               *matchup-faq*
 
@@ -564,9 +623,19 @@ A Read the contribution guidelines (CONTRIBUTING.md) and issue template
 ==============================================================================
 INTEROPERABILITY                                     *matchup-interoperability*
 
-match-up's match highlighting is not compatible with |vimtex|'s implementation
-and match-up highlighting will be disabled automatically when vimtex is
-detected.
+vimtex, for LaTeX documents~
+
+By default, match-up will be disabled automatically for tex files when vimtex
+is detected.  To enable match-up for tex files, use >
+
+  let g:matchup_override_vimtex = 1
+<
+match-up's matching engine is more advanced than vimtex's and supports middle
+delimiters such as `\middle|` and `\else`.  The exact set of delimiters recognized
+may differ between the two plugins.  For example, the mappings `da%` and `dad`
+will not always match, particularly if you have customized vimtex's delimiters.
+
+Matchit~
 
 matchit.vim should not be loaded.  If it is loaded, it must be loaded after
 match-up (in this case, matchit.vim will be disabled).  Note that some plugins,
