@@ -168,6 +168,11 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
   if pumvisible() | return | endif
 
+  " don't get matches when inside a closed fold
+  if foldclosed(line('.')) > -1
+    return
+  endif
+
   let l:force_update    = a:0 >= 1 ? a:1 : 0
   let l:entering_insert = a:0 >= 2 ? a:2 : 0
 
