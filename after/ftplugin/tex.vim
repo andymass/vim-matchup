@@ -57,8 +57,12 @@ function! s:get_match_words()
         \ . ':\\toprule\>:\\midrule\>:\\bottomrule\>'
         \ . ':\\end{tabular}'
 
+  " enumerate, itemize
+  let l:match_words .= ',\\begin\s*{\(enumerate\*\=\|itemize\*\=\)}'
+        \ . ':\\item\>:\\end\s*{\1}'
+
   " generic environment
-  let l:match_words .= ',\\begin\s*{\([^}]*\)}:\\item\>:\\end\s*{\1}'
+  let l:match_words .= ',\\begin\s*{\([^}]*\)}:\\end\s*{\1}'
 
   return l:match_words
 endfunction
