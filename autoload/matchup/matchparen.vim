@@ -309,15 +309,17 @@ function! s:format_statusline(offscreen) " {{{1
   let l:line = getline(a:offscreen.lnum)
 
   let l:sl = ''
-  if &number
+  if &number || &relativenumber
     let l:nw = max([strlen(line('$')), &numberwidth-1])
     let l:linenr = a:offscreen.lnum
+    let l:direction = l:linenr < line('.')
+
     if &relativenumber
-      let l:linenr = l:linenr-line('.')
+      let l:linenr = abs(l:linenr-line('.'))
     endif
 
     let l:sl = printf('%'.(l:nw).'s', l:linenr)
-    if l:linenr < line('.')
+    if l:direction
       let l:sl = '%#Search#' . l:sl . '∆%#Normal#'
     else
       let l:sl = '%#LineNr#' . l:sl . ' %#Normal#'
