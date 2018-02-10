@@ -404,6 +404,14 @@ Options~
 
   Default: 0
 
+*g:matchup_delim_stopline*
+
+  Configures the number of lines to search in either direction while using
+  motions and text objects.  Does not apply to match highlighting
+  (see |g:matchup_matchparen_stopline| instead).
+
+  Default: 1500
+
 Variables~
 
 *b:match_words*
@@ -451,7 +459,21 @@ Module matchparen~
 
   Whether to replace the |statusline| for off-screen matches.
 
+  If a match is off of the screen, the line belonging to that match will be
+  displayed syntax-highlighted in the status line along with the line number
+  (if line numbers are enabled).  If the match is above the screen border, an
+  additional Δ symbol will be shown to indicate that the matching line is
+  really above the cursor line.
+
   Default: 1
+
+*g:matchup_matchparen_stopline*
+
+  The number of lines to search in either direction while highlighting
+  matches.  Set this conservatively since high values may cause performance
+  issues.
+
+  Default: 400
 
 *g:matchup_matchparen_timeout*
 *g:matchup_matchparen_insert_timeout*
@@ -500,6 +522,13 @@ Module motion~
   will land on the beginning.  Set to 0 to disable.
   Note: this has no effect on operators: `d%` will delete |inclusive| of the
   ending word (this is compatible with matchit).
+
+  Default: 1
+
+*g:matchup_motion_count_fail*
+
+  When enabled, giving an invalid count to the |[%| and |]%| motions will
+  cause the motion to fail.  Otherwise they will move as far as possible.
 
   Default: 1
 
@@ -614,6 +643,21 @@ A match-up aims to be as fast as possible, but highlighting matching words can
   If are having any other performance issues, please open a new issue and
   report g:matchup#perf#times.
 
+Q Why is there a weird entry on the status line?
+
+A This is a feature which helps you see matches that are outside of the
+  vim screen, similar to some IDEs.  If you wish to disable it, use >
+
+  let g:matchup_matchparen_status_offscreen = 0
+<
+Q Matching does not work when lines are too far apart.
+
+A The number of search lines is limited for performance reasons.  You may
+  increase the limits with the following options: >
+
+  let g:matchup_delim_stopline      = 1500 " generally
+  let g:matchup_matchparen_stopline = 400  " for match highlighting only
+<
 Q How can I contribute?
 
 A Read the contribution guidelines (CONTRIBUTING.md) and issue template

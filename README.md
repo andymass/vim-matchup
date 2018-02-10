@@ -363,6 +363,14 @@ let g:matchup_transmute_enabled = 1
 ```
 default: 0
 
+To configure the number of lines to search in either direction while using
+motions and text objects.  Does not apply to match highlighting
+(see `g:matchup_matchparen_stopline` instead).
+```vim
+let g:matchup_delim_stopline = 1500
+```
+default: 1500
+
 ### Variables
 
 match-up understands the following variables from matchit.
@@ -411,7 +419,23 @@ Whether to replace the statusline for off-screen matches:
 ```vim
 let g:matchup_matchparen_status_offscreen = 0
 ```
+
+If a match is off of the screen, the line belonging to that match will be
+displayed syntax-highlighted in the status line along with the line number
+(if line numbers are enabled).  If the match is above the screen border,
+an additional Δ symbol will be shown to indicate that the matching line is
+really above the cursor line.
+
 default: 1
+
+The number of lines to search in either direction while highlighting
+matches.  Set this conservatively since high values may cause performance
+issues.
+```vim
+let g:matchup_matchparen_stopline = 400  " for match highlighting only
+```
+
+default: 400
 
 #### highlighting timeouts
 
@@ -523,6 +547,25 @@ _Options planned_.
 
   If are having any other performance issues, please open a new issue and
   report `g:matchup#perf#times`.
+
+- Why is there a weird entry on the status line?
+
+  This is a feature which helps you see matches that are outside of the
+  vim screen, similar to some IDEs.  If you wish to disable it, use
+
+  ```vim
+  let g:matchup_matchparen_status_offscreen = 0
+  ```
+
+- Matching does not work when lines are too far apart.
+
+  The number of search lines is limited for performance reasons.  You may
+  increase the limits with the following options:
+
+  ```vim
+  let g:matchup_delim_stopline      = 1500 " generally
+  let g:matchup_matchparen_stopline = 400  " for match highlighting only
+  ```
 
 - How can I contribute?
 

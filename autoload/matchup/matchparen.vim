@@ -202,11 +202,13 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   call matchup#perf#timeout_start(l:timeout)
 
   let l:current = matchup#delim#get_current('all', 'both_all',
-        \ { 'insertmode': l:insertmode })
+        \ { 'insertmode': l:insertmode,
+        \   'stopline': g:matchup_matchparen_stopline, })
   call matchup#perf#toc('matchparen.highlight', 'get_current')
   if empty(l:current) | return | endif
 
-  let l:corrlist = matchup#delim#get_matching(l:current, 1)
+  let l:corrlist = matchup#delim#get_matching(l:current,
+        \ { 'stopline': g:matchup_matchparen_stopline, })
   call matchup#perf#toc('matchparen.highlight', 'get_matching')
   if empty(l:corrlist) | return | endif
 

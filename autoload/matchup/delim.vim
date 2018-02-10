@@ -104,6 +104,9 @@ endfunction
 function! matchup#delim#get_matching(delim, ...) " {{{1
   if empty(a:delim) || !has_key(a:delim, 'lnum') | return {} | endif
 
+  let l:opts = a:0 && type(a:1) == type({}) ? a:1 : {}
+  let l:stopline = get(l:opts, 'stopline', s:stopline)
+
   " get all the matching position(s)
   " *important*: in the case of mid, we search up before searching down
   " this gives us a context object which we use for the other side
@@ -118,7 +121,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
       call add(l:matches, [])
     endif
 
-    let l:res = a:delim.get_matching(l:down)
+    let l:res = a:delim.get_matching(l:down, l:stopline)
     if l:res[0][1] > 0
       call extend(l:matches, l:res)
     endif
@@ -358,6 +361,9 @@ function! s:get_delim(opts) " {{{1
     let l:need_restore_cursor = 1
   endif
 
+  " stopline may depend on the current action
+  let l:stopline = get(a:opts, 'stopline', s:stopline)
+
   " in the first pass, we get matching line and column numbers
   " this is intended to be as fast as possible, with no capture groups
   " we look for a match on this line (if direction == current)
@@ -365,9 +371,9 @@ function! s:get_delim(opts) " {{{1
   " for current, we actually search leftwards from the cursor
   while 1
     let [l:lnum, l:cnum] = a:opts.direction ==# 'next'
-          \ ? searchpos(l:re, 'cnW', line('.') + s:stopline)
+          \ ? searchpos(l:re, 'cnW', line('.') + l:stopline)
           \ : a:opts.direction ==# 'prev'
-          \   ? searchpos(l:re, 'bcnW', max([line('.') - s:stopline, 1]))
+          \   ? searchpos(l:re, 'bcnW', max([line('.') - l:stopline, 1]))
           \   : searchpos(l:re, 'bcnW', line('.'))
     if l:lnum == 0 | break | endif
 
@@ -602,7 +608,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
 endfunction
 " }}}1
 
-function! s:get_matching_delims(down) dict " {{{1
+function! s:get_matching_delims(down, stopline) dict " {{{1
   " called as:   a:delim.get_matching(...)
   " called from: matchup#delim#get_matching <- matchparen, motion
   "   from: matchup#delim#get_surrounding <- matchparen, motion, text_obj
@@ -613,8 +619,8 @@ function! s:get_matching_delims(down) dict " {{{1
   " first, we figure out what the furthest match is, which will be
   " either the open or close depending on the direction
   let [l:re, l:flags, l:stopline] = a:down
-      \ ? [self.regextwo.close, 'W', line('.') + s:stopline]
-      \ : [self.regextwo.open, 'bW', max([line('.') - s:stopline, 1])]
+      \ ? [self.regextwo.close, 'W', line('.') + a:stopline]
+      \ : [self.regextwo.open, 'bW', max([line('.') - a:stopline, 1])]
 
   " these are the anchors for searchpairpos
   let l:open = self.regexone.open     " TODO is this right? BADLOGIC
@@ -1293,7 +1299,7 @@ endfunction
 " }}}1
 
 " initialize script variables
-let s:stopline = get(g:, 'matchup_delim_stopline', 400)
+let s:stopline = get(g:, 'matchup_delim_stopline', 1500)
 
 let s:sidedict = {
       \ 'open'     : ['open'],

@@ -21,6 +21,7 @@ function! s:init_options()
   call s:init_option('matchup_matchparen_deferred', 0)
   call s:init_option('matchup_matchparen_deferred_show_delay', 50)
   call s:init_option('matchup_matchparen_deferred_hide_delay', 700)
+  call s:init_option('matchup_matchparen_stopline', 400)
 
   call s:init_option('matchup_matchparen_timeout',
     \ get(g:, 'matchparen_timeout', 300))
