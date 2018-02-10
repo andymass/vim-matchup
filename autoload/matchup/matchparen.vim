@@ -168,11 +168,6 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
   if pumvisible() | return | endif
 
-  " don't get matches when inside a closed fold
-  if foldclosed(line('.')) > -1
-    return
-  endif
-
   let l:force_update    = a:0 >= 1 ? a:1 : 0
   let l:entering_insert = a:0 >= 2 ? a:2 : 0
 
@@ -188,6 +183,11 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   call matchup#perf#tic('matchparen.highlight')
 
   call self.clear()
+
+  " don't get matches when inside a closed fold
+  if foldclosed(line('.')) > -1
+    return
+  endif
 
   " in insert mode, cursor is treated as being one behind
   let l:insertmode = l:entering_insert
