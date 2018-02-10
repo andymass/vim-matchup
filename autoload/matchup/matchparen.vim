@@ -85,7 +85,7 @@ function! s:matchparen.clear() abort dict " {{{1
   endif
 
   if exists('w:matchup_oldstatus')
-    let &statusline = w:matchup_oldstatus
+    let &l:statusline = w:matchup_oldstatus
     unlet w:matchup_oldstatus
   endif
 
@@ -286,9 +286,9 @@ function! matchup#matchparen#offscreen(current) " {{{1
 
   if empty(l:offscreen) | return | endif
 
-  let w:matchup_oldstatus = &statusline
+  let w:matchup_oldstatus = &l:statusline
 
-  let &statusline = s:format_statusline(l:offscreen)
+  let &l:statusline = s:format_statusline(l:offscreen)
 endfunction
 
 " }}}1
