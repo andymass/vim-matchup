@@ -82,6 +82,11 @@ if get(g:, 'vimtex_enabled',
     silent! nunmap <buffer> %
     silent! xunmap <buffer> %
     silent! ounmap <buffer> %
+
+    " lervag/vimtex/issues/1051
+    let g:vimtex_matchparen_enabled = 0
+    silent! call vimtex#matchparen#disable()
+
     call s:setup_match_words()
   else
     let b:matchup_matchparen_enabled = 0
