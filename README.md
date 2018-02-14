@@ -575,14 +575,37 @@ _Options planned_.
 
 ## Interoperability
 
-  - match-up's match highlighting is not compatible with [vimtex]'s
-  implementation.  match-up highlighting and will be disabled
-  automatically when vimtex is detected.
-  - matchit.vim should not be loaded.  If it is loaded, it must be loaded
-  after match-up (in this case, matchit.vim will be disabled).  Note that
-  some plugins, such as [vim-sensible](https://github.com/tpope/vim-sensible),
-  load matchit.vim so these must also be initialized after match-up.
-  - match-up loads matchparen if it is not already loaded.
+### vimtex, for LaTeX documents
+
+By default, match-up will be disabled automatically for tex files when
+[vimtex] is detected.  To enable match-up for tex files, use
+
+```vim
+let g:matchup_override_vimtex = 1
+```
+
+match-up's matching engine is more advanced than vimtex's and supports
+middle delimiters such as `\middle|` and `\else`.  The exact set of
+delimiters recognized may differ between the two plugins.  For example,
+the mappings `da%` and `dad` will not always match, particularly if you
+have customized vimtex's delimiters.
+
+### Matchit
+
+matchit.vim should not be loaded.  If it is loaded, it must be loaded
+after match-up (in this case, matchit.vim will be disabled).  Note that
+some plugins, such as
+[vim-sensible](https://github.com/tpope/vim-sensible),
+load matchit.vim so these must also be initialized after match-up.
+
+### Matchparen emulation~
+
+match-up loads [matchparen] if it is not already loaded.  Ordinarily, match-up
+disables matchparen's highlighting and emulates it to highlight the symbol
+contained in the 'matchpairs' option (by default `()`, `[]`, and `{}`).  If match-up
+is disabled per-buffer using `b:matchup_matchparen_enabled`, match-up will use
+matchparen instead of its own highlighting.  See `b:matchup_matchparen_fallback`
+for more information.
 
 ## Acknowledgments
 
