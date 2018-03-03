@@ -16,6 +16,7 @@ function! matchup#delim#init_module() " {{{1
   augroup matchup_filetype
     au!
     autocmd FileType * call matchup#delim#init_buffer()
+    autocmd BufWinEnter * call matchup#delim#bufwinenter()
   augroup END
 
   call matchup#delim#init_buffer()
@@ -39,6 +40,15 @@ function! matchup#delim#init_buffer() " {{{1
 endfunction
 
 " }}}1
+function! matchup#delim#bufwinenter() " {{{1
+  if get(b:, 'matchup_delim_enabled', 0)
+    return
+  endif
+  call matchup#delim#init_buffer()
+endfunction
+
+" }}}1
+
 
 function! matchup#delim#close() " {{{1
   let l:save_pos = matchup#pos#get_cursor()
