@@ -496,6 +496,9 @@ Module matchparen~
 
   Default: 0 (disabled)
 
+Note: this feature is only available if your vim version has |timers| and
+the function |timer_pause| (version 7.4.2180 and after).
+
 *g:matchparen_matchparen_deferred_show_time*
 *g:matchparen_matchparen_deferred_hide_time*
 

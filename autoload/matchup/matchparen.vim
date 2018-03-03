@@ -21,8 +21,13 @@ endfunction
 " }}}1
 
 function! matchup#matchparen#enable() " {{{1
-  if !has('timers')
+  if g:matchup_matchparen_deferred
+        \ && (!has('timers') || !exists('*timer_pause'))
     let g:matchup_matchparen_deferred = 0
+    echohl WarningMsg
+    echom "match-up's deferred highlighting feature is "
+          \ . 'not supported in your vim version'
+    echohl None
   endif
 
   augroup matchup_matchparen
