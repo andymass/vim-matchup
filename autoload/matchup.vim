@@ -25,8 +25,10 @@ function! s:init_options()
 
   call s:init_option('matchup_matchparen_timeout',
     \ get(g:, 'matchparen_timeout', 300))
-  call s:init_option('matchup_matchparen_insert_timeout', 
+  call s:init_option('matchup_matchparen_insert_timeout',
     \ get(g:, 'matchparen_insert_timeout', 60))
+
+  call s:init_option('matchup_delim_count_fail', 0)
 
   call s:init_option('matchup_motion_enabled', 1)
   call s:init_option('matchup_motion_cursor_end', 1)
@@ -38,7 +40,7 @@ function! s:init_options()
   call s:init_option('matchup_transmute_enabled', 0)
 
   call s:init_option('matchup_imap_enabled', 0)
-  
+
   call s:init_option('matchup_complete_enabled', 0)
 endfunction
 

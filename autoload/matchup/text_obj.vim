@@ -57,8 +57,8 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
     let l:linewise_op = 1
   endif
 
-  " disable the timeout
-  call matchup#perf#timeout_start(0)
+  " set the timeout fairly high
+  call matchup#perf#timeout_start(725)
 
   " try up to four times
   for l:try_again in range(4)

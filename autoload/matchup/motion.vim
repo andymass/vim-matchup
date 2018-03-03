@@ -203,8 +203,8 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
     normal! gv
   endif
 
-  " disable the timeout
-  call matchup#perf#timeout_start(0)
+  " set the timeout fairly high
+  call matchup#perf#timeout_start(750)
 
   for l:second_try in range(2)
     let [l:open, l:close] = matchup#delim#get_surrounding('delim_all',

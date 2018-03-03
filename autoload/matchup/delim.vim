@@ -209,15 +209,19 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
   " provided count == 0 refers to local any block
   let l:local = l:count == 0 ? 1 : 0
 
-  let l:opts = {}
-  let s:invert_skip = 0
-  if matchup#delim#skip() " TODO: check for insert mode
-    let l:opts.check_skip = 0
+  let l:delimopts = {}
+  let s:invert_skip = 0   " TODO: this logic is still bad
+  if matchup#delim#skip() " TODO: check for insert mode (?)
+    let l:delimopts.check_skip = 0
   endif
+
+  " keep track of the outermost pair found so far
+  " returned when g:matchup_delim_count_fail = 1
+  let l:best = []
 
   while l:pos_val_open < l:pos_val_last
     let l:open = matchup#delim#get_prev(a:type,
-          \ l:local ? 'open_mid' : 'open', l:opts)
+          \ l:local ? 'open_mid' : 'open', l:delimopts)
     if empty(l:open) | break | endif
 
     let l:matches = matchup#delim#get_matching(l:open, 1)
@@ -237,12 +241,19 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
       endif
       call matchup#pos#set_cursor(matchup#pos#prev(l:open))
       let l:counter -= 1
+      let l:best = [l:open, l:close]
     else
       call matchup#pos#set_cursor(matchup#pos#prev(l:open))
       let l:pos_val_last = l:pos_val_open
       let l:pos_val_open = matchup#pos#val(l:open)
     endif
   endwhile
+
+  if !empty(l:best) && g:matchup_delim_count_fail
+    call matchup#pos#set_cursor(l:save_pos)
+    call matchup#perf#toc('delim#get_surrounding', 'bad_count')
+    return l:best
+  endif
 
   " restore cursor and return failure
   call matchup#pos#set_cursor(l:save_pos)

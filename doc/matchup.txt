@@ -525,12 +525,15 @@ Module motion~
 
   Default: 1
 
-*g:matchup_motion_count_fail*
+*g:matchup_delim_count_fail*
 
-  When enabled, giving an invalid count to the |[%| and |]%| motions will
-  cause the motion to fail.  Otherwise they will move as far as possible.
+  When disabled (default), giving an invalid count to the |[%| and |]%| motions
+  and the text objects |i%| and |a%| will cause the motion or operation to fail.
+  When enabled, they will move as far as possible.
+  Note: targeting high counts when this option is enabled can become slow
+  because many positions need to be tried before giving up.
 
-  Default: 1
+  Default: 0
 
 Module text_obj~
 
