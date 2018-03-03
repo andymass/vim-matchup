@@ -566,6 +566,25 @@ _Options planned_.
   let g:matchup_delim_stopline      = 1500 " generally
   let g:matchup_matchparen_stopline = 400  " for match highlighting only
   ```
+- The maps `1i%` and `1a%` are difficult to press.
+
+  You may use the following maps `I%` and `A%` for convenience:
+
+  ```vim
+  function! s:matchup_convenience_maps()
+    xnoremap <sid>(std-I) I
+    xnoremap <sid>(std-A) A
+    xmap <expr> I mode()=='<c-v>'?'<sid>(std-I)':(v:count?'':'1').'i'
+    xmap <expr> A mode()=='<c-v>'?'<sid>(std-A)':(v:count?'':'1').'a'
+    for l:v in ['', 'v', 'V', '<c-v>']
+      execute 'omap <expr>' l:v.'I%' "(v:count?'':'1').'".l:v."i%'"
+      execute 'omap <expr>' l:v.'A%' "(v:count?'':'1').'".l:v."a%'"
+    endfor
+  endfunction
+  call s:matchup_convenience_maps()
+  ```
+
+  Note: this is not compatible with the plugin targets.vim.
 
 - How can I contribute?
 
