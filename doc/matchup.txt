@@ -641,7 +641,7 @@ A match-up aims to be as fast as possible, but highlighting matching words can
     |g:matchup_matchparen_timeout|, |g:matchup_matchparen_insert_timeout|
 
   If are having any other performance issues, please open a new issue and
-  report g:matchup#perf#times.
+  report the output of `:MatchupShowTimes`.
 
 Q Why is there a weird entry on the status line?
 

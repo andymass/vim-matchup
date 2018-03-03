@@ -546,7 +546,7 @@ _Options planned_.
   attempted again until the cursor moves.
 
   If are having any other performance issues, please open a new issue and
-  report `g:matchup#perf#times`.
+  report the output of `:MatchupShowTimes`.
 
 - Why is there a weird entry on the status line?
 
