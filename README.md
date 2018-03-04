@@ -457,7 +457,8 @@ let g:matchup_matchparen_deferred = 1
 default: 0 (disabled)
 
 Note: this feature is only available if your vim version has `timers` and
-the function `timer_pause` (version 7.4.2180 and after).
+the function `timer_pause`, version 7.4.2180 and after.  For neovim, this
+will only work in nvim-0.2.1 and after.
 
 Adjust timeouts in milliseconds for deferred highlighting:
 ```vim

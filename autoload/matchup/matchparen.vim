@@ -22,7 +22,8 @@ endfunction
 
 function! matchup#matchparen#enable() " {{{1
   if g:matchup_matchparen_deferred
-        \ && (!has('timers') || !exists('*timer_pause'))
+        \ && (!has('timers') || !exists('*timer_pause')
+        \     || has('nvim') && !has('nvim-0.2.1'))
     let g:matchup_matchparen_deferred = 0
     echohl WarningMsg
     echom "match-up's deferred highlighting feature is "
