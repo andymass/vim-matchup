@@ -1,9 +1,7 @@
 # vim match-up
 
-:mag: [screenshot](https://raw.githubusercontent.com/wiki/andymass/vim-matchup/images/match-up-hl1.gif) :mag:
-
-match-up is a replacement for the venerable vim plugin [matchit.vim].
-match-up aims to replicate all of matchit's features, fix a number of its
+match-up is a drop-in replacement for the vim plugin [matchit.vim].
+match-up aims to enhance all of matchit's features, fix a number of its
 deficiencies and bugs, and add a few totally new features.  It also
 replaces the standard plugin [matchparen], allowing all of matchit's words
 to be highlighted along with the `matchpairs` (`(){}[]`).
@@ -15,6 +13,10 @@ to be highlighted along with the `matchpairs` (`(){}[]`).
 
 A major goal of this project is to keep a modern and modular code base.
 Contributions are welcome!
+
+## Screenshot
+
+<img src='https://raw.githubusercontent.com/wiki/andymass/vim-matchup/images/match-up-hl1.gif' width='450px'>
 
 ## Table of contents
 
@@ -50,17 +52,27 @@ more information.  This plugin:
 
 ## Installation
 
-If you use vim-plug, then add the following line to your vimrc file:
+If you use [vim-plug](https://github.com/junegunn/vim-plug), then add the following line to your vimrc file:
 
 ```vim
 Plug 'andymass/vim-matchup'
 ```
 
-Or use some other plugin manager:
+and then use `:PlugInstall`.  Or, you can use any other plugin manager such as
+[vundle](https://github.com/gmarik/vundle),
+[dein](https://github.com/Shougo/dein.vim),
+[neobundle](https://github.com/Shougo/neobundle.vim), or
+[pathogen](https://github.com/tpope/vim-pathogen).
 
-  - vundle
-  - neobundle
-  - pathogen
+match-up should automatically disable matchit and matchparen, but if you
+are still having trouble, try placing this near the top of your vimrc:
+
+```vim
+let g:loaded_matchit = 1
+```
+
+See [Interoperability](#interoperability) for more information about working
+together with other plugins.
 
 ## Features
 
@@ -460,10 +472,10 @@ Note: this feature is only available if your vim version has `timers` and
 the function `timer_pause`, version 7.4.2180 and after.  For neovim, this
 will only work in nvim-0.2.1 and after.
 
-Adjust timeouts in milliseconds for deferred highlighting:
+Adjust delays in milliseconds for deferred highlighting:
 ```vim
-let g:matchparen_matchparen_deferred_show_time = 50
-let g:matchparen_matchparen_deferred_hide_time = 700
+let g:matchup_matchparen_deferred_show_delay = 50
+let g:matchup_matchparen_deferred_hide_time = 700
 ```
 default: 50, 700
 
@@ -621,7 +633,7 @@ some plugins, such as
 [vim-sensible](https://github.com/tpope/vim-sensible),
 load matchit.vim so these must also be initialized after match-up.
 
-### Matchparen emulation~
+### Matchparen emulation
 
 match-up loads [matchparen] if it is not already loaded.  Ordinarily, match-up
 disables matchparen's highlighting and emulates it to highlight the symbol
@@ -672,7 +684,6 @@ contributing.
 
 ### Todo list
 
-- thoroughly test with unicode, tabs
 - complete parallel transmutation in an efficient way.
 - add screenshots and animations
 - support for fenced code possible?
