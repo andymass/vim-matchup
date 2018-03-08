@@ -475,9 +475,12 @@ will only work in nvim-0.2.1 and after.
 Adjust delays in milliseconds for deferred highlighting:
 ```vim
 let g:matchup_matchparen_deferred_show_delay = 50
-let g:matchup_matchparen_deferred_hide_time = 700
+let g:matchup_matchparen_deferred_hide_delay = 700
 ```
 default: 50, 700
+
+Note: these delays cannot be changed dynamically and should be configured
+before the plugin loads (e.g., in your vimrc).
 
 #### highlight surrounding
 

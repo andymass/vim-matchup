@@ -500,10 +500,12 @@ Note: this feature is only available if your vim version has |timers| and
 the function |timer_pause|, version 7.4.2180 and after.  For neovim, this
 will only work in nvim-0.2.1 and after.
 
-*g:matchup_matchparen_deferred_show_time*
-*g:matchup_matchparen_deferred_hide_time*
+*g:matchup_matchparen_deferred_show_delay*
+*g:matchup_matchparen_deferred_hide_delay*
 
-  Adjust timeouts in milliseconds for deferred highlighting.
+  Adjust delays in milliseconds for deferred highlighting.
+  Note: these delays cannot be changed dynamically and should be configured
+  before the plugin loads (e.g., in your vimrc).
 
   Defaults: 50, 700
 
