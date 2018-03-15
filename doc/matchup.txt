@@ -558,9 +558,24 @@ Module text_obj~
 
 *g:matchup_text_obj_linewise_operators*
 
-  Modifies the set of operators which may operate line-wise
-  (see |matchup-feat-linewise|)
+  Modifies the set of operators which may operate line-wise with |i%|
+  (see |matchup-feat-linewise|).
 
+  You may use 'v', 'V', and "\<c-v>" (i.e., an actual CTRL-V character) to the
+  specify the corresponding visual mode.
+
+  You can also specify custom plugin operators with 'g@' and optionally, an
+  expression separated by a comma.  For example, to make |commentary|'s |gc|
+  mapping work likewise when used in the operator `gci%`, >
+
+  function! IsCommentaryOpFunc()
+    return &operatorfunc ==? matchstr(maparg('<Plug>Commentary', 'n'),
+        \ '\cset op\%(erator\)\?func=\zs.\{-\}\ze<cr>')
+  endfunction
+
+  let g:matchup_text_obj_linewise_operators = ['d', 'y',
+      \ 'g@,IsCommentaryOpFunc()']
+<
   Default: `['d', 'y']`
 
 ------------------------------------------------------------------------------
