@@ -29,6 +29,7 @@ function! s:init_options()
     \ get(g:, 'matchparen_insert_timeout', 60))
 
   call s:init_option('matchup_delim_count_fail', 0)
+  call s:init_option('matchup_delim_noskips', 0)
 
   call s:init_option('matchup_motion_enabled', 1)
   call s:init_option('matchup_motion_cursor_end', 1)

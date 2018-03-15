@@ -383,6 +383,13 @@ let g:matchup_delim_stopline = 1500
 ```
 default: 1500
 
+To disable matching within strings and comments,
+```vim
+let g:matchup_delim_noskips = 1   " recognize symbols within comments
+let g:matchup_delim_noskips = 2   " don't recognize anything in comments
+```
+default: 0 (matching is enabled within strings and comments)
+
 ### Variables
 
 match-up understands the following variables from matchit.

@@ -412,6 +412,19 @@ Options~
 
   Default: 1500
 
+*g:matchup_delim_noskips*
+
+  This option controls whether matching is done within strings and comments.
+  By default, it is set to 0 which means all valid matches are made within
+  strings and comments.  If set to 1, symbols like `()` will still be matched
+  but words like `for` and `end` will not.  If set to 2, nothing will be
+  matched within strings and comments. >
+
+  let g:matchup_delim_noskips = 1
+  let g:matchup_delim_noskips = 2
+<
+  Default: 0 (matching enabled within strings and comments)
+
 Variables~
 
 *b:match_words*

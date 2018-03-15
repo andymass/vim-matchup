@@ -349,14 +349,16 @@ function! s:get_delim(opts) " {{{1
   let s:invert_skip = 0
 
   if a:opts.direction ==# 'current'
-    let l:check_skip = get(a:opts, 'check_skip', 0)
+    let l:check_skip = get(a:opts, 'check_skip',
+          \ g:matchup_delim_noskips >= 2)
     if l:check_skip && matchup#delim#skip(line('.'), l:cursorpos)
       return {}
     endif
   else
     " check skip if cursor is not currently in skip
     let l:check_skip = get(a:opts, 'check_skip',
-          \ !matchup#delim#skip(line('.'), l:cursorpos))
+          \ !matchup#delim#skip(line('.'), l:cursorpos)
+          \ || g:matchup_delim_noskips >= 2)
   endif
 
   let a:opts.cursorpos = l:cursorpos
@@ -398,10 +400,16 @@ function! s:get_delim(opts) " {{{1
           \   : searchpos(l:re, 'bcnW', line('.'))
     if l:lnum == 0 | break | endif
 
+    let l:wordish_skip = g:matchup_delim_noskips == 1
+          \ && getline(l:lnum)[l:cnum-1] =~ '[^[:punct:]]'
+    if a:opts.direction ==# 'current' && l:wordish_skip
+      return {}
+    endif
+
     " note: the skip here should not be needed
     " in 'current' mode, but be explicit
     if a:opts.direction !=# 'current'
-          \ && l:check_skip
+          \ && (l:check_skip || l:wordish_skip)
           \ && matchup#delim#skip(l:lnum, l:cnum)
 
       " invalid match, move cursor and keep looking
