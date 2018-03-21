@@ -11,7 +11,7 @@ issue description. In short, it should contain the following:
 
 ## Branch model
 
-matchup is developed mainly through the master branch, and pull requests should
+match-up is developed mainly through the master branch, and pull requests should
 be [fork based](https://help.github.com/articles/using-pull-requests/).
 
 ## Documentation style
@@ -20,7 +20,7 @@ Vim help files have their own specific syntax. There is a Vim help section on
 how to write them, see [`:h
 help-writing`](http://vimdoc.sourceforge.net/htmldoc/helphelp.html#help-writing).
 
-The matchup documentation style should be relatively clear, and it should be
+The match-up documentation style should be relatively clear, and it should be
 easy to see from the existing documentation how to write it. Still, here are
 some pointers:
 
@@ -33,7 +33,7 @@ some pointers:
 
 ## Code style
 
-When submitting code for matchup, please adhere to the following standards:
+When submitting code for match-up, please adhere to the following standards:
 
 - Use `shiftwidth=2` - no tabs!
 - Write readable code

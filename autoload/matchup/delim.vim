@@ -8,11 +8,6 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! matchup#delim#init_module() " {{{1
-  " nnoremap <silent> <plug>(matchup-delim-delete)
-  "       \ :call matchup#delim#delete()<cr>
-  " inoremap <silent> <plug>(matchup-delim-close)
-  "       \ <c-r>=matchup#delim#close()<cr>
-
   augroup matchup_filetype
     au!
     autocmd FileType * call matchup#delim#init_buffer()
@@ -50,39 +45,6 @@ endfunction
 " }}}1
 
 
-function! matchup#delim#close() " {{{1
-  let l:save_pos = matchup#pos#get_cursor()
-  let l:pos_val_cursor = matchup#pos#val(l:save_pos)
-
-  let l:lnum = l:save_pos[1] + 1
-  while l:lnum > 1
-    let l:open = matchup#delim#get_prev('all', 'open',
-          \ { 'syn_exclude' : 'Comment' })
-    if empty(l:open)
-      break
-    endif
-
-    let l:close = matchup#delim#get_matching(l:open)
-    if empty(l:close.match)
-      call matchup#pos#set_cursor(l:save_pos)
-      return l:open.corr
-    endif
-
-    let l:pos_val_try = matchup#pos#val(l:close) + strlen(l:close.match)
-    if l:pos_val_try > l:pos_val_cursor
-      call matchup#pos#set_cursor(l:save_pos)
-      return l:open.corr
-    else
-      let l:lnum = l:open.lnum
-      call matchup#pos#set_cursor(matchup#pos#prev(l:open))
-    endif
-  endwhile
-
-  call matchup#pos#set_cursor(l:save_pos)
-  return ''
-endfunction
-
-" }}}1
 
 function! matchup#delim#get_next(type, side, ...) " {{{1
   return s:get_delim(extend({
