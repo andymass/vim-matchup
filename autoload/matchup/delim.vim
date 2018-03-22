@@ -11,10 +11,10 @@ function! matchup#delim#init_module() " {{{1
   augroup matchup_filetype
     au!
     autocmd FileType * call matchup#delim#init_buffer()
-    autocmd BufWinEnter * call matchup#delim#bufwinenter()
+    if g:matchup_delim_start_plaintext
+      autocmd BufWinEnter * call matchup#delim#bufwinenter()
+    endif
   augroup END
-
-  call matchup#delim#init_buffer()
 endfunction
 
 " }}}1
