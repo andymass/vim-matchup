@@ -7,26 +7,6 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! matchup#text_obj#init_module() " {{{1
-  if !g:matchup_text_obj_enabled | return | endif
-
-  for [l:map, l:name, l:opt] in [
-        \ ['%', 'delimited', 'delim_all'],
-        \]
-    let l:p1 = 'noremap <silent> <plug>(matchup-'
-    let l:p2 = l:map . ') :<c-u>call matchup#text_obj#' . l:name
-    let l:p3 = empty(l:opt) ? ')<cr>' : ', ''' . l:opt . ''')<cr>'
-    execute 'x' . l:p1 . 'i' . l:p2 . '(1, 1' . l:p3
-    execute 'x' . l:p1 . 'a' . l:p2 . '(0, 1' . l:p3
-    execute 'o' . l:p1 . 'i' . l:p2 . '(1, 0' . l:p3
-    execute 'o' . l:p1 . 'a' . l:p2 . '(0, 0' . l:p3
-  endfor
-
-  nnoremap <silent> <plug>(matchup-double-click)
-    \ :<c-u>call matchup#text_obj#double_click()<cr>
-endfunction
-
-" }}}1
 function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   " get the current selection, move to end of range
   if a:visual

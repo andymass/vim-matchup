@@ -7,63 +7,6 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! matchup#motion#init_module() " {{{1
-  if !g:matchup_motion_enabled | return | endif
-
-  " gets the current forced motion type
-  nnoremap <silent><expr> <sid>(wise)
-        \ empty(g:v_motion_force) ? 'v' : g:v_motion_force
-
-  " jump between matching pairs
-  " TODO can % be made vi compatible wrt yank (:h quote_number)?
-
-  " the basic motions % and g%
-  nnoremap <silent> <plug>(matchup-%)
-        \ :<c-u>call matchup#motion#find_matching_pair(0, 1)<cr>
-  nnoremap <silent> <plug>(matchup-g%)
-        \ :<c-u>call matchup#motion#find_matching_pair(0, 0)<cr>
-
-  " visual and operator-pending
-  xnoremap <silent> <sid>(matchup-%)
-        \ :<c-u>call matchup#motion#find_matching_pair(1, 1)<cr>
-  xmap     <silent> <plug>(matchup-%) <sid>(matchup-%)
-  onoremap <silent> <plug>(matchup-%)
-        \ :<c-u>call matchup#motion#op('%')<cr>
-
-  xnoremap <silent> <sid>(matchup-g%)
-        \ :<c-u>call matchup#motion#find_matching_pair(1, 0)<cr>
-  xmap     <silent> <plug>(matchup-g%) <sid>(matchup-g%)
-  onoremap <silent> <plug>(matchup-g%)
-        \ :<c-u>call matchup#motion#op('g%')<cr>
-
-  " ]% and [%
-  nnoremap <silent> <plug>(matchup-]%)
-        \ :<c-u>call matchup#motion#find_unmatched(0, 1)<cr>
-  nnoremap <silent> <plug>(matchup-[%)
-        \ :<c-u>call matchup#motion#find_unmatched(0, 0)<cr>
-
-  xnoremap <silent> <sid>(matchup-]%)
-        \ :<c-u>call matchup#motion#find_unmatched(1, 1)<cr>
-  xnoremap <silent> <sid>(matchup-[%)
-        \ :<c-u>call matchup#motion#find_unmatched(1, 0)<cr>
-  xmap     <plug>(matchup-]%) <sid>(matchup-]%)
-  xmap     <plug>(matchup-[%) <sid>(matchup-[%)
-  onoremap <silent> <plug>(matchup-]%)
-        \ :<c-u>call matchup#motion#op(']%')<cr>
-  onoremap <silent> <plug>(matchup-[%)
-        \ :<c-u>call matchup#motion#op('[%')<cr>
-
-  " jump inside z%
-  nnoremap <silent> <plug>(matchup-z%)
-        \ :<c-u>call matchup#motion#jump_inside(0)<cr>
-
-  xnoremap <silent> <sid>(matchup-z%)
-        \ :<c-u>call matchup#motion#jump_inside(1)<cr>
-  xmap     <silent> <plug>(matchup-z%) <sid>(matchup-z%)
-  onoremap <silent> <plug>(matchup-z%)
-        \ :<c-u>call matchup#motion#op('z%')<cr>
-endfunction
-
 function! s:snr()
   return str2nr(matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_snr$'))
 endfunction
@@ -75,8 +18,6 @@ function! matchup#motion#op(motion)
         \ . s:sid.'(matchup-'.a:motion.')'
   unlet s:v_operator
 endfunction
-
-" }}}1
 
 function! matchup#motion#find_matching_pair(visual, down) " {{{1
   let [l:count, l:count1] = [v:count, v:count1]

@@ -4,13 +4,6 @@
 " Email:      a@normed.space
 "
 
-function! matchup#misc#init_module() " {{{1
-  command! MatchupReload          call matchup#misc#reload()
-  nnoremap <plug>(matchup-reload) :<c-u>MatchupReload<cr>
-endfunction
-
-" }}}1
-
 " {{{1 function! matchup#misc#reload()
 if get(s:, 'reload_guard', 1)
   function! matchup#misc#reload() abort
@@ -25,6 +18,8 @@ if get(s:, 'reload_guard', 1)
     unlet s:reload_guard
   endfunction
 endif
+
+" }}}1
 
 let s:file = expand('<sfile>')
 

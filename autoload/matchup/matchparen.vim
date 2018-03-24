@@ -45,11 +45,26 @@ function! matchup#matchparen#enable() " {{{1
     autocmd InsertEnter * call s:matchparen.highlight(1, 1)
   augroup END
 
+endfunction
+
+" }}}1
+
+function! s:pi_paren_sid() " {{{1
+  if s:pi_paren_sid >= 0
+    return s:pi_paren_sid
+  endif
+
   let s:pi_paren_sid = 0
   if get(g:, 'loaded_matchparen')
-    let l:pat = expand('$VIM').'.\+matchparen\.vim'
-    let l:lines = matchup#util#command('scriptnames')
-    call filter(l:lines, 'v:val =~# l:pat')
+    let l:pat = '\%#=1\V'.expand('$VIM').'\m.\+matchparen\.vim$'
+    if v:version >= 800
+      " execute() was added in 7.4.2008
+      " :filter was introduced in 7.4.2244 but I have not tested it there
+      let l:lines = split(execute("filter '".l:pat."' scriptnames"), '\n')
+    else
+      let l:lines = matchup#util#command('scriptnames')
+      call filter(l:lines, 'v:val =~# l:pat')
+    endif
     let s:pi_paren_sid = matchstr(get(l:lines, 0), '\d\+\ze: ')
     if !exists('*<SNR>'.s:pi_paren_sid.'_Highlight_Matching_Pair')
       let s:pi_paren_sid = 0
@@ -59,11 +74,13 @@ function! matchup#matchparen#enable() " {{{1
     let s:pi_paren_fcn = function('<SNR>'.s:pi_paren_sid
       \ .'_Highlight_Matching_Pair')
   endif
-
-  call s:matchparen.highlight()
+  return s:pi_paren_sid
 endfunction
 
+let s:pi_paren_sid = -1
+
 " }}}1
+
 function! matchup#matchparen#disable() " {{{1
   call s:matchparen.clear()
   autocmd! matchup_matchparen
@@ -168,8 +185,10 @@ endfunction
 function! s:matchparen.highlight(...) abort dict " {{{1
   if !g:matchup_matchparen_enabled | return | endif
 
+  if has('vim_starting') | return | endif
+
   if !get(b:, 'matchup_matchparen_enabled', 1)
-        \ && get(b:, 'matchup_matchparen_fallback', 1) && s:pi_paren_sid
+        \ && get(b:, 'matchup_matchparen_fallback', 1) && s:pi_paren_sid()
     return call(s:pi_paren_fcn, [])
   endif
 

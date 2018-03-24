@@ -8,9 +8,13 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! matchup#init()
+  call matchup#perf#tic('loading')
+
   call s:init_options()
   call s:init_modules()
   call s:init_default_mappings()
+
+  call matchup#perf#toc('loading', 'init_done')
 endfunction
 
 function! s:init_options()
@@ -54,16 +58,15 @@ function! s:init_option(option, default)
 endfunction
 
 function! s:init_modules()
-  for l:mod in s:modules
-    if index(get(g:, 'matchup_disabled_modules', []), l:mod) >= 0
-      continue
-    endif
-
-    try
-      call matchup#{l:mod}#init_module()
-    catch /E117.*#init_/
-    endtry
+  for l:mod in [ 'delim', 'matchparen' ]
+    call matchup#perf#tic('loading_module')
+    call matchup#{l:mod}#init_module()
+    call matchup#perf#toc('loading_module', l:mod)
   endfor
+
+  call s:motion_init_module()
+  call s:text_obj_init_module()
+  call s:misc_init_module()
 endfunction
 
 let g:v_motion_force = ''
@@ -130,19 +133,104 @@ function! s:init_default_mappings()
     endfor
   endif
 
-  if get(g:, 'matchup_imap_enabled', 0)
-    " call s:map('i', '<c-x><cr>',  '<plug>(matchup-delim-close)')
-    " XXX other maps..?
-  endif
-
   if get(g:, 'matchup_mouse_enabled', 1)
     call s:map('n', '<2-LeftMouse>', '<plug>(matchup-double-click)')
   endif
 endfunction
 
-let s:modules = map(
-      \ glob(fnamemodify(expand('<sfile>'), ':r') . '/*.vim', 0, 1),
-      \ 'fnamemodify(v:val, '':t:r'')')
+" module initialization
+
+function! s:motion_init_module() " {{{1
+  if !g:matchup_motion_enabled | return | endif
+
+  call matchup#perf#tic('loading_module')
+
+  " gets the current forced motion type
+  nnoremap <silent><expr> <sid>(wise)
+        \ empty(g:v_motion_force) ? 'v' : g:v_motion_force
+
+  " the basic motions % and g%
+  nnoremap <silent> <plug>(matchup-%)
+        \ :<c-u>call matchup#motion#find_matching_pair(0, 1)<cr>
+  nnoremap <silent> <plug>(matchup-g%)
+        \ :<c-u>call matchup#motion#find_matching_pair(0, 0)<cr>
+
+  " visual and operator-pending
+  xnoremap <silent> <sid>(matchup-%)
+        \ :<c-u>call matchup#motion#find_matching_pair(1, 1)<cr>
+  xmap     <silent> <plug>(matchup-%) <sid>(matchup-%)
+  onoremap <silent> <plug>(matchup-%)
+        \ :<c-u>call matchup#motion#op('%')<cr>
+
+  xnoremap <silent> <sid>(matchup-g%)
+        \ :<c-u>call matchup#motion#find_matching_pair(1, 0)<cr>
+  xmap     <silent> <plug>(matchup-g%) <sid>(matchup-g%)
+  onoremap <silent> <plug>(matchup-g%)
+        \ :<c-u>call matchup#motion#op('g%')<cr>
+
+  " ]% and [%
+  nnoremap <silent> <plug>(matchup-]%)
+        \ :<c-u>call matchup#motion#find_unmatched(0, 1)<cr>
+  nnoremap <silent> <plug>(matchup-[%)
+        \ :<c-u>call matchup#motion#find_unmatched(0, 0)<cr>
+
+  xnoremap <silent> <sid>(matchup-]%)
+        \ :<c-u>call matchup#motion#find_unmatched(1, 1)<cr>
+  xnoremap <silent> <sid>(matchup-[%)
+        \ :<c-u>call matchup#motion#find_unmatched(1, 0)<cr>
+  xmap     <plug>(matchup-]%) <sid>(matchup-]%)
+  xmap     <plug>(matchup-[%) <sid>(matchup-[%)
+  onoremap <silent> <plug>(matchup-]%)
+        \ :<c-u>call matchup#motion#op(']%')<cr>
+  onoremap <silent> <plug>(matchup-[%)
+        \ :<c-u>call matchup#motion#op('[%')<cr>
+
+  " jump inside z%
+  nnoremap <silent> <plug>(matchup-z%)
+        \ :<c-u>call matchup#motion#jump_inside(0)<cr>
+
+  xnoremap <silent> <sid>(matchup-z%)
+        \ :<c-u>call matchup#motion#jump_inside(1)<cr>
+  xmap     <silent> <plug>(matchup-z%) <sid>(matchup-z%)
+  onoremap <silent> <plug>(matchup-z%)
+        \ :<c-u>call matchup#motion#op('z%')<cr>
+
+  call matchup#perf#toc('loading_module', 'motion')
+endfunction
+
+" }}}1
+function! s:text_obj_init_module() " {{{1
+  if !g:matchup_text_obj_enabled | return | endif
+
+  call matchup#perf#tic('loading_module')
+
+  for [l:map, l:name, l:opt] in [
+        \ ['%', 'delimited', 'delim_all'],
+        \]
+    let l:p1 = 'noremap <silent> <plug>(matchup-'
+    let l:p2 = l:map . ') :<c-u>call matchup#text_obj#' . l:name
+    let l:p3 = empty(l:opt) ? ')<cr>' : ', ''' . l:opt . ''')<cr>'
+    execute 'x' . l:p1 . 'i' . l:p2 . '(1, 1' . l:p3
+    execute 'x' . l:p1 . 'a' . l:p2 . '(0, 1' . l:p3
+    execute 'o' . l:p1 . 'i' . l:p2 . '(1, 0' . l:p3
+    execute 'o' . l:p1 . 'a' . l:p2 . '(0, 0' . l:p3
+  endfor
+
+  nnoremap <silent> <plug>(matchup-double-click)
+    \ :<c-u>call matchup#text_obj#double_click()<cr>
+
+  call matchup#perf#toc('loading_module', 'motion')
+endfunction
+
+" }}}1
+function! s:misc_init_module() " {{{1
+  call matchup#perf#tic('loading_module')
+  command! MatchupReload          call matchup#misc#reload()
+  nnoremap <plug>(matchup-reload) :<c-u>MatchupReload<cr>
+  call matchup#perf#toc('loading_module', 'misc')
+endfunction
+
+" }}}1
 
 let &cpo = s:save_cpo
 
