@@ -187,14 +187,14 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
   if has('vim_starting') | return | endif
 
+  if !g:matchup_matchparen_pumvisible && pumvisible() | return | endif
+
   if !get(b:, 'matchup_matchparen_enabled', 1)
         \ && get(b:, 'matchup_matchparen_fallback', 1) && s:pi_paren_sid()
     return call(s:pi_paren_fcn, [])
   endif
 
   if !get(b:, 'matchup_matchparen_enabled', 1) | return | endif
-
-  if pumvisible() | return | endif
 
   let l:force_update    = a:0 >= 1 ? a:1 : 0
   let l:entering_insert = a:0 >= 2 ? a:2 : 0

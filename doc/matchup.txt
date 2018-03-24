@@ -522,6 +522,14 @@ will only work in nvim-0.2.1 and after.
 
   Defaults: 50, 700
 
+*g:matchup_matchparen_pumvisible*
+
+  If set to 1, matches will be made even when the |popupmenu-completion| is
+  visible.  If you use an auto-complete plugin which interacts badly with
+  matching, set this option to 0.
+
+  Default: 1
+
 Module motion~
 
 *g:matchup_motion_override_Npercent*
