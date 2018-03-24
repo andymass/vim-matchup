@@ -7,7 +7,7 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! matchup#delim#init_module() " {{{1
+function! matchup#delim#init_module() " {{{1   !LOADER
   augroup matchup_filetype
     au!
     autocmd FileType * call matchup#delim#init_buffer()
@@ -18,7 +18,7 @@ function! matchup#delim#init_module() " {{{1
 endfunction
 
 " }}}1
-function! matchup#delim#init_buffer() " {{{1
+function! matchup#delim#init_buffer() " {{{1   !LOADER
   " initialize lists of delimiter pairs and regular expressions
   " this is the data obtained from parsing b:match_words
   let b:matchup_delim_lists = s:init_delim_lists()
@@ -35,7 +35,7 @@ function! matchup#delim#init_buffer() " {{{1
 endfunction
 
 " }}}1
-function! matchup#delim#bufwinenter() " {{{1
+function! matchup#delim#bufwinenter() " {{{1   !LOADER
   if get(b:, 'matchup_delim_enabled', 0)
     return
   endif
@@ -582,14 +582,14 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
   endif
 
   let l:result = {
-        \ 'type'         : 'delim',
+        \ 'type'         : 'delim_tex',
         \ 'match'        : l:match,
         \ 'augment'      : l:augment,
         \ 'groups'       : l:groups,
         \ 'side'         : l:side,
         \ 'is_open'      : (l:side ==# 'open') ? 1 : 0,
         \ 'class'        : [(l:i / l:ns), l:id],
-        \ 'get_matching' : function('s:get_matching_delims'),
+        \ 'get_matching' : s:basetypes['delim_tex'].get_matching,
         \ 'regexone'     : l:thisre,
         \ 'regextwo'     : l:thisrebr,
         \ 'rematch'      : l:re,
@@ -603,7 +603,6 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   " called as:   a:delim.get_matching(...)
   " called from: matchup#delim#get_matching <- matchparen, motion
   "   from: matchup#delim#get_surrounding <- matchparen, motion, text_obj
-  "   from: matchup#delim#close <- delim
 
   call matchup#perf#tic('get_matching_delims')
 
@@ -628,8 +627,8 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   endif
 
   " turn \(\) into \%(\) for searchpairpos
-  let l:open  = s:remove_capture_groups(l:open)
-  let l:close = s:remove_capture_groups(l:close)
+  let l:open  = matchup#delim#remove_capture_groups(l:open)
+  let l:close = matchup#delim#remove_capture_groups(l:close)
 
   " fill in back-references
   " TODO: BADLOGIC2: when going up we don't have these groups yet..
@@ -689,7 +688,7 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   call matchup#perf#toc('get_matching_delims', 'get_matches')
 
   " fill in additional groups
-  let l:mids = s:remove_capture_groups(self.regexone.mid)
+  let l:mids = matchup#delim#remove_capture_groups(self.regexone.mid)
   let l:mids = matchup#delim#fill_backrefs(l:mids, self.groups, 1)
 
   " if there are no mids, we're done
@@ -738,7 +737,7 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
 endfunction
 " }}}1
 
-function! s:init_delim_lists() " {{{1
+function! s:init_delim_lists(...) " {{{1    !LOADER
   let l:lists = { 'delim_tex': { 'regex': [], 'regex_backref': [] } }
 
   " very tricky examples:
@@ -848,7 +847,7 @@ function! s:init_delim_lists() " {{{1
     for l:i in range(1, len(l:words)-1)
 
       " first get rid of the capture groups in this pattern
-      let l:words_backref[l:i] = s:remove_capture_groups(
+      let l:words_backref[l:i] = matchup#delim#remove_capture_groups(
             \ l:words_backref[l:i])
 
       " get the necessary \1, \2, etc back-references
@@ -1053,7 +1052,7 @@ function! s:capture_group_sort(a, b) dict
   return self[a:b].depth - self[a:a].depth
 endfunction
 
-function! matchup#delim#capture_group_replacement_order(cg)
+function! matchup#delim#capture_group_replacement_order(cg)   " !LOADER
   let l:order = reverse(sort(keys(a:cg), s:Nsort))
   call sort(l:order, 's:capture_group_sort', a:cg)
   return l:order
@@ -1061,7 +1060,7 @@ endfunction
 
 " }}}1
 
-function! s:init_delim_regexes() " {{{1
+function! s:init_delim_regexes() " {{{1   !LOADER
   let l:re = {}
   let l:re.delim_all = {}
   let l:re.all = {}
@@ -1084,7 +1083,7 @@ function! s:init_delim_regexes() " {{{1
 endfunction
 
 " }}}1
-function! s:init_delim_regexes_generator(list_name) " {{{1
+function! s:init_delim_regexes_generator(list_name) " {{{1    !LOADER
   let l:list = b:matchup_delim_lists[a:list_name].regex_backref
 
   " build the full regex strings: order matters here
@@ -1100,7 +1099,7 @@ function! s:init_delim_regexes_generator(list_name) " {{{1
       endfor
     endfor
 
-    let l:regexes[l:key] = s:remove_capture_groups(
+    let l:regexes[l:key] = matchup#delim#remove_capture_groups(
           \ '\%(' . join(l:relist, '\|') . '\)')
   endfor
 
@@ -1109,7 +1108,7 @@ endfunction
 
 " }}}1
 
-function! matchup#delim#get_capture_groups(str, ...) " {{{1
+function! matchup#delim#get_capture_groups(str, ...) " {{{1    !LOADER
   let l:allow_percent = a:0 ? a:1 : 0
   let l:pat = g:matchup#re#not_bslash . '\(\\%(\|\\(\|\\)\)'
 
@@ -1163,7 +1162,7 @@ endfunction
 
 " }}}1
 
-function! s:init_delim_skip() "{{{1
+function! s:init_delim_skip() "{{{1     !LOADER
   let l:skip = get(b:, 'match_skip', '')
   if empty(l:skip) | return '' | endif
 
@@ -1241,7 +1240,7 @@ endfunction
 
 " }}}1
 
-function! s:remove_capture_groups(re) "{{{1
+function! matchup#delim#remove_capture_groups(re) "{{{1    !LOADER
   let l:sub_grp = '\(\\\@<!\(\\\\\)*\)\@<=\\('
   return substitute(a:re, l:sub_grp, '\\%(', 'g')
 endfunction
@@ -1281,7 +1280,7 @@ endfunction
 
 " }}}1
 
-function! s:Nsort_func(a, b) " {{{1
+function! s:Nsort_func(a, b) " {{{1   !LOADER
   let l:a = type(a:a) == type('') ? str2nr(a:a) : a:a
   let l:b = type(a:b) == type('') ? str2nr(a:b) : a:b
   return l:a == l:b ? 0 : l:a > l:b ? 1 : -1
@@ -1303,7 +1302,8 @@ let s:sidedict = {
 
 let s:basetypes = {
       \ 'delim_tex': {
-      \   'parser' : function('s:parser_delim_new'),
+      \   'parser'       : function('s:parser_delim_new'),
+      \   'get_matching' : function('s:get_matching_delims'),
       \ },
       \}
 
