@@ -199,6 +199,16 @@ function! s:motion_init_module() " {{{1
   call matchup#perf#toc('loading_module', 'motion')
 endfunction
 
+" TODO redo this
+function! s:snr()
+  return str2nr(matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_snr$'))
+endfunction
+let s:sid = printf("\<SNR>%d_", s:snr())
+
+function! matchup#motion_sid()
+  return s:sid
+endfunction
+
 " }}}1
 function! s:text_obj_init_module() " {{{1
   if !g:matchup_text_obj_enabled | return | endif

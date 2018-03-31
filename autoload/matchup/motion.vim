@@ -7,15 +7,12 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! s:snr()
-  return str2nr(matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_snr$'))
-endfunction
-let s:sid = printf("\<SNR>%d_", s:snr())
-
+" TODO redo this
 function! matchup#motion#op(motion)
+  let l:sid = matchup#motion_sid()
   let s:v_operator = v:operator
-  execute 'normal' s:sid.'(wise)' . (v:count > 0 ? v:count : '')
-        \ . s:sid.'(matchup-'.a:motion.')'
+  execute 'normal' l:sid.'(wise)' . (v:count > 0 ? v:count : '')
+        \ . l:sid.'(matchup-'.a:motion.')'
   unlet s:v_operator
 endfunction
 
