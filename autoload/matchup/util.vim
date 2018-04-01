@@ -111,6 +111,12 @@ function! matchup#util#patch_match_words(from, to) " {{{1
 endfunction
 
 " }}}1
+function! matchup#util#check_match_words(sha256) " {{{1
+  if !exists('b:match_words') | return 0 | endif
+  return sha256(b:match_words) =~# '^'.a:sha256
+endfunction
+
+" }}}1
 
 let &cpo = s:save_cpo
 

@@ -752,6 +752,8 @@ function! s:init_delim_lists(...) " {{{1    !LOADER
 
   if exists('g:matchup_hotfix_'.&filetype)
     call call(g:matchup_hotfix_{&filetype}, [])
+  elseif exists('b:matchup_hotfix')
+    call call(b:matchup_hotfix, [])
   endif
 
   " parse matchpairs and b:match_words
