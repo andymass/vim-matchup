@@ -57,7 +57,7 @@ endfunction
 command! MatchupShowTimes call matchup#perf#show_times()
 command! MatchupClearTimes let g:matchup#perf#times = {}
 
-let s:timeout = 0 
+let s:timeout = 0
 let s:timeout_enabled = 0
 let s:timeout_pulse_time = reltime()
 
@@ -67,7 +67,7 @@ endfunction
 
 "}}}1
 function! matchup#perf#timeout_start(timeout) " {{{1
-  let s:timeout = a:timeout 
+  let s:timeout = a:timeout
   let s:timeout_enabled = (a:timeout == 0) ? 0 : 1
   let s:timeout_pulse_time = reltime()
 endfunction
@@ -83,14 +83,16 @@ endfunction
 
 " }}}1
 
-function! s:reltimefloat(time) " {{{1
-  if s:exists_reltimefloat
+" function! s:reltimefloat(time) {{{1
+if exists('*reltimefloat')
+  function! s:reltimefloat(time)
     return reltimefloat(a:time)
-  else
+  endfunction
+else
+  function! s:reltimefloat(time)
     return str2float(reltimestr(a:time))
-  endif
-endfunction
-let s:exists_reltimefloat = exists('*reltimefloat')
+  endfunction
+endif
 
 " }}}1
 

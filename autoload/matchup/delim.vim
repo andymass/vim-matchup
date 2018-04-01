@@ -1150,15 +1150,17 @@ function! matchup#delim#get_capture_groups(str, ...) " {{{1    !LOADER
 endfunction
 
 " compatibility
-function! s:matchstrpos(expr, pat, start) abort
-  if exists('*matchstrpos')
+if exists('*matchstrpos')
+  function! s:matchstrpos(expr, pat, start) abort
     return matchstrpos(a:expr, a:pat, a:start)
-  else
+  endfunction
+else
+  function! s:matchstrpos(expr, pat, start) abort
     return [matchstr(a:expr, a:pat, a:start),
           \ match(a:expr, a:pat, a:start),
           \ matchend(a:expr, a:pat, a:start)]
-  endif
-endfunction
+  endfunction
+endif
 
 " }}}1
 

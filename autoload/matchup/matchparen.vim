@@ -145,16 +145,21 @@ function! s:timer_callback(win_id, timer_id) abort " {{{1
   endif
 endfunction
 
-function! s:reltimefloat(time)
-  if s:exists_reltimefloat
+" }}}1
+
+" function! s:reltimefloat(time) {{{1
+if exists('*reltimefloat')
+  function! s:reltimefloat(time)
     return reltimefloat(a:time)
-  else
+  endfunction
+else
+  function! s:reltimefloat(time)
     return str2float(reltimestr(a:time))
-  endif
-endfunction
-let s:exists_reltimefloat = exists('*reltimefloat')
+  endfunction
+endif
 
 " }}}1
+
 function! s:matchparen.highlight_deferred() abort dict " {{{1
   if !g:matchup_matchparen_deferred
     return s:matchparen.highlight()
