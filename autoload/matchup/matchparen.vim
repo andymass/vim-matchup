@@ -336,16 +336,27 @@ function! matchup#matchparen#offscreen(current) " {{{1
 endfunction
 
 " }}}1
-function! matchup#matchparen#highlight_surrounding() " {{{1
-  call matchup#perf#timeout_start(0)
+function! matchup#matchparen#highlight_surrounding(...) " {{{1
+  call matchup#perf#timeout_start(500)
   let l:delims = matchup#delim#get_surrounding('delim_all', 1)
-  if empty(l:delims[0]) | return | endif
+  let l:open = l:delims[0]
+  if empty(l:open) | return | endif
 
-  let l:save_pos = matchup#pos#get_cursor()
-  call matchup#pos#set_cursor(l:delims[0])
-  call s:matchparen.highlight(1)
+  let l:corrlist = matchup#delim#get_matching(l:open, 1)
+  if empty(l:corrlist) | return | endif
 
-  call matchup#pos#set_cursor(l:save_pos)
+  " store flag meaning highlighting is active
+  let w:matchup_need_clear = 1
+
+  " add highlighting matches
+  if !exists('w:matchup_match_id_list')
+    let w:matchup_match_id_list = []
+  endif
+
+  for l:corr in l:corrlist
+    call add(w:matchup_match_id_list, matchaddpos('MatchParen',
+       \   [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]]))
+  endfor
 endfunction
 
 "}}}1
