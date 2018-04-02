@@ -21,6 +21,8 @@ endfunction
 " }}}1
 
 function! matchup#matchparen#enable() " {{{1
+  let g:matchup_matchparen_enabled = 1
+
   if g:matchup_matchparen_deferred
         \ && (!has('timers') || !exists('*timer_pause')
         \     || has('nvim') && !has('nvim-0.2.1'))
@@ -40,8 +42,6 @@ function! matchup#matchparen#enable() " {{{1
       autocmd TextChangedP * call s:matchparen.highlight_deferred()
     endif
     autocmd WinLeave * call s:matchparen.clear()
-    " autocmd BufLeave * call s:matchparen.clear()
-    " autocmd InsertEnter,InsertLeave  * call s:matchparen.highlight()
     autocmd InsertEnter * call s:matchparen.highlight(1, 1)
   augroup END
 
@@ -86,8 +86,9 @@ let s:pi_paren_sid = -1
 " }}}1
 
 function! matchup#matchparen#disable() " {{{1
+  let g:matchup_matchparen_enabled = 0
   call s:matchparen.clear()
-  autocmd! matchup_matchparen
+  silent! autocmd! matchup_matchparen
 endfunction
 
 " }}}1
@@ -96,9 +97,10 @@ function! matchup#matchparen#toggle(...) " {{{1
         \ ? a:1
         \ : !g:matchup_matchparen_enabled
   if g:matchup_matchparen_enabled
+    call matchup#matchparen#enable()
     call s:matchparen.highlight(1)
   else
-    call s:matchparen.clear()
+    call matchup#matchparen#disable()
   endif
 endfunction
 

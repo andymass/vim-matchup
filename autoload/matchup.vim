@@ -61,6 +61,9 @@ endfunction
 
 function! s:init_modules()
   for l:mod in [ 'loader', 'matchparen' ]
+    if !get(g:, 'matchup_'.l:mod.'_enabled', 1)
+      continue
+    endif
     call matchup#perf#tic('loading_module')
     call matchup#{l:mod}#init_module()
     call matchup#perf#toc('loading_module', l:mod)

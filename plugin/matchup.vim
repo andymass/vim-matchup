@@ -30,14 +30,18 @@ if exists('g:loaded_matchit')
 endif
 let g:loaded_matchit = 1
 
-if get(g:, 'matchup_matchparen_enabled', 1)
-  if !exists('g:loaded_matchparen')
-    runtime plugin/matchparen.vim
-  endif
+" ensure pi_paren is loaded but deactivated
+try
+  runtime plugin/matchparen.vim
   au! matchparen
-  command! NoMatchParen call matchup#matchparen#toggle(0)
-  command! DoMatchParen call matchup#matchparen#toggle(1)
-endif
+catch /^Vim\%((\a\+)\)\=:E216/
+  unlet! g:loaded_matchparen
+  runtime plugin/matchparen.vim
+  silent! au! matchparen
+  let g:loaded_matchparen = 1
+endtry
+command! NoMatchParen call matchup#matchparen#toggle(0)
+command! DoMatchParen call matchup#matchparen#toggle(1)
 
 if get(g:, 'matchup_override_vimtex', 0)
   let g:vimtex_matchparen_enabled = 0
