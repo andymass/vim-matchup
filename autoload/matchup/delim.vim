@@ -336,9 +336,15 @@ function! s:get_delim(opts) " {{{1
   "  let l:re = '\%<'.(l:cursorpos+1).'c' . l:re
   endif
 
-  " allow overlapping delimiters (replaces cpo-=c)
+  " allow overlapping delimiters
   " without this, the > in <tag> would not be found
-  let l:re .= '\&'
+  if b:matchup_delim_re[a:opts.type]._engine_info.has_zs[a:opts.side]
+    let l:save_cpo = &cpo
+    noautocmd set cpo-=c
+  else
+    " faster than changing cpo but doesn't work right with \zs
+    let l:re .= '\&'
+  endif
 
   " use b:match_ignorecase
   call s:ignorecase_start()
@@ -388,6 +394,13 @@ function! s:get_delim(opts) " {{{1
 
     break
   endwhile
+
+  " restore cpo if necessary
+  " note: this messes with cursor position
+  if exists('l:save_cpo')
+    noautocmd let &cpo = l:save_cpo
+    let l:need_restore_cursor = 1
+  endif
 
   " reset ignorecase
   call s:ignorecase_end()
@@ -1072,18 +1085,21 @@ function! s:init_delim_regexes() " {{{1   !LOADER
   let l:re.all = {}
 
   let l:re.delim_tex = s:init_delim_regexes_generator('delim_tex')
+  let l:re.delim_tex._engine_info = { 'has_zs': {} }
 
   for l:k in keys(s:sidedict)
+    let l:re.delim_tex._engine_info.has_zs[l:k]
+          \ = l:re.delim_tex[l:k] =~# g:matchup#re#zs
+
+    " be explicit about regex mode (set magic mode)
+    let l:re.delim_tex[l:k] = '\m' . l:re.delim_tex[l:k]
+
     let l:re.delim_all[l:k] = l:re.delim_tex[l:k]
     let l:re.all[l:k] = l:re.delim_all[l:k]
   endfor
 
-  " be explicit about regex mode (set magic mode)
-  for l:type in values(l:re)
-    for l:side in keys(l:type)
-      let l:type[l:side] = '\m' . l:type[l:side]
-    endfor
-  endfor
+  let l:re.delim_all._engine_info = l:re.delim_tex._engine_info
+  let l:re.all._engine_info = l:re.delim_all._engine_info
 
   return l:re
 endfunction
