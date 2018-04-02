@@ -60,7 +60,7 @@ function! s:init_option(option, default)
 endfunction
 
 function! s:init_modules()
-  for l:mod in [ 'delim', 'matchparen' ]
+  for l:mod in [ 'loader', 'matchparen' ]
     call matchup#perf#tic('loading_module')
     call matchup#{l:mod}#init_module()
     call matchup#perf#toc('loading_module', l:mod)
