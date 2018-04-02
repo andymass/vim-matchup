@@ -221,6 +221,11 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
   call self.clear()
 
+  if g:matchup_matchparen_novisual
+        \ && index(['v','V',"\<c-v>"], mode()) >= 0
+    return
+  endif
+
   " don't get matches when inside a closed fold
   if foldclosed(line('.')) > -1
     return
@@ -402,3 +407,4 @@ endfunction
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
+
