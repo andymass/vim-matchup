@@ -186,6 +186,10 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
           \ l:local ? 'open_mid' : 'open', l:delimopts)
     if empty(l:open) | break | endif
 
+    if matchup#perf#timeout_check() && !g:matchup_delim_count_fail
+      break
+    endif
+
     let l:matches = matchup#delim#get_matching(l:open, 1)
 
     if len(l:matches)
