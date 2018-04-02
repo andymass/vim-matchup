@@ -775,12 +775,20 @@ function! s:init_delim_lists(...) " {{{1    !LOADER
 
   " parse matchpairs and b:match_words
   let l:mps = escape(&matchpairs, '[$^.*~\\/?]')
-  let l:match_words = get(b:, 'match_words', '')
+  let l:match_words = a:0 ? a:1 : get(b:, 'match_words', '')
   if !empty(l:match_words) && l:match_words !~# ':'
-    echohl ErrorMsg
-    echo 'match-up: function b:match_words not supported'
-    echohl None
-    let l:match_words = ''
+    if a:0
+      echohl ErrorMsg
+      echo 'match-up: function b:match_words error'
+      echohl None
+      let l:match_words = ''
+    else
+      " execute 'let l:match_words =' b:match_words
+      echohl ErrorMsg
+      echo 'match-up: function b:match_words not supported'
+      echohl None
+      let l:match_words = ''
+    endif
   endif
   if !get(b:, 'matchup_delim_nomatchpairs', 0) && !empty(l:mps)
     let l:match_words .= ','.l:mps
