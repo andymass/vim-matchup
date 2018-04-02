@@ -425,6 +425,14 @@ Options~
 <
   Default: 0 (matching enabled within strings and comments)
 
+*g:matchup_delim_start_plaintext*
+
+  When enabled (the default), the plugin will be loaded for all buffers,
+  including ones without a file type set.  This allows matching to be done in
+  new buffers and plain text files but adds a small start-up cost to vim.
+
+  Default: 1
+
 Variables~
 
 *b:match_words*
@@ -530,6 +538,13 @@ will only work in nvim-0.2.1 and after.
 
   Default: 1
 
+*g:matchup_matchparen_novisual*
+
+  When enabled, highlighting will be turned off in visual mode, after moving
+  the cursor.
+
+  Default: 0
+
 Module motion~
 
 *g:matchup_motion_override_Npercent*
@@ -634,6 +649,10 @@ Customization~
       " customization
     endfunction
     let g:matchup_hotfix_vim = 'VimHotfix'
+
+*b:matchup_hotfix*
+
+  This is an alternative buffer-local name for adding customization.
 
 *matchup#util#patch_match_words*                                  *matchup-patch*
 >
