@@ -13,12 +13,12 @@ file2="$file-2.log"
 
 "$VISUAL" -u vimrc-startup --startuptime "$file1"
 
-echo 'g:matchup_delim_start_plain=0'
+echo 'g:matchup_delim_start_plaintext=0'
 grep matchup "$file1"
 
 export TEST_PLAIN=1
 "$VISUAL" -u vimrc-startup --startuptime "$file2"
 
-echo 'g:matchup_delim_start_plain=1'
+echo 'g:matchup_delim_start_plaintext=1'
 grep matchup "$file2"
 
