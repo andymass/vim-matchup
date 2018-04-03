@@ -214,10 +214,11 @@ in the `matchpairs` setting.
 
 #### (c.2) highlight _all_ matches
 
-To disable match highlighting, `let g:matchup_matchparen_enabled = 0`.
-If this option is set before the plugin is loaded, it will not disable
-the built-in matchparen plugin.  See [here](#module-matchparen) for
-other related options.
+To disable match highlighting at startup, use
+`let g:matchup_matchparen_enabled = 0`
+in your vimrc.
+See [here](#module-matchparen) for more information and related
+options.
 
 #### (c.3) display matches off screen
 
@@ -403,7 +404,32 @@ every file type.  To support a new file type, create a file
 
 ### Module matchparen
 
-The matchparen module can be disabled on a per-buffer basis
+To disable match highlighting at startup, use
+`let g:matchup_matchparen_enabled = 0` in your vimrc.
+Note: vim's built-in plugin |pi_paren| plugin is also disabled.
+The variable `g:loaded_matchparen` has no effect on match-up.
+
+#### Customizing the highlighting colors
+
+match-up uses the `MatchParen` highlighting group, which can be configured.
+For example,
+```vim
+  :hi MatchParen ctermbg=blue guibg=lightblue cterm=italic gui=italic
+```
+
+You may want to put this inside a `ColorScheme` `autocmd` so it is
+preserved after colorscheme changes:
+```vim
+  augroup matchup_matchparen_highlight
+    autocmd!
+    autocmd ColorScheme * hi MatchParen guifg=red
+  augroup END
+```
+
+The matchparen module can also be disabled on a per-buffer basis (there is
+no command for this).  By default, when disabling highlighting for a
+particular buffer, the standard plugin matchparen will still be used
+for that buffer.
 
 ```vim
 let b:matchup_matchparen_enabled = 0
@@ -411,15 +437,15 @@ let b:matchup_matchparen_enabled = 0
 default: 1
 
 If this module is disabled on a particular buffer, match-up will still
-fall-back to the vim standard plugin matchit, which will highlight
+fall-back to the vim standard plugin matchparen, which will highlight
 `matchpairs` such as `()`, `[]`, & `{}`.  To disable this,
 ```vim
 let b:matchup_matchparen_fallback = 0
 ```
 default: 1
 
-A common usage is to automatically disable matchparen for
-particular file types;
+A common usage of these options is to automatically disable
+matchparen for particular file types;
 ```vim
 augroup matchup_matchparen_disable_ft
   autocmd!

@@ -242,16 +242,31 @@ important special cases.
 
 Highlighting matches~
 
-To disable match highlighting, set |g:matchup_matchparen_enabled| to 0.
-If this option is set before the plugin is loaded, it will not disable
-the built-in |matchparen| plugin.  See |matchup-opts-matchparen| for other
-related options.
+To disable match highlighting at |startup|, use >
+
+  let g:matchup_matchparen_enabled = 0
+>
+in your vimrc.  See |matchup-opts-matchparen| for more information and related
+options.
+
+You can enable highlighting on the fly using >
+
+  :DoMatchParen
+<
+Likewise, you can disable highlighting at any time using >
+
+  :NoMatchParen
+<
+After start-up, is better to use `:NoMatchParen` and `:DoMatchParen` to toggle
+highlighting globally than setting the global variable since these commands
+make sure not to leave stale matches around.
 
 Display matches off screen~
 
 If a open or close which would have been highlighted is on a line positioned
 outside the current window, the match is shown in the status line.  If both
 the open and close match are off-screen, the close match is preferred.
+See |g:matchup_matchparen_status_offscreen|.
 
                                                   *<plug>(matchup-hi-surround)*
 Highlight surrounding~
@@ -447,22 +462,55 @@ Variables~
                                                   *matchup-opts-matchparen*
 Module matchparen~
 
+*g:matchup_matchparen_enabled*
+
+  This option will disable match highlighting at |startup|, e.g., use >
+
+    let g:matchup_matchparen_enabled = 0
+<
+  in your vimrc.
+
+  Note: vim's built-in plugin |pi_paren| plugin is also disabled.  The variable
+  `g:loaded_matchparen` has no effect on match-up.
+
+  Default: 1
+
+  You can also enable and disable highlighting for specific buffers using the
+  variable |b:matchup_matchparen_enabled|.
+
+  Customizing the highlighting colors~
+
+    match-up uses the |MatchParen| highlighting group, which can be configured.
+    For example, >
+
+      :hi MatchParen ctermbg=blue guibg=lightblue cterm=italic gui=italic
+<
+    You may want to put this inside a |ColorScheme| |autocmd| so it is
+    preserved after colorscheme changes: >
+
+      augroup matchup_matchparen_highlight
+        autocmd!
+        autocmd ColorScheme * hi MatchParen guifg=red
+      augroup END
+<
 *b:matchup_matchparen_enabled*
 
-  Set to 0 to disable highlighting on a per-buffer basis.
+  Set to 0 to disable highlighting on a per-buffer basis (there is no command
+  for this).  By default, when disabling highlighting for a particular buffer,
+  the standard plugin |pi_paren| will still be used for that buffer.
 
   Default: undefined (equivalent to 1)
 
 *b:matchup_matchparen_fallback*
 
   If highlighting is disabled on a particular buffer, match-up will fall back
-  to the vim standard plugin matchit, which will highlight 'matchpairs' such
+  to the vim standard plugin |pi_paren|, which will highlight 'matchpairs' such
   as `()`, `[]`, & `{}`.  To disable this, set this option to 0.
 
   Default: undefined (equivalent to 1)
 
-  A common usage is to automatically disable matchparen for particular file
-  types: >
+  A common usage of these options is to automatically disable matchparen for
+  particular file types: >
 
     augroup matchup_matchparen_disable_ft
       autocmd!
