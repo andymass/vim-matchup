@@ -220,12 +220,21 @@ in your vimrc.
 See [here](#module-matchparen) for more information and related
 options.
 
+You can enable highlighting on the fly using `:DoMatchParen`.
+Likewise, you can disable highlighting at any time using
+`:NoMatchParen`.
+
+After start-up, is better to use `:NoMatchParen` and `:DoMatchParen`
+to toggle highlighting globally than setting the global variable
+since these commands make sure not to leave stale matches around.
+
 #### (c.3) display matches off screen
 
 If a open or close which would have been highlighted is on a line
 positioned outside the current window, the match is shown in the
 status line.  If both the open and close match are off-screen, the
 close match is preferred.
+(See the option `g:matchup_matchparen_status_offscreen`).
 
 #### (d.1) parallel transmutation
 
