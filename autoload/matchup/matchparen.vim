@@ -45,9 +45,15 @@ function! matchup#matchparen#enable() " {{{1
     autocmd InsertEnter * call s:matchparen.highlight(1, 1)
   augroup END
 
-  " prevent this from autoloading during timer callback at startup
-  if has('vim_starting') && g:matchup_matchparen_deferred
-    call matchup#pos#val(0,0)
+  if has('vim_starting')
+    " prevent this from autoloading during timer callback at startup
+    if g:matchup_matchparen_deferred
+      call matchup#pos#val(0,0)
+    endif
+
+    " prevent loading the delim module at vim startup
+    let w:last_changedtick = 2
+    let w:last_cursor = [0,1,1,0,1]
   endif
 endfunction
 
