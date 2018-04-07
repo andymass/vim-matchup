@@ -641,7 +641,7 @@ Module text_obj~
 
   function! IsCommentaryOpFunc()
     return &operatorfunc ==? matchstr(maparg('<Plug>Commentary', 'n'),
-        \ '\cset op\%(erator\)\?func=\zs.\{-\}\ze<cr>')
+        \ '\c<SNR>\w\+\ze()\|set op\%(erator\)\?func=\zs.\{-\}\ze<cr>')
   endfunction
 
   let g:matchup_text_obj_linewise_operators = ['d', 'y',
