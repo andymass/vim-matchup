@@ -344,6 +344,8 @@ function! s:get_delim(opts) " {{{1
     if a:opts.direction !=# 'current'
           \ && (l:check_skip || l:wordish_skip)
           \ && matchup#delim#skip(l:lnum, l:cnum)
+          \ && (a:opts.direction ==# 'prev' ? (l:lnum > 1 || l:cnum > 1)
+          \     : (l:lnum < line('$') || l:cnum < len(getline('$'))))
 
       " invalid match, move cursor and keep looking
       call matchup#pos#set_cursor(a:opts.direction ==# 'next'
