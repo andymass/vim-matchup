@@ -405,11 +405,13 @@ Options~
 
   Default: 1
 
-*g:matchup_matchparen_enabled*      highlighting
+*g:matchup_mappings_enabled*        all mappings
+|g:matchup_matchparen_enabled|      match highlighting
+*g:matchup_mouse_enabled*           double click to select matches
 *g:matchup_motion_enabled*          |matchup-%|, |%|, |[%|, |]%|
 *g:matchup_text_obj_enabled*        |a%|, |i%|
 
-  Set to 0 to disable a particular module.
+  Set to 0 to disable a particular module or feature.
 
   Defaults: 1
 
