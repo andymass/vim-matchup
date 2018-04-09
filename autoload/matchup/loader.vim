@@ -19,6 +19,8 @@ endfunction
 
 " }}}1
 function! matchup#loader#init_buffer() abort " {{{1
+  call matchup#perf#tic('loader_init_buffer')
+
   " initialize lists of delimiter pairs and regular expressions
   " this is the data obtained from parsing b:match_words
   let b:matchup_delim_lists = s:init_delim_lists()
@@ -31,7 +33,9 @@ function! matchup#loader#init_buffer() abort " {{{1
   let b:matchup_delim_skip = s:init_delim_skip()
 
   " enable/disable for this buffer
-  let b:matchup_delim_enabled = 1
+  let b:matchup_delim_enabled = !empty(b:matchup_delim_lists.all.regex)
+
+  call matchup#perf#toc('loader_init_buffer', 'done')
 endfunction
 
 " }}}1
@@ -64,7 +68,6 @@ function! s:init_delim_lists(...) abort " {{{1
   endif
 
   " parse matchpairs and b:match_words
-  let l:mps = escape(&matchpairs, '[$^.*~\\/?]')
   let l:match_words = a:0 ? a:1 : get(b:, 'match_words', '')
   if !empty(l:match_words) && l:match_words !~# ':'
     if a:0
@@ -80,9 +83,17 @@ function! s:init_delim_lists(...) abort " {{{1
       let l:match_words = ''
     endif
   endif
+  let l:simple = empty(l:match_words)
+
+  let l:mps = escape(&matchpairs, '[$^.*~\\/?]')
   if !get(b:, 'matchup_delim_nomatchpairs', 0) && !empty(l:mps)
-    let l:match_words .= ','.l:mps
+    let l:match_words .= (l:simple ? '' : ',').l:mps
   endif
+
+  if l:simple
+    return s:init_delim_lists_fast(l:match_words)
+  endif
+
   let l:sets = split(l:match_words, g:matchup#re#not_bslash.',')
 
   " do not duplicate whole groups of match words
@@ -366,6 +377,58 @@ function! s:init_delim_lists(...) abort " {{{1
 endfunction
 
 " }}}1
+function! s:init_delim_lists_fast(mps) abort " {{{1
+  let l:lists = { 'delim_tex': { 'regex': [], 'regex_backref': [] } }
+
+  let l:sets = split(a:mps, ',')
+  let l:seen = {}
+
+  for l:s in l:sets
+    if l:s =~# '^\s*$' | continue | endif
+
+    if l:s ==# '[:]' || l:s ==# '\[:\]'
+      let l:s = '\[:]'
+    endif
+
+    if has_key(l:seen, l:s) | continue | endif
+    let l:seen[l:s] = 1
+
+    let l:words = split(l:s, ':')
+    if len(l:words) < 2 | continue | endif
+
+    call add(l:lists.delim_tex.regex, {
+      \ 'open'     : l:words[0],
+      \ 'close'    : l:words[-1],
+      \ 'mid'      : '',
+      \ 'mid_list' : [],
+      \ 'augments' : {},
+      \})
+    call add(l:lists.delim_tex.regex_backref, {
+      \ 'open'     : l:words[0],
+      \ 'close'    : l:words[-1],
+      \ 'mid'      : '',
+      \ 'mid_list' : [],
+      \ 'need_grp' : {},
+      \ 'grp_renu' : {},
+      \ 'aug_comp' : {},
+      \ 'has_zs'   : 0,
+      \})
+  endfor
+
+  " TODO if this is empty!
+
+  " generate combined lists
+  let l:lists.delim_all = {}
+  let l:lists.all = {}
+  for l:k in ['regex', 'regex_backref']
+    let l:lists.delim_all[l:k] = l:lists.delim_tex[l:k]
+    let l:lists.all[l:k] = l:lists.delim_all[l:k]
+  endfor
+
+  return l:lists
+endfunction
+
+" }}}1
 function! s:init_delim_regexes() abort " {{{1
   let l:re = {}
   let l:re.delim_all = {}
@@ -380,6 +443,10 @@ function! s:init_delim_regexes() abort " {{{1
 
     " be explicit about regex mode (set magic mode)
     let l:re.delim_tex[l:k] = '\m' . l:re.delim_tex[l:k]
+
+    if l:re.delim_tex[l:k] ==# '\m\%(\)'
+      let l:re.delim_tex[l:k] = ''
+    endif
 
     let l:re.delim_all[l:k] = l:re.delim_tex[l:k]
     let l:re.all[l:k] = l:re.delim_all[l:k]

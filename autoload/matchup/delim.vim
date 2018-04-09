@@ -571,20 +571,21 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
           \ ? len(l:thisrebr.mid_list)+1
           \ : l:mid_id
 
-    for [l:br, l:to] in items(l:thisrebr.grp_renu[l:id])
-      let l:groups[l:to] = l:matches[l:br]
-    endfor
+    if has_key(l:thisrebr.grp_renu, l:id)
+      for [l:br, l:to] in items(l:thisrebr.grp_renu[l:id])
+        let l:groups[l:to] = l:matches[l:br]
+      endfor
+    endif
 
     " fill in augment pattern
     " TODO all the augment patterns should match,
     " but checking might be too slow
-    let l:aug = l:thisrebr.aug_comp[l:id][0]
-    " let l:augment.str = substitute(l:aug.str,
-    "       \ g:matchup#re#backref,
-    "       \ '\=l:groups[submatch(1)]', 'g')
-    let l:augment.str = matchup#delim#fill_backrefs(
-          \ l:aug.str, l:groups, 0)
-    let l:augment.unresolved = deepcopy(l:aug.outputmap)
+    if has_key(l:thisrebr.aug_comp, l:id)
+      let l:aug = l:thisrebr.aug_comp[l:id][0]
+      let l:augment.str = matchup#delim#fill_backrefs(
+            \ l:aug.str, l:groups, 0)
+      let l:augment.unresolved = deepcopy(l:aug.outputmap)
+    endif
   endif
 
   let l:result = {
