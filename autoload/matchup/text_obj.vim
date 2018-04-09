@@ -8,10 +8,10 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
-  " get the current selection, move to end of range
+  " get the current selection, move to the _start_ the of range
   if a:visual
     let l:selection = getpos("'<")[1:2] + getpos("'>")[1:2]
-    call matchup#pos#set_cursor(getpos("'>"))
+    call matchup#pos#set_cursor(getpos("'<"))
   endif
 
   " motion forcing
@@ -40,15 +40,22 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   " set the timeout fairly high
   call matchup#perf#timeout_start(725)
 
-  " try up to four times
-  for l:try_again in range(4)
-    " on the first try, we use v:count which may be zero
-    " on the next tries, use v:count1 and increment each time
-    " TODO: make sure this logic is right
-    let [l:open, l:close] = matchup#delim#get_surrounding(
-          \ a:type, l:try_again ? (v:count1 + l:try_again - 1) : v:count)
+  " try up to six times
+  for [l:local, l:try_again] in (v:count == 1
+        \ || v:count > g:matchup_delim_count_max)
+        \ ? a:is_inner ? [[0, 0], [0, 1], [0, 2], [0, 3]]
+        \              : [[0, 0], [0, 1], [0, 2]]
+        \ : a:is_inner ? [[1, 0], [0, 0], [1, 1], [0, 1], [1, 2], [0, 2]]
+        \              : [[0, 0], [0, 1], [0, 2], [0, 3]]
 
-    if empty(l:open)
+    let l:count = v:count1 + l:try_again
+
+    " we use v:count1 on the first try and increment each successive time
+    " find the open-close block then narrow down to local after
+    let [l:open_, l:close_] = matchup#delim#get_surrounding(
+          \ a:type, l:count, { 'local': 0 })
+
+    if empty(l:open_)
       if a:visual
         normal! gv
       else
@@ -62,6 +69,15 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
               \ .undotree().seq_cur.")\<cr>:\<c-c>", 'n')
       endif
       return
+    endif
+
+    if l:local
+      let [l:open, l:close] = matchup#delim#get_surround_nearest(l:open_)
+      if empty(l:open)
+        let [l:open, l:close] = [l:open_, l:open_.links.next]
+      endif
+    else
+      let [l:open, l:close] = [l:open_, l:open_.links.close]
     endif
 
     " no way to specify an empty region so we need to use some tricks
@@ -83,17 +99,6 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
       endif
 
       return
-    endif
-
-    " heuristic to handle overlapping any-blocks;
-    " if the start delimiter is inside our already visually selected
-    " area, try again but this time find open instead of open_mid
-    if a:visual && !l:try_again
-          \ && (l:open.lnum > l:selection[0]
-          \    || l:open.lnum == l:selection[0]
-          \    && l:open.cnum >= l:selection[1])
-      let [l:open, l:close] = matchup#delim#get_surrounding(
-            \ a:type, v:count1 + l:try_again)
     endif
 
     let [l:l1, l:c1, l:l2, l:c2] = [l:open.lnum,  l:open.cnum,
@@ -207,12 +212,12 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
       continue
     endif
 
-    " in other visual modes, try again if we did not reach a
-    " `bigger' selection
-    " TODO this logic is vim compatible but is pretty weird
-    if a:visual && (l:selection == [l:l1, l:c1, l:l2, l:c2]
-          \ || (!matchup#pos#smaller([l:l1, l:c1], l:selection[0:1])
-          \     && !matchup#pos#smaller(l:selection[2:3], [l:l2, l:c2])))
+    " in other visual modes, try again if we didn't reach a bigger range
+    if a:visual && visualmode() !=# 'V'
+          \ && !matchup#pos#equal(l:selection[0:1], l:selection[2:3])
+          \ && (l:selection == [l:l1, l:c1, l:l2, l:c2]
+          \ || matchup#pos#larger([l:l1, l:c1], l:selection[0:1])
+          \ || matchup#pos#larger(l:selection[2:3], [l:l2, l:c2]))
       continue
     endif
 

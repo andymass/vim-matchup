@@ -129,8 +129,10 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
   let l:count = a:0 >= 1 ? a:1 : 1
   let l:counter = l:count
 
+  " third argument specifies local any block, otherwise,
   " provided count == 0 refers to local any block
-  let l:local = l:count == 0 ? 1 : 0
+  let l:opts = a:0 >= 2 ? a:2 : {}
+  let l:local = get(l:opts, 'local', l:count == 0 ? 1 : 0)
 
   let l:delimopts = {}
   let s:invert_skip = 0   " TODO: this logic is still bad
@@ -185,6 +187,30 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
   " restore cursor and return failure
   call matchup#pos#set_cursor(l:save_pos)
   call matchup#perf#toc('delim#get_surrounding', 'fail')
+  return [{}, {}]
+endfunction
+
+" }}}1
+function! matchup#delim#get_surround_nearest(open, ...) " {{{1
+  " finds the first consecutive pair whose start
+  " positions surround pos (default to the cursor)
+  let l:cur_pos = a:0 ? a:1 : matchup#pos#get_cursor()
+  let l:pos_val_cursor = matchup#pos#val(l:cur_pos)
+  let l:pos_val_open = matchup#pos#val(a:open)
+
+  let l:pos_val_prev = l:pos_val_open
+  let l:delim = a:open.links.next
+  let l:pos_val_next = matchup#pos#val(l:delim)
+  while l:pos_val_next > l:pos_val_open
+    if l:pos_val_prev <= l:pos_val_cursor
+          \ && l:pos_val_next >= l:pos_val_cursor
+      return [l:delim.links.prev, l:delim]
+    endif
+    let l:pos_val_prev = l:pos_val_next
+    let l:delim = l:delim.links.next
+    let l:pos_val_next = matchup#pos#val(l:delim)
+  endwhile
+
   return [{}, {}]
 endfunction
 
