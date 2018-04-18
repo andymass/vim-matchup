@@ -394,6 +394,24 @@ function! s:format_statusline(offscreen) " {{{1
     let l:sl = '%#Search#∆%#Normal#'
   endif
 
+  " possible sign column, up to 2 characters
+  if !exists('&signcolumn') || &signcolumn ==# 'auto'
+    let l:signs = matchup#util#command('sign place buffer='.bufnr(''))
+    if len(l:signs) > 2 && l:signs[0] !~# '^Error'
+      let l:sl = '  '.l:sl
+    endif
+  elseif &signcolumn ==# 'yes'
+    let l:sl = '  '.l:sl
+  endif
+
+  " possible fold column, up to &foldcolumn characters
+  if &foldcolumn
+    let l:foldlevel = min([foldlevel(a:offscreen.lnum), &foldcolumn])
+    let l:sl = '%#FoldColumn#'.repeat('|', l:foldlevel).'%#Normal#'
+          \ . repeat(' ', &foldcolumn - l:foldlevel)
+          \ . l:sl
+  endif
+
   let l:lasthi = ''
   for l:c in range(min([winwidth(0), strlen(l:line)]))
     if a:offscreen.cnum <= l:c+1 && l:c+1 <= a:offscreen.cnum
