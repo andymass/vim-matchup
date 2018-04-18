@@ -538,6 +538,14 @@ Module matchparen~
 
   Default: 1
 
+*g:matchup_matchparen_scrolloff*
+
+  When enabled, off-screen matches will not be shown in the statusline
+  while the cursor is at the screen edge (respects the value of 'scrolloff').
+  This is intended to prevent flickering while scrolling with j and k.
+
+  Default: 0
+
 *g:matchup_matchparen_stopline*
 
   The number of lines to search in either direction while highlighting
