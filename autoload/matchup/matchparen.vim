@@ -229,8 +229,11 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
   call self.clear()
 
-  if g:matchup_matchparen_novisual
-        \ && index(['v','V',"\<c-v>"], mode()) >= 0
+  let l:modes = g:matchup_matchparen_nomode
+  if get(g:, 'matchup_matchparen_novisual', 0)  " deprecated option name
+    let l:modes .= "vV\<c-v>"
+  endif
+  if stridx(l:modes, l:entering_insert ? 'i' : mode()) >= 0
     return
   endif
 

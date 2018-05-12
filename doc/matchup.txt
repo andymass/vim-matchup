@@ -596,12 +596,21 @@ will only work in nvim-0.2.1 and after.
 
   Default: 1
 
-*g:matchup_matchparen_novisual*
+*g:matchup_matchparen_nomode*
 
-  When enabled, highlighting will be turned off in visual mode, after moving
-  the cursor.
+  When not empty, match highlighting will be disabled in the specified modes,
+  where each mode is a single character like in the |mode()| function.  E.g., to
+  disable highlighting in insert mode,
+>
+    let g:matchup_matchparen_nomode = 'i'
+<
+  and in visual modes,
+>
+    let g:matchup_matchparen_nomode = "vV\<c-v>"
+<
+  Note: In visual modes, this takes effect only after moving the cursor.
 
-  Default: 0
+  Default: ''
 
 Module motion~
 

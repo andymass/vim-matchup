@@ -28,7 +28,7 @@ function! s:init_options()
   call s:init_option('matchup_matchparen_deferred_hide_delay', 700)
   call s:init_option('matchup_matchparen_stopline', 400)
   call s:init_option('matchup_matchparen_pumvisible', 1)
-  call s:init_option('matchup_matchparen_novisual', 0)
+  call s:init_option('matchup_matchparen_nomode', '')
 
   call s:init_option('matchup_matchparen_timeout',
     \ get(g:, 'matchparen_timeout', 300))
