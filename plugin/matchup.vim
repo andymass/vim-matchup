@@ -43,6 +43,8 @@ endtry
 command! NoMatchParen call matchup#matchparen#toggle(0)
 command! DoMatchParen call matchup#matchparen#toggle(1)
 
+hi def link MatchParenCur MatchParen
+
 if get(g:, 'matchup_override_vimtex', 0)
   let g:vimtex_matchparen_enabled = 0
 endif

@@ -319,8 +319,10 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   endif
 
   for l:corr in l:corrlist
-    call add(w:matchup_match_id_list, matchaddpos('MatchParen',
-       \   [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]]))
+    let l:group = l:corr.match_index == l:current.match_index
+          \ ? 'MatchParenCur' : 'MatchParen'
+    call add(w:matchup_match_id_list, matchaddpos(l:group,
+          \ [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]]))
   endfor
 
   call matchup#perf#toc('matchparen.highlight', 'end')
