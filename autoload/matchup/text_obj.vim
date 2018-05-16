@@ -263,7 +263,7 @@ function! matchup#text_obj#double_click() " {{{1
   endif
 
   if empty(l:open) || empty(l:close)
-    execute "normal! \<2-LeftMouse>"
+    call feedkeys("\<2-LeftMouse>", 'nt')
     return
   endif
 
