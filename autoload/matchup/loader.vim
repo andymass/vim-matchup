@@ -341,8 +341,17 @@ function! s:init_delim_lists(...) abort " {{{1
       endif
     endfor
 
+    " stores information for each word
+    let l:extra_list = repeat([{}], len(l:words))
+
+    " stores series-level information
+    let l:extra_info = {
+          \ 'has_zs': match(l:words_backref, g:matchup#re#zs) >= 0,
+          \}
+
     " this is the original set of words plus the set of augments
     " TODO this should probably be renamed
+    " (also called regexone)
     call add(l:lists.delim_tex.regex, {
       \ 'open'     : l:words[0],
       \ 'close'    : l:words[-1],
@@ -353,6 +362,7 @@ function! s:init_delim_lists(...) abort " {{{1
 
     " this list has \(groups\) and we also stuff recapture data
     " TODO this should probably be renamed
+    " (also called regextwo)
     call add(l:lists.delim_tex.regex_backref, {
       \ 'open'     : l:words_backref[0],
       \ 'close'    : l:words_backref[-1],
@@ -361,7 +371,8 @@ function! s:init_delim_lists(...) abort " {{{1
       \ 'need_grp' : l:all_needed_groups,
       \ 'grp_renu' : l:group_renumber,
       \ 'aug_comp' : l:augment_comp,
-      \ 'has_zs'   : match(l:words_backref, g:matchup#re#zs) >= 0,
+      \ 'extra_list' : l:extra_list,
+      \ 'extra_info' : l:extra_info,
       \})
   endfor
 
@@ -412,6 +423,8 @@ function! s:init_delim_lists_fast(mps) abort " {{{1
       \ 'grp_renu' : {},
       \ 'aug_comp' : {},
       \ 'has_zs'   : 0,
+      \ 'extra_list' : repeat([{}], len(l:words)),
+      \ 'extra_info' : { 'has_zs': 0, },
       \})
   endfor
 

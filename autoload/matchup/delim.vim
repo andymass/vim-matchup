@@ -500,7 +500,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
     endif
 
     " if pattern may contain \zs, extra processing is required
-    let l:has_zs = l:rebrs[l:i / l:ns].has_zs
+    let l:has_zs = l:rebrs[l:i / l:ns].extra_info.has_zs
 
     let l:mid_id = 0
     for l:re in l:res
@@ -670,7 +670,7 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   endif
 
   " get the match and groups
-  let l:has_zs = self.regextwo.has_zs
+  let l:has_zs = self.regextwo.extra_info.has_zs
   let l:re_anchored = s:anchor_regex(l:re, l:cnum_corr, l:has_zs)
   let l:matches = matchlist(getline(l:lnum_corr), l:re_anchored)
   let l:match_corr = l:matches[0]
