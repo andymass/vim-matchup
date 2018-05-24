@@ -292,8 +292,10 @@ function! s:matchparen.highlight(...) abort dict " {{{1
     return s:matchparen.highlight(0, l:entering_insert)
   endif
 
-  if len(l:corrlist) <= (l:current.side ==# 'mid' ? 2 : 1)
+  if !has_key(l:current, 'match_index')
+        \ || len(l:corrlist) <= (l:current.side ==# 'mid' ? 2 : 1)
         \ && !g:matchup_matchparen_singleton
+    " TODO this doesn't catch every case, needs refactor
     " TODO singleton doesn't work right for mids
     return
   endif
