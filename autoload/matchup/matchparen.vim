@@ -125,7 +125,7 @@ function! s:matchparen.clear() abort dict " {{{1
   if exists('w:matchup_oldstatus')
     let &l:statusline = w:matchup_oldstatus
     unlet w:matchup_oldstatus
-    doautocmd User MatchupOffscreenLeave
+    silent! doautocmd User MatchupOffscreenLeave
   endif
 
   let w:matchup_need_clear = 0
@@ -350,7 +350,7 @@ function! matchup#matchparen#offscreen(current) " {{{1
   let w:matchup_oldstatus = &l:statusline
 
   let &l:statusline = s:format_statusline(l:offscreen)
-  doautocmd User MatchupOffscreenEnter
+  silent! doautocmd User MatchupOffscreenEnter
 endfunction
 
 " }}}1
