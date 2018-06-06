@@ -500,7 +500,8 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
     endif
 
     " if pattern may contain \zs, extra processing is required
-    let l:has_zs = l:rebrs[l:i / l:ns].extra_info.has_zs
+    let l:extra_info = l:rebrs[l:i / l:ns].extra_info
+    let l:has_zs = get(l:extra_info, 'has_zs', 0)
 
     let l:mid_id = 0
     for l:re in l:res

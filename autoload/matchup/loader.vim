@@ -114,6 +114,12 @@ function! s:init_delim_lists(...) abort " {{{1
 
     if len(l:words) < 2 | continue | endif
 
+    " stores series-level information
+    let l:extra_info = {}
+
+    " stores information for each word
+    let l:extra_list = map(range(len(l:words)), '{}')
+
     " we will resolve backrefs to produce two sets of words,
     " one with \(foo\)s and one with \1s, along with a set of
     " bookkeeping structures
@@ -341,13 +347,10 @@ function! s:init_delim_lists(...) abort " {{{1
       endif
     endfor
 
-    " stores information for each word
-    let l:extra_list = repeat([{}], len(l:words))
+    " check whether any of these patterns has \zs
+    let l:extra_info.has_zs
+          \ = match(l:words_backref, g:matchup#re#zs) >= 0
 
-    " stores series-level information
-    let l:extra_info = {
-          \ 'has_zs': match(l:words_backref, g:matchup#re#zs) >= 0,
-          \}
 
     " this is the original set of words plus the set of augments
     " TODO this should probably be renamed
