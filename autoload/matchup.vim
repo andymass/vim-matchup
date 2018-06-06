@@ -126,6 +126,8 @@ function! s:init_default_mappings()
       call s:map('o', l:opforce.'z%',
             \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-z%)')
     endfor
+
+    call s:map('i', '<c-g>%', '<plug>(matchup-c_g%)')
   endif
 
   if get(g:, 'matchup_text_obj_enabled', 0)
@@ -200,6 +202,9 @@ function! s:motion_init_module() " {{{1
   xmap     <silent> <plug>(matchup-z%) <sid>(matchup-z%)
   onoremap <silent> <plug>(matchup-z%)
         \ :<c-u>call matchup#motion#op('z%')<cr>
+
+  inoremap <silent> <plug>(matchup-c_g%)
+        \ <c-\><c-o>:call matchup#motion#insert_mode()<cr>
 
   call matchup#perf#toc('loading_module', 'motion')
 endfunction
