@@ -14,7 +14,7 @@ function! matchup#util#command(cmd) " {{{1
       silent! execute a:cmd
     redir END
   finally
-    return split(l:lines, "\n")
+    return split(l:lines, '\n')
   endtry
 endfunction
 
@@ -102,8 +102,21 @@ endfunction
 
 " }}}1
 
-function! matchup#util#patch_match_words(from, to) " {{{1
+function! matchup#util#patch_match_words(from, to, ...) abort " {{{1
   if !exists('b:match_words') | return | endif
+
+  " if extra argument is given, give diagnostic information
+  if a:0
+    let l:first = stridx(b:match_words, a:from)
+    if l:first < 0
+      echoerr 'match-up: patch_match_words:' a:from 'not found'
+      return
+    elseif stridx(b:match_words, a:from, l:first+1) > -1
+      echoerr 'match-up: patch_match_words: multiple occurences of' a:from
+      return
+    endif
+  endif
+
   let b:match_words = substitute(b:match_words,
         \ '\V'.escape(a:from, '\'),
         \ escape(a:to, '\'),

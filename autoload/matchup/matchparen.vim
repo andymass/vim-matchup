@@ -419,6 +419,8 @@ function! s:format_statusline(offscreen) " {{{1
           \ : join(range(l:fdl-l:fdc+1, l:fdl), '')
     let l:padding -= len(l:fdcstr)
     let l:fdcstr = '%#FoldColumn#' . l:fdcstr . '%#Normal#'
+  elseif empty(l:sl)
+    let l:sl = '%#Normal#'
   endif
 
   " add remaining padding (this handles rest of fdc and scl)

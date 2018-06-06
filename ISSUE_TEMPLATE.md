@@ -19,9 +19,9 @@ Please provide a minimal working example, e.g.,
 ```vim
 if l:x == 1
   call one()
-else
+elseif l:x == 2
   call two()
-elseif
+else
   call three()
 endif
 ```

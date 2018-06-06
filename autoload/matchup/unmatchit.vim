@@ -1,3 +1,10 @@
+" vim match-up - matchit replacement and more
+"
+" Maintainer: Andy Massimino
+" Email:      a@normed.space
+"
+
+" this file is loaded only from plugin/matchup.vim
 
 if !exists('g:loaded_matchup')
       \ || !exists('g:loaded_matchit')
@@ -14,4 +21,6 @@ silent! unmap [%
 silent! unmap ]%
 silent! unmap a%
 silent! unmap g%
+
+" vim: fdm=marker sw=2
 
