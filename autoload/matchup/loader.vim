@@ -453,15 +453,19 @@ function! s:init_delim_regexes() abort " {{{1
   let l:re.delim_tex = s:init_delim_regexes_generator('delim_tex')
   let l:re.delim_tex._engine_info = { 'has_zs': {} }
 
+  " use a flag for b:match_ignorecase
+  let l:ic = get(b:, 'match_ignorecase', 0) ? '\c' : '\C'
+
   for l:k in keys(s:sidedict)
     let l:re.delim_tex._engine_info.has_zs[l:k]
           \ = l:re.delim_tex[l:k] =~# g:matchup#re#zs
 
-    " be explicit about regex mode (set magic mode)
-    let l:re.delim_tex[l:k] = '\m' . l:re.delim_tex[l:k]
-
-    if l:re.delim_tex[l:k] ==# '\m\%(\)'
+    if l:re.delim_tex[l:k] ==# '\%(\)'
       let l:re.delim_tex[l:k] = ''
+    else
+      " since these patterns are used in searchpos(),
+      " be explicit about regex mode (set magic mode and ignorecase)
+      let l:re.delim_tex[l:k] = '\m' . l:ic . l:re.delim_tex[l:k]
     endif
 
     let l:re.delim_all[l:k] = l:re.delim_tex[l:k]
