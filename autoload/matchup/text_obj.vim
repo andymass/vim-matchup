@@ -46,7 +46,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         \ ? a:is_inner ? [[0, 0], [0, 1], [0, 2], [0, 3]]
         \              : [[0, 0], [0, 1], [0, 2]]
         \ : a:is_inner ? [[1, 0], [0, 0], [1, 1], [0, 1], [1, 2], [0, 2]]
-        \              : [[0, 0], [0, 1], [0, 2], [0, 3]]
+        \              : [[1, 0], [0, 0], [1, 1], [0, 1]]
 
     let l:count = v:count1 + l:try_again
 

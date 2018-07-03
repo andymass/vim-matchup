@@ -202,8 +202,9 @@ function! matchup#delim#get_surround_nearest(open, ...) " {{{1
   let l:delim = a:open.links.next
   let l:pos_val_next = matchup#pos#val(l:delim)
   while l:pos_val_next > l:pos_val_open
+    let l:end_offset = matchup#delim#end_offset(l:delim)
     if l:pos_val_prev <= l:pos_val_cursor
-          \ && l:pos_val_next >= l:pos_val_cursor
+          \ && l:pos_val_next + l:end_offset >= l:pos_val_cursor
       return [l:delim.links.prev, l:delim]
     endif
     let l:pos_val_prev = l:pos_val_next
