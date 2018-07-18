@@ -330,16 +330,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   endif
 
   " add highlighting matches
-  if !exists('w:matchup_match_id_list')
-    let w:matchup_match_id_list = []
-  endif
-
-  for l:corr in l:corrlist
-    let l:group = l:corr.match_index == l:current.match_index
-          \ ? 'MatchParenCur' : 'MatchParen'
-    call add(w:matchup_match_id_list, matchaddpos(l:group,
-          \ [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]]))
-  endfor
+  call s:add_matches(l:corrlist, l:current)
 
   call matchup#perf#toc('matchparen.highlight', 'end')
 endfunction
@@ -382,14 +373,7 @@ function! matchup#matchparen#highlight_surrounding(...) " {{{1
   let w:matchup_need_clear = 1
 
   " add highlighting matches
-  if !exists('w:matchup_match_id_list')
-    let w:matchup_match_id_list = []
-  endif
-
-  for l:corr in l:corrlist
-    call add(w:matchup_match_id_list, matchaddpos('MatchParen',
-       \   [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]]))
-  endfor
+  call s:add_matches(l:corrlist)
 endfunction
 
 "}}}1
@@ -419,6 +403,9 @@ function! s:format_statusline(offscreen) " {{{1
   if empty(l:sl) && a:offscreen.lnum < line('.')
     let l:sl = '%#Search#∆%#Normal#'
     let l:padding -= 1    " OK if this is negative
+    if l:padding == -1 && indent(a:offscreen.lnum) == 0
+      let l:padding = 0
+    endif
   endif
 
   " possible fold column, up to &foldcolumn characters
@@ -463,6 +450,35 @@ endfunction
 
 function! s:gchar_virtpos(lnum, cnum)
   return matchstr(getline(a:lnum), '\%'.a:cnum.'v.')
+endfunction
+
+" }}}1
+function! s:add_matches(corrlist, ...) " {{{1
+  if !exists('w:matchup_match_id_list')
+    let w:matchup_match_id_list = []
+  endif
+
+  " if MatchwordCur is undefined and MatchWord links to MatchParen
+  " (as default), behave like MatchWordCur is the same as MatchParenCur
+  " otherwise, MatchWordCur is the same as MatchWord
+  if a:0
+    let l:mwc = hlexists('MatchWordCur') ? 'MatchWordCur'
+          \ : (synIDtrans(hlID('MatchWord')) == hlID('MatchParen')
+          \     ? 'MatchParenCur' : 'MatchWord')
+  endif
+
+  for l:corr in a:corrlist
+    let l:wordish = l:corr.match !~? '^[[:punct:]]\{1,3\}$'
+
+    if a:0 && l:corr.match_index == a:1.match_index
+      let l:group = l:wordish ? l:mwc : 'MatchParenCur'
+    else
+      let l:group = l:wordish ? 'MatchWord' : 'MatchParen'
+    endif
+
+    call add(w:matchup_match_id_list, matchaddpos(l:group,
+          \ [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]], 0))
+  endfor
 endfunction
 
 " }}}1
