@@ -125,6 +125,9 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
   endif
 
   call matchup#pos#set_cursor(l:lnum, l:column)
+  if stridx(&foldopen, 'percent') >= 0
+    normal! zv
+  endif
 endfunction
 
 " }}}1
