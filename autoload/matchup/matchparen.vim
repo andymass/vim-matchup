@@ -146,7 +146,18 @@ function! s:timer_callback(win_id, timer_id) abort " {{{1
   if l:elapsed >= s:show_delay
     let w:matchup_timer_paused = 1
     call timer_pause(a:timer_id, 1)
-    call s:matchparen.highlight()
+    if exists('#TextYankPost') && !has('patch-8.1.0192')
+      " workaround crash with autocmd trigger during regex match (#3175)
+      let l:save_ei = &eventignore
+      try
+        set eventignore+=TextYankPost
+        call s:matchparen.highlight()
+      finally
+        let &eventignore = l:save_ei
+      endtry
+    else
+      call s:matchparen.highlight()
+    endif
   elseif w:matchup_need_clear && exists('w:matchup_hi_time')
     " if highlighting becomes too stale, clear it
     let l:elapsed = 1000*s:reltimefloat(reltime(w:matchup_hi_time))
