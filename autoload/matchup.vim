@@ -51,6 +51,7 @@ function! s:init_options()
 
   call s:init_option('matchup_mouse_enabled', 1)
 
+  call s:init_option('matchup_matchpref', {})
 endfunction
 
 function! s:init_option(option, default)

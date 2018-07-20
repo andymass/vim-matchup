@@ -687,9 +687,17 @@ LaTeX~
 
     let g:matchup_matchparen_deferred = 1
 <
-HTML~
+Match preferences~                                        *g:matchup_matchpref*
 
-*g:matchup_matchpref_html_nolists*
+  A limited number of common preferences are available which affect how
+  matching is done for a particular filetype.  They may be set through the
+  `matchup_matchpref` dictionary: >
+
+    let g:matchup_matchpref[&filetype].option_name = 1
+<
+HTML
+
+*g:matchup_matchpref.html.nolists*
 
   When set to 1, this option disables matching and navigation between groups
   of list items in HTML documents such as the following >

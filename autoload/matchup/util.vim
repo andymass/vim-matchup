@@ -131,6 +131,12 @@ endfunction
 
 " }}}1
 
+function! matchup#util#matchpref(id, default) " {{{1
+  return get(get(g:matchup_matchpref, &filetype, {}), a:id, a:default)
+endfunction
+
+" }}}1
+
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
