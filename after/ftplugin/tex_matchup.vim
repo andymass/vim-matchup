@@ -74,6 +74,9 @@ function! s:setup_match_words()
 
     " the syntax method is too slow for latex
     let b:match_skip = 'r:\\\@<!\%(\\\\\)*%'
+
+    " the old regexp engine is a bit faster '\%#=1'
+    let b:matchup_regexpengine = 1
 endfunction
 
 if get(g:, 'vimtex_enabled',

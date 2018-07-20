@@ -456,6 +456,11 @@ function! s:init_delim_regexes() abort " {{{1
   " use a flag for b:match_ignorecase
   let l:ic = get(b:, 'match_ignorecase', 0) ? '\c' : '\C'
 
+  " if a particular engine is specified, use that for the patterns
+  " (currently only applied to delim_re TODO)
+  let l:eng = string(get(b:, 'matchup_regexpengine', 0))
+  let l:eng = l:eng > 0 ? '\%#='.l:eng : ''
+
   for l:k in keys(s:sidedict)
     let l:re.delim_tex._engine_info.has_zs[l:k]
           \ = l:re.delim_tex[l:k] =~# g:matchup#re#zs
@@ -465,7 +470,7 @@ function! s:init_delim_regexes() abort " {{{1
     else
       " since these patterns are used in searchpos(),
       " be explicit about regex mode (set magic mode and ignorecase)
-      let l:re.delim_tex[l:k] = '\m' . l:ic . l:re.delim_tex[l:k]
+      let l:re.delim_tex[l:k] = l:eng . '\m' . l:ic . l:re.delim_tex[l:k]
     endif
 
     let l:re.delim_all[l:k] = l:re.delim_tex[l:k]
