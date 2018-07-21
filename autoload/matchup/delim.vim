@@ -79,7 +79,9 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
 
     let [l:match, l:lnum, l:cnum] = l:matches[l:i]
 
-    let l:matching = deepcopy(a:delim)
+    let l:matching = copy(a:delim)
+    let l:matching.class = copy(a:delim.class)
+
     let l:matching.lnum = l:lnum
     let l:matching.cnum = l:cnum
     let l:matching.match = l:match
