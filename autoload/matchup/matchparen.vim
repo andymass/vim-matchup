@@ -428,8 +428,9 @@ function! s:format_statusline(offscreen) " {{{1
   for l:c in range(min([winwidth(0), strlen(l:line)]))
     if a:offscreen.cnum <= l:c+1 && l:c+1 <= a:offscreen.cnum
           \ - 1 + strlen(a:offscreen.match)
+      let l:wordish = a:offscreen.match !~? '^[[:punct:]]\{1,3\}$'
       " TODO: we can't overlap groups, this might not be totally correct
-      let l:curhi = 'MatchParen'
+      let l:curhi = l:wordish ? 'MatchWord' : 'MatchParen'
     else
       let l:curhi = synIDattr(
             \ synID(a:offscreen.lnum, l:c+1, 1), 'name')
