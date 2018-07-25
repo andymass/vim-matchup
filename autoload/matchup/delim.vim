@@ -478,6 +478,15 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
     for l:re in l:res
       let l:mid_id += 1
 
+      " check whether hlend needs to be handled
+      let l:id = l:side ==# 'mid' ? l:mid_id : l:side ==# 'open' ? 0 : -1
+      let l:extra_entry = l:rebrs[l:i / l:ns].extra_list[l:id]
+      let l:has_hlend = has_key(l:extra_entry, 'hlend')
+
+      if l:has_hlend && get(a:opts, 'highlighting', 0)
+        let l:re = s:process_hlend(l:re, l:cursorpos)
+      endif
+
       " prepend the column number and append the cursor column
       " to anchor the match; we don't use {start} for matchlist
       " because there may be zero-width look behinds
@@ -493,7 +502,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
 
       " reject matches which the cursor is outside of
       " this matters only for \ze
-      if a:opts.direction ==# 'current'
+      if !l:has_hlend && a:opts.direction ==# 'current'
           \ && a:cnum + strlen(l:matches[0]) <= l:cursorpos
         continue
       endif
@@ -571,6 +580,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
         \ 'regexone'     : l:thisre,
         \ 'regextwo'     : l:thisrebr,
         \ 'rematch'      : l:re,
+        \ 'highlighting' : get(a:opts, 'highlighting', 0),
         \}
 
   return l:result
@@ -641,6 +651,12 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
     return [['', 0, 0]]
   endif
 
+  " when highlighting, respect hlend
+  let l:extra_entry = self.regextwo.extra_list[a:down ? -1 : 0]
+  if self.highlighting && has_key(l:extra_entry, 'hlend')
+    let l:re = s:process_hlend(l:re, -1)
+  endif
+
   " get the match and groups
   let l:has_zs = self.regextwo.extra_info.has_zs
   let l:re_anchored = l:ic . s:anchor_regex(l:re, l:cnum_corr, l:has_zs)
@@ -675,6 +691,11 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   endif
 
   let l:re = l:mids
+
+  " when highlighting, respect hlend
+  if get(self.regextwo.extra_info, 'mid_hlend') && self.highlighting
+    let l:re = s:process_hlend(l:re, -1)
+  endif
 
   " use b:match_ignorecase
   let l:mid = l:ic . l:mids
@@ -789,6 +810,15 @@ function! s:anchor_regex(re, cnum, method) " {{{1
     " fails to match with \zs
     return '\%'.(a:cnum).'c\%('.a:re.'\)'
   endif
+endfunction
+
+" }}}1
+function! s:process_hlend(re, cursorpos) " {{{1
+  " first replace all \ze with \%>{cursorpos}c
+  let l:re = substitute(a:re, g:matchup#re#ze,
+        \ a:cursorpos < 0 ? '' : '\\%>'.a:cursorpos.'c', 'g')
+  " next convert hlend mark to \ze
+  return substitute(l:re, '\V\\%(hlend\\)\\{0}', '\\ze', 'g')
 endfunction
 
 " }}}1

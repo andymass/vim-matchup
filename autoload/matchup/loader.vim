@@ -120,6 +120,19 @@ function! s:init_delim_lists(...) abort " {{{1
     " stores information for each word
     let l:extra_list = map(range(len(l:words)), '{}')
 
+    " pre-process various \g{special} instructions
+    let l:replacement = { 'hlend': '\%(hlend\)\{0}' }
+    for l:i in range(len(l:words))
+      let l:special_flags = []
+      let l:words[l:i] = substitute(l:words[l:i],
+            \ g:matchup#re#gspec,
+            \ '\=[get(l:replacement,submatch(1),""),'
+            \ . 'add(l:special_flags,submatch(1))][0]', 'g')
+      for l:f in l:special_flags
+        let l:extra_list[l:i][l:f] = 1
+      endfor
+    endfor
+
     " we will resolve backrefs to produce two sets of words,
     " one with \(foo\)s and one with \1s, along with a set of
     " bookkeeping structures
@@ -351,6 +364,10 @@ function! s:init_delim_lists(...) abort " {{{1
     let l:extra_info.has_zs
           \ = match(l:words_backref, g:matchup#re#zs) >= 0
 
+    if !empty(filter(copy(l:extra_list[1:-2]),
+          \ 'get(v:val, "hlend")'))
+      let l:extra_info.mid_hlend = 1
+    endif
 
     " this is the original set of words plus the set of augments
     " TODO this should probably be renamed
@@ -426,7 +443,7 @@ function! s:init_delim_lists_fast(mps) abort " {{{1
       \ 'grp_renu' : {},
       \ 'aug_comp' : {},
       \ 'has_zs'   : 0,
-      \ 'extra_list' : repeat([{}], len(l:words)),
+      \ 'extra_list' : [{}, {}],
       \ 'extra_info' : { 'has_zs': 0, },
       \})
   endfor

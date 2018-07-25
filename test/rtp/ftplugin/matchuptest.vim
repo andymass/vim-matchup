@@ -32,6 +32,11 @@ if exists("loaded_matchit")
   let b:match_words .= ',ぽ:も'
   let b:match_words .= ',\\begin{\([^}]\+\)}:\\end{\1}'
   let b:match_words .= ',one😀🐑one:two😐🐑two:three🙁🐑'
+  let b:match_words .= ',muopen:mumidone:mumidtwo:mumidthree:muclose'
+  let b:match_words .= ',op\ten:mi\td:cl\tose'
+  let b:match_words .= ',so👔me\zething:t\t👕t\zemid:e👖\te\zeend'
+  let b:match_words .= ',< highlight \(\w\+\)\g{hlend} | but not this >\ze no cursor:< mid \1\g{hlend} | not >\ze no:< end \1\g{hlend} | not >\ze no'
+  let b:match_words .= ',\\word{\(.\{-}\)}:\\endword{\1}'
 
   let b:match_skip = 'synIDattr(synID(line("."),col("."),1),"name")
         \ =~? "comment\\|string\\|vimSynReg\\|vimSet"'
