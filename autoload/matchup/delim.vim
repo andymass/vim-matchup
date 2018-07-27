@@ -625,7 +625,11 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   let l:close = matchup#delim#fill_backrefs(l:close, self.groups, 0)
 
   let s:invert_skip = self.skip
-  let l:skip = 'matchup#delim#skip0()'
+  if empty(b:matchup_delim_skip)
+    let l:skip = 'matchup#delim#skip_default()'
+  else
+    let l:skip = 'matchup#delim#skip0()'
+  endif
 
   if matchup#perf#timeout_check() | return [['', 0, 0]] | endif
 
@@ -752,12 +756,12 @@ function! matchup#delim#skip(...) " {{{1
   execute 'return' (s:invert_skip ? '!(' : '(') b:matchup_delim_skip ')'
 endfunction
 
-function! matchup#delim#skip0()
-  if empty(b:matchup_delim_skip)
-    return matchup#util#in_comment_or_string(line('.'), col('.'))
-          \ ? !s:invert_skip : s:invert_skip
-  endif
+function! matchup#delim#skip_default()
+  return matchup#util#in_comment_or_string(line('.'), col('.'))
+        \ ? !s:invert_skip : s:invert_skip
+endfunction
 
+function! matchup#delim#skip0()
   let s:eff_curpos = [line('.'), col('.')]
   execute 'return' (s:invert_skip ? '!(' : '(') b:matchup_delim_skip ')'
 endfunction
