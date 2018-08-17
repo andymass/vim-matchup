@@ -45,8 +45,8 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
   " this gives us a context object which we use for the other side
   " TODO: what if no open is found here?
   let l:matches = []
+  let l:save_pos = matchup#pos#get_cursor()
   for l:down in {'open': [1], 'close': [0], 'mid': [0,1]}[a:delim.side]
-    let l:save_pos = matchup#pos#get_cursor()
     call matchup#pos#set_cursor(a:delim)
 
     " second iteration: [] refers to the current match
@@ -58,8 +58,8 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     if l:res[0][1] > 0
       call extend(l:matches, l:res)
     endif
-    call matchup#pos#set_cursor(l:save_pos)
   endfor
+  call matchup#pos#set_cursor(l:save_pos)
 
   if a:delim.side ==# 'open'
     call insert(l:matches, [])
@@ -156,6 +156,9 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
     endif
 
     let l:matches = matchup#delim#get_matching(l:open, 1)
+    if has_key(l:opts, 'matches')
+      let l:opts.matches = l:matches
+    endif
 
     if len(l:matches)
       let l:close = l:local ? l:open.links.next : l:open.links.close

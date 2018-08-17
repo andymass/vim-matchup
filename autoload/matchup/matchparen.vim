@@ -364,13 +364,20 @@ function! matchup#matchparen#offscreen(current) " {{{1
 endfunction
 
 " }}}1
-function! matchup#matchparen#highlight_surrounding(...) " {{{1
+function! matchup#matchparen#highlight_surrounding() " {{{1
   call matchup#perf#timeout_start(500)
-  let l:delims = matchup#delim#get_surrounding('delim_all', 1)
+  call s:highlight_surrounding()
+endfunction
+
+" }}}1
+
+function! s:highlight_surrounding(...) " {{{1
+  let l:opts = { 'local': 0, 'matches': [] }
+  let l:delims = matchup#delim#get_surrounding('delim_all', 1, l:opts)
   let l:open = l:delims[0]
   if empty(l:open) | return | endif
 
-  let l:corrlist = matchup#delim#get_matching(l:open, 1)
+  let l:corrlist = l:opts.matches
   if empty(l:corrlist) | return | endif
 
   " store flag meaning highlighting is active
