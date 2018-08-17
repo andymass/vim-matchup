@@ -411,6 +411,10 @@ function! s:get_delim(opts) " {{{1
     return {}
   endif
 
+  " XXX: workaround an apparent obscure vim bug where the
+  " reported syntax id is incorrect on the first synID() call
+  call matchup#delim#skip(l:lnum, l:cnum)
+
   let l:skip_state = l:check_skip ? 0
         \ : matchup#delim#skip(l:lnum, l:cnum)
 
