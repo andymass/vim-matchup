@@ -183,7 +183,8 @@ endif
 " }}}1
 
 function! s:matchparen.highlight_deferred() abort dict " {{{1
-  if !g:matchup_matchparen_deferred
+  if !get(b:, 'matchup_matchparen_deferred',
+        \ g:matchup_matchparen_deferred)
     return s:matchparen.highlight()
   endif
 
@@ -273,7 +274,15 @@ function! s:matchparen.highlight(...) abort dict " {{{1
         \   'stopline': g:matchup_matchparen_stopline,
         \   'highlighting': 1, })
   call matchup#perf#toc('matchparen.highlight', 'get_current')
-  if empty(l:current) | return | endif
+  if empty(l:current)
+    if get(b:, 'matchup_matchparen_deferred',
+          \ g:matchup_matchparen_deferred)
+          \ && get(b:, 'matchup_matchparen_hi_surround_always',
+          \        g:matchup_matchparen_hi_surround_always)
+       call s:highlight_surrounding(l:insertmode)
+    endif
+    return
+  endif
 
   let l:corrlist = matchup#delim#get_matching(l:current,
         \ { 'stopline': g:matchup_matchparen_stopline,
