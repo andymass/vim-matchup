@@ -281,31 +281,33 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   call matchup#perf#toc('matchparen.highlight', 'get_matching')
   if empty(l:corrlist) | return | endif
 
-  if !exists('w:matchup_matchparen_context')
-    let w:matchup_matchparen_context = {
-          \ 'normal': {
-          \   'current':   {},
-          \   'corrlist':  [],
-          \  },
-          \ 'prior': {},
-          \ 'counter': 0,
-          \}
-  endif
+  if g:matchup_transmute_enabled
+    if !exists('w:matchup_matchparen_context')
+      let w:matchup_matchparen_context = {
+            \ 'normal': {
+            \   'current':   {},
+            \   'corrlist':  [],
+            \  },
+            \ 'prior': {},
+            \ 'counter': 0,
+            \}
+    endif
 
-  let w:matchup_matchparen_context.counter += 1
+    let w:matchup_matchparen_context.counter += 1
 
-  if !l:insertmode
-    let w:matchup_matchparen_context.prior
-          \ = deepcopy(w:matchup_matchparen_context.normal)
+    if !l:insertmode
+      let w:matchup_matchparen_context.prior
+            \ = deepcopy(w:matchup_matchparen_context.normal)
 
-    let w:matchup_matchparen_context.normal.current = l:current
-    let w:matchup_matchparen_context.normal.corrlist = l:corrlist
-  endif
+      let w:matchup_matchparen_context.normal.current = l:current
+      let w:matchup_matchparen_context.normal.corrlist = l:corrlist
+    endif
 
-  " if transmuted, highlight again (will reset timeout)
-  if matchup#transmute#tick(l:insertmode, l:entering_insert)
-    " no force_update here because it would screw up prior
-    return s:matchparen.highlight(0, l:entering_insert)
+    " if transmuted, highlight again (will reset timeout)
+    if matchup#transmute#tick(l:insertmode, l:entering_insert)
+      " no force_update here because it would screw up prior
+      return s:matchparen.highlight(0, l:entering_insert)
+    endif
   endif
 
   if !has_key(l:current, 'match_index')
