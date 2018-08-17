@@ -304,6 +304,10 @@ function! s:get_delim(opts) " {{{1
   if l:cursorpos > 1 && l:insertmode
     let l:cursorpos -= 1
   endif
+  if l:cursorpos > strlen(getline('.'))
+        \ && stridx("vV\<c-v>", mode()) > -1
+    let l:cursorpos -= 1
+  endif
 
   let s:invert_skip = 0
 
