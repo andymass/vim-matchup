@@ -97,7 +97,7 @@ For customization, see |matchup-custom-mappings|.
                                                          *matchup-N%*
 {count}%                If {count} is less than 6, go forwards {count} times.
                         Otherwise, go to {count} percentage in the file (|N%|).
-                        See |g:matchup_motion_override_Npercent|
+                        See |g:matchup_motion_override_Npercent|.
 
                                                          *g%*
 g%                      Go backwards to [count]th previous matching word.  If
@@ -147,6 +147,20 @@ i%                      select the inside of an |any-block|.
                         When {count} is greater than 1, select the inside of
                         the {count}th surrounding open-to-close block.
 
+                                                         *ds%*
+{count}ds%              delete {count}th surrounding matching words.  This
+                        only works for open and close words.
+                        Requires |g:matchup_surround_enabled| = 1.
+
+                                                         *cs%*
+{count}cs%              change {count}th surrounding matching words.  This
+                        only works for open and close words.  If vim-surround
+                        is installed, you can type replacements according to
+                        that plugin's rules.  Otherwise, match-up will give
+                        you the opportunity to type open and close
+                        replacements.
+                        Requires |g:matchup_surround_enabled| = 1.
+
 ------------------------------------------------------------------------------
 Customizing mappings~
                                                       *matchup-custom-mappings*
@@ -170,6 +184,8 @@ the corresponding default left-hand side will not be mapped.
    z%          |<plug>(matchup-z%)|                        nx     motion
    a%          |<plug>(matchup-%)|                         x      text_obj
    i%          |<plug>(matchup-%)|                         x      text_obj
+   ds%         |<plug>(matchup-ds%)|                       n      surround
+   cs%         |<plug>(matchup-cs%)|                       n      surround
    (none)      |<plug>(matchup-hi-surround)|               n      matchparen
   -------------------------------------------------------------------------~
    Operator pending maps~
@@ -482,18 +498,30 @@ Module matchparen~
 
   Customizing the highlighting colors~
 
-    match-up uses the |MatchParen| highlighting group, which can be configured.
-    For example, >
+    match-up uses the |MatchParen| highlighting group by default, which can be
+    configured.  For example, >
 
       :hi MatchParen ctermbg=blue guibg=lightblue cterm=italic gui=italic
 <
-    You may want to put this inside a |ColorScheme| |autocmd| so it is
-    preserved after colorscheme changes: >
+    You may want to put this inside a |ColorScheme| |autocmd| so it is preserved
+    after colorscheme changes: >
 
       augroup matchup_matchparen_highlight
         autocmd!
         autocmd ColorScheme * hi MatchParen guifg=red
       augroup END
+<
+    You can also highlight words differently than parentheses using the
+    `MatchWord` highlighting group.  You might do this if you find the
+    `MatchParen` style distracting for large blocks. >
+
+      :hi MatchWord ctermfg=red guifg=blue cterm=underline gui=underline
+<
+    There are also `MatchParenCur` and `MatchWordCur` which allow you to configure
+    the highlight separately for the match under the cursor. >
+
+      :hi MatchParenCur cterm=underline gui=underline
+      :hi MatchWordCur cterm=underline gui=underline
 <
 *b:matchup_matchparen_enabled*
 
@@ -612,6 +640,14 @@ will only work in nvim-0.2.1 and after.
 
   Default: ''
 
+*g:matchup_matchparen_hi_surround_always*
+
+  Always highlight the surrounding words, if possible.  This is like
+  |<plug>(matchup-hi-surround)| but is updated each time the cursor moves.
+  This requires deferred matching (|g:matchup_matchparen_deferred| = 1).
+
+  Default: 0
+
 Module motion~
 
 *g:matchup_motion_override_Npercent*
@@ -667,6 +703,14 @@ Module text_obj~
       \ 'g@,IsCommentaryOpFunc()']
 <
   Default: `['d', 'y']`
+
+Module surround~
+
+*g:matchup_surround_enabled*
+
+  Enables the surround module which provides maps |ds%| and |cs%|.
+
+  Default: 0
 
 ------------------------------------------------------------------------------
 File type options~
@@ -854,13 +898,16 @@ for more information.
 
 Other plugins~
 
-match-up does not currently provide support for auto-completion or operating
-on surrounding delimiters.  The following plugins may be useful:
+match-up does not currently provide support for auto-completion.  The
+following plugins may be useful for this:
 
 - |vim-endwise|         https://github.com/tpope/vim-endwise
 - |auto-pairs|          https://github.com/jiangmiao/auto-pairs
 - |delimitMate|         https://github.com/Raimondi/delimitMate
 - |splitjoin.vim|       https://github.com/AndrewRadev/splitjoin.vim
+
+There is basic support for deleting and changing surroundings, but you may
+prefer to use one of the following:
 
 - |vim-surround|        https://github.com/tpope/vim-surround
 - |vim-sandwich|        https://github.com/machakann/vim-sandwich
@@ -889,7 +936,7 @@ Development is tracked at https://github.com/andymass/vim-matchup.
 
 Reporting problems~
 
-This is a brand new plugin and there are likely to be some bugs.  Thorough
+This is a new plugin and there are likely to be some bugs.  Thorough
 issue reports are encouraged.  Please read the issue template first
 (ISSUE_TEMPLATE.md).  Be as precise and detailed as possible when submitting
 issues.

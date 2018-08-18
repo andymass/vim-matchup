@@ -378,6 +378,13 @@ let g:matchup_text_obj_enabled = 0
 ```
 defaults: 1
 
+To enable the delete surrounding (`ds%`) and change surrounding (`cs%`)
+maps,
+```vim
+let g:matchup_surround_enabled = 1
+```
+default: 0
+
 To enable the experimental [transmute](#d1-parallel-transmutation)
 module,
 ```vim
@@ -420,22 +427,36 @@ The variable `g:loaded_matchparen` has no effect on match-up.
 
 #### Customizing the highlighting colors
 
-match-up uses the `MatchParen` highlighting group, which can be configured.
-For example,
+match-up uses the `MatchParen` highlighting group by default, which can be
+configured.  For example,
 ```vim
-  :hi MatchParen ctermbg=blue guibg=lightblue cterm=italic gui=italic
+:hi MatchParen ctermbg=blue guibg=lightblue cterm=italic gui=italic
 ```
 
 You may want to put this inside a `ColorScheme` `autocmd` so it is
 preserved after colorscheme changes:
 ```vim
-  augroup matchup_matchparen_highlight
-    autocmd!
-    autocmd ColorScheme * hi MatchParen guifg=red
-  augroup END
+augroup matchup_matchparen_highlight
+  autocmd!
+  autocmd ColorScheme * hi MatchParen guifg=red
+augroup END
 ```
 
-The matchparen module can also be disabled on a per-buffer basis (there is
+You can also highlight words differently than parentheses using the
+`MatchWord` highlighting group.  You might do this if you find the
+`MatchParen` style distracting for large blocks.
+```vim
+:hi MatchWord ctermfg=red guifg=blue cterm=underline gui=underline
+```
+
+There are also `MatchParenCur` and `MatchWordCur` which allow you to
+configure the highlight separately for the match under the cursor.
+```vim
+:hi MatchParenCur cterm=underline gui=underline
+:hi MatchWordCur cterm=underline gui=underline
+```
+
+The matchparen module can be disabled on a per-buffer basis (there is
 no command for this).  By default, when disabling highlighting for a
 particular buffer, the standard plugin matchparen will still be used
 for that buffer.
@@ -532,6 +553,22 @@ such as the following
 nmap <silent> <F7> <plug>(matchup-hi-surround)
 ```
 There is no default map for this feature.
+
+You can also highlight surrounding delimiters always as the cursor moves.
+```vim
+let g:matchup_matchparen_deferred = 1
+let g:matchup_matchparen_hi_surround_always = 1
+```
+default: 0 (off)
+
+This can be set on a per-buffer basis:
+```vim
+autocmd FileType tex let b:matchup_matchparen_hi_surround_always = 1
+```
+
+Note: this feature _requires_
+[deferred highlighting](#deferred-highlighting) to be supported and
+enabled.
 
 ### Module motion
 
@@ -715,7 +752,7 @@ heavily influenced by vimtex. :beers:
 
 ### Reporting problems
 
-This is a brand new plugin and there are likely to be many bugs.
+This is a new plugin and there are likely to be some bugs.
 Thorough issue reports are encouraged.  Please read the [issue
 template](ISSUE_TEMPLATE.md) first.  Be as precise and detailed as
 possible when submitting issues.
@@ -734,7 +771,5 @@ contributing.
 - support for fenced code possible?
 - add file type `quirks` module
 - investigate whether `&selection`/`&virtualedit` options are important
-- can match-up be integrated with
-  [vim-surround](https://github.com/tpope/vim-surround)?
 - support python (like python_match.vim)
 
