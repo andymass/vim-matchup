@@ -52,6 +52,8 @@ function! s:init_options()
 
   call s:init_option('matchup_mouse_enabled', 1)
 
+  call s:init_option('matchup_surround_enabled', 0)
+
   call s:init_option('matchup_matchpref', {})
 endfunction
 
@@ -75,6 +77,7 @@ function! s:init_modules()
   call s:motion_init_module()
   call s:text_obj_init_module()
   call s:misc_init_module()
+  call s:surround_init_module()
 endfunction
 
 let g:v_motion_force = ''
@@ -145,6 +148,11 @@ function! s:init_default_mappings()
 
   if get(g:, 'matchup_mouse_enabled', 1)
     call s:map('n', '<2-LeftMouse>', '<plug>(matchup-double-click)')
+  endif
+
+  if get(g:, 'matchup_surround_enabled', 0)
+    call s:map('n', 'ds%', '<plug>(matchup-ds%)')
+    call s:map('n', 'cs%', '<plug>(matchup-cs%)')
   endif
 endfunction
 
@@ -251,6 +259,25 @@ function! s:misc_init_module() " {{{1
   command! MatchupReload          call matchup#misc#reload()
   nnoremap <plug>(matchup-reload) :<c-u>MatchupReload<cr>
   call matchup#perf#toc('loading_module', 'misc')
+endfunction
+
+" }}}1
+function! s:surround_init_module() " {{{1
+  if !g:matchup_surround_enabled | return | endif
+
+  call matchup#perf#tic('loading_module')
+
+  for [l:map, l:name, l:opt] in [
+        \ ['%', 'delimited', 'delim_all'],
+        \]
+    let l:p1 = 'noremap <silent> <plug>(matchup-'
+    let l:p2 = l:map . ') :<c-u>call matchup#surround#' . l:name
+    let l:p3 = empty(l:opt) ? ')<cr>' : ', ''' . l:opt . ''')<cr>'
+    execute 'n' . l:p1 . 'ds' . l:p2 . '(0, "d"' . l:p3
+    execute 'n' . l:p1 . 'cs' . l:p2 . '(0, "c"' . l:p3
+  endfor
+
+  call matchup#perf#toc('loading_module', 'surround')
 endfunction
 
 " }}}1
