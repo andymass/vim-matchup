@@ -466,11 +466,31 @@ function! s:format_statusline(offscreen) " {{{1
   endfor
   let l:sl .= '%#Normal#'
 
+  if has('timers') && exists('*timer_pause')
+    if !exists('s:scroll_timer')
+      let s:scroll_timer = timer_start(50,
+            \ 'matchup#matchparen#scroll_callback',
+            \ { 'repeat': -1 })
+      call timer_pause(s:scroll_timer, 1)
+    endif
+    let l:sl .= '%{matchup#matchparen#scroll_update('
+          \ .a:offscreen.lnum.')}'
+  endif
+
   return l:sl
 endfunction
 
-function! s:gchar_virtpos(lnum, cnum)
-  return matchstr(getline(a:lnum), '\%'.a:cnum.'v.')
+function! matchup#matchparen#scroll_callback(tid)
+  call timer_pause(a:tid, 1)
+  call s:matchparen.highlight(1)
+endfunction
+
+function! matchup#matchparen#scroll_update(lnum)
+  if line('w0') <= a:lnum && a:lnum <= line('w$')
+        \ && exists('s:scroll_timer')
+    call timer_pause(s:scroll_timer, 0)
+  endif
+  return ''
 endfunction
 
 " }}}1
