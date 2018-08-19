@@ -47,6 +47,41 @@ function! matchup#loader#bufwinenter() abort " {{{1
 endfunction
 
 " }}}1
+function! matchup#loader#refresh_match_words() " {{{1
+  if get(b:, 'match_words', ':') !~# ':'
+    call matchup#perf#tic('refresh')
+
+    " protect the cursor from the match_words function
+    let l:save_pos = matchup#pos#get_cursor()
+    execute 'let l:match_words = ' b:match_words
+    if l:save_pos != matchup#pos#get_cursor()
+      call matchup#pos#set_cursor(l:save_pos)
+    endif
+
+    call matchup#perf#toc('refresh', 'function')
+
+    if has_key(s:match_word_cache, l:match_words)
+      let b:matchup_delim_lists
+            \ = s:match_word_cache[l:match_words].delim_lists
+      let b:matchup_delim_re
+            \ = s:match_word_cache[l:match_words].delim_regexes
+      call matchup#perf#toc('refresh', 'cache_hit')
+    else
+      " re-parse match words
+      let b:matchup_delim_lists = s:init_delim_lists()
+      let b:matchup_delim_re = s:init_delim_regexes()
+      let s:match_word_cache[l:match_words] = {
+            \ 'delim_lists'  : b:matchup_delim_lists,
+            \ 'delim_regexes': b:matchup_delim_re,
+            \}
+      call matchup#perf#toc('refresh', 'parse')
+    endif
+  endif
+endfunction
+
+let s:match_word_cache = {}
+
+" }}}1
 
 function! s:init_delim_lists(...) abort " {{{1
   let l:lists = { 'delim_tex': { 'regex': [], 'regex_backref': [] } }
@@ -76,11 +111,11 @@ function! s:init_delim_lists(...) abort " {{{1
       echohl None
       let l:match_words = ''
     else
-      " execute 'let l:match_words =' b:match_words
-      echohl ErrorMsg
-      echo 'match-up: function b:match_words not supported'
-      echohl None
-      let l:match_words = ''
+      execute 'let l:match_words =' b:match_words
+      " echohl ErrorMsg
+      " echo 'match-up: function b:match_words not supported'
+      " echohl None
+      " let l:match_words = ''
     endif
   endif
   let l:simple = empty(l:match_words)

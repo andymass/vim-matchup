@@ -295,6 +295,8 @@ function! s:get_delim(opts) " {{{1
 
   let l:save_pos = matchup#pos#get_cursor()
 
+  call matchup#loader#refresh_match_words()
+
   " this contains all the patterns for the specified type and side
   let l:re = b:matchup_delim_re[a:opts.type][a:opts.side]
 
