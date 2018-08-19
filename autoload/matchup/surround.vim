@@ -32,21 +32,27 @@ function! matchup#surround#delimited(is_cap, op, type) " {{{1
   if a:op ==# 'd' || a:op ==# 'c'
     call matchup#pos#set_cursor(l1, c12+1)
 
+    let [l:insl, l:insr] = ['', '']
+    if a:op ==# 'c' && !l:tpope
+      let l:idx = index(s:pairtrans, l:char)
+      let l:insl = l:idx < 0 ? l:char : s:pairtrans[l:idx/2*2]
+      let l:insr = l:idx < 0 ? l:char : s:pairtrans[l:idx/2*2+1]
+    endif
+
     let l:line = getline(l:l2)
     call setline(l:l2, strpart(l:line, 0, l:c21-1)
-          \ . strpart(l:line, l:c22))
+          \ . l:insr . strpart(l:line, l:c22))
     let l:regtext = strpart(l:line, l:c21-1, l:c22-l:c21+1)
 
-    let l:ins = a:op ==# 'c' && !l:tpope ? l:char : ''
     let l:line = getline(l:l1)
     call setline(l:l1, strpart(l:line, 0, l:c11-1)
-          \ . l:ins . strpart(l:line, l:c12))
+          \ . l:insl . strpart(l:line, l:c12))
 
     call setreg(v:register, strpart(l:line, l:c11-1, l:c12-l:c11+1)
           \ . ' ' . l:regtext)
 
     let l:epos = l:c21-1 - (l:l1 == l:l2
-          \ ? (l:c12-l:c11+1-strlen(l:ins)) : 0)
+          \ ? (l:c12-l:c11+1-strlen(l:insl)-strlen(l:insr)) : 0)
     call setpos("']", [0, l:l2, l:epos, 0])
     call setpos("'[", [0, l:l1, l:c11, 0])
   endif
@@ -60,12 +66,12 @@ function! matchup#surround#delimited(is_cap, op, type) " {{{1
     silent! call repeat#set("\<plug>(matchup-cs%)"
           \ . matchstr(g:repeat_sequence, 'SSurroundRepeat\zs.\+'),
           \ v:count)
-  elseif a:op ==# 'c'
-    call feedkeys('`]a', 'tn')
   endif
 
   call matchup#pos#set_cursor(l1, c11)
 endfunction
+
+let s:pairtrans = split('()<>[]{}«»“”', '\ze')
 
 " }}}1
 
