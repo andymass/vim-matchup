@@ -306,7 +306,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
     if !l:insertmode
       let w:matchup_matchparen_context.prior
-            \ = deepcopy(w:matchup_matchparen_context.normal)
+            \ = copy(w:matchup_matchparen_context.normal)
 
       let w:matchup_matchparen_context.normal.current = l:current
       let w:matchup_matchparen_context.normal.corrlist = l:corrlist
