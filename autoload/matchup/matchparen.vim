@@ -102,6 +102,11 @@ function! matchup#matchparen#toggle(...) " {{{1
   let g:matchup_matchparen_enabled = a:0 > 0
         \ ? a:1
         \ : !g:matchup_matchparen_enabled
+  call matchup#matchparen#reload()
+endfunction
+
+" }}}1
+function! matchup#matchparen#reload() " {{{1
   if g:matchup_matchparen_enabled
     call matchup#matchparen#enable()
     call s:matchparen.highlight(1)
@@ -128,6 +133,9 @@ function! s:matchparen.clear() abort dict " {{{1
     if exists('#User#MatchupOffscreenLeave')
       doautocmd <nomodeline> User MatchupOffscreenLeave
     endif
+  endif
+  if exists('w:matchup_statusline')
+    unlet w:matchup_statusline
   endif
 
   let w:matchup_need_clear = 0
@@ -339,7 +347,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   " show off-screen matches
   if g:matchup_matchparen_status_offscreen
         \ && !l:current.skip && !l:scrolling
-    call matchup#matchparen#offscreen(l:current)
+    call s:do_offscreen(l:current)
   endif
 
   " add highlighting matches
@@ -349,7 +357,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 endfunction
 
 " }}}1
-function! matchup#matchparen#offscreen(current) " {{{1
+function! s:do_offscreen(current) " {{{1
   let l:offscreen = {}
 
   if !has_key(a:current, 'links') | return | endif
@@ -364,9 +372,14 @@ function! matchup#matchparen#offscreen(current) " {{{1
 
   if empty(l:offscreen) | return | endif
 
-  let w:matchup_oldstatus = &l:statusline
+  let w:matchup_statusline = s:format_statusline(l:offscreen)
+  if !exists('w:matchup_oldstatus')
+    let w:matchup_oldstatus = &l:statusline
+  endif
+  if !g:matchup_matchparen_status_offscreen_manual
+    let &l:statusline =  w:matchup_statusline
+  endif
 
-  let &l:statusline = s:format_statusline(l:offscreen)
   if exists('#User#MatchupOffscreenEnter')
     doautocmd <nomodeline> User MatchupOffscreenEnter
   endif
@@ -376,6 +389,17 @@ endfunction
 function! matchup#matchparen#highlight_surrounding() " {{{1
   call matchup#perf#timeout_start(500)
   call s:highlight_surrounding()
+endfunction
+
+" }}}1
+
+function! MatchupStatusOffscreen() " {{{1
+  return get(w:, 'matchup_statusline', '')
+endfunction
+
+" }}}1
+function! MatchupStatusOffscreenNohl() " {{{1
+  return substitute(MatchupStatusOffscreen(), '%#\w*#', '', 'g')
 endfunction
 
 " }}}1
@@ -473,8 +497,10 @@ function! s:format_statusline(offscreen) " {{{1
             \ { 'repeat': -1 })
       call timer_pause(s:scroll_timer, 1)
     endif
-    let l:sl .= '%{matchup#matchparen#scroll_update('
-          \ .a:offscreen.lnum.')}'
+    if !g:matchup_matchparen_status_offscreen_manual
+      let l:sl .= '%{matchup#matchparen#scroll_update('
+            \ .a:offscreen.lnum.')}'
+    endif
   endif
 
   return l:sl
