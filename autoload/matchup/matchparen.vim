@@ -35,13 +35,15 @@ function! matchup#matchparen#enable() " {{{1
 
   augroup matchup_matchparen
     autocmd!
-    autocmd CursorMoved,CursorMovedI * call s:matchparen.highlight_deferred()
+    autocmd CursorMoved,CursorMovedI *
+          \ call s:matchparen.highlight_deferred()
     autocmd WinEnter * call s:matchparen.highlight(1)
-    autocmd TextChanged,TextChangedI * call s:matchparen.highlight_deferred()
+    autocmd TextChanged,TextChangedI *
+          \ call s:matchparen.highlight_deferred()
     if has('patch-8.0.1494')
       autocmd TextChangedP * call s:matchparen.highlight_deferred()
     endif
-    autocmd WinLeave * call s:matchparen.clear()
+    autocmd WinLeave,BufLeave * call s:matchparen.clear()
     autocmd InsertEnter * call s:matchparen.highlight(1, 1)
   augroup END
 
