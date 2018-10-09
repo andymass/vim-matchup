@@ -24,13 +24,8 @@ if exists('g:loaded_matchup')
 endif
 let g:loaded_matchup = 1
 
-if has('nvim')
-  if exists(':MatchDebug')
-    runtime! autoload/matchup/unmatchit.vim
-  endif
-elseif exists('g:loaded_matchit')
-  echoerr 'match-up must be loaded before matchit'
-  finish
+if exists('g:loaded_matchit') && exists(':MatchDebug')
+  runtime! autoload/matchup/unmatchit.vim
 endif
 let g:loaded_matchit = 1
 
