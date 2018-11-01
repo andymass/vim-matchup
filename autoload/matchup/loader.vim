@@ -12,7 +12,7 @@ function! matchup#loader#init_module() abort " {{{1
     au!
     autocmd FileType * call matchup#loader#init_buffer()
     if g:matchup_delim_start_plaintext
-      autocmd BufWinEnter * call matchup#loader#bufwinenter()
+      autocmd BufWinEnter,CmdWinEnter * call matchup#loader#bufwinenter()
     endif
   augroup END
 endfunction
