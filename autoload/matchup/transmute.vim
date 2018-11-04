@@ -96,7 +96,7 @@ function! matchup#transmute#dochange(list, pri, cur) " {{{1
 
       for l:dummy in range(len(l:count))
         " create a pattern which isolates the old group text
-        let l:prevtext = escape(l:groups[l:grp], '\')
+        let l:prevtext = escape(l:groups[l:grp], '\''')
         let l:pattern = substitute(l:re_anchored,
               \ g:matchup#re#not_bslash.'\\'.l:grp,
               \ '\=''\zs\V'.l:prevtext.'\m\ze''', '')
@@ -104,7 +104,7 @@ function! matchup#transmute#dochange(list, pri, cur) " {{{1
               \ l:groups, 0)
         let l:string = l:cur.groups[l:grp]
         let l:line = substitute(l:line, l:pattern,
-              \ '\='''.l:string."'", '')
+              \ '\='''.escape(l:string, '\''')."'", '')
       endfor
 
       let l:groups[l:grp] = l:cur.groups[l:grp]
