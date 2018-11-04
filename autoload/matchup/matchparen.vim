@@ -44,7 +44,8 @@ function! matchup#matchparen#enable() " {{{1
       autocmd TextChangedP * call s:matchparen.highlight_deferred()
     endif
     autocmd WinLeave,BufLeave * call s:matchparen.clear()
-    autocmd InsertEnter * call s:matchparen.highlight(1, 1)
+    autocmd InsertEnter,Insertchange * call s:matchparen.highlight(1, 1)
+    autocmd InsertLeave * call s:matchparen.highlight(1)
   augroup END
 
   if has('vim_starting')
@@ -239,7 +240,8 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   if !get(b:, 'matchup_matchparen_enabled', 1) | return | endif
 
   let l:force_update    = a:0 >= 1 ? a:1 : 0
-  let l:entering_insert = a:0 >= 2 ? a:2 : 0
+  let l:changing_insert = a:0 >= 2 ? a:2 : 0
+  let l:real_mode = l:changing_insert ? v:insertmode : mode()
 
   if !l:force_update
         \ && exists('w:last_changedtick') && exists('w:last_cursor')
@@ -258,7 +260,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   if get(g:, 'matchup_matchparen_novisual', 0)  " deprecated option name
     let l:modes .= "vV\<c-v>"
   endif
-  if stridx(l:modes, l:entering_insert ? 'i' : mode()) >= 0
+  if stridx(l:modes, l:real_mode) >= 0
     return
   endif
 
@@ -268,8 +270,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   endif
 
   " in insert mode, cursor is treated as being one behind
-  let l:insertmode = l:entering_insert
-        \ || (mode() ==# 'i' || mode() ==# 'R')
+  let l:insertmode = l:real_mode ==# 'i'
 
   " start the timeout period
   let l:timeout = l:insertmode
@@ -323,9 +324,9 @@ function! s:matchparen.highlight(...) abort dict " {{{1
     endif
 
     " if transmuted, highlight again (will reset timeout)
-    if matchup#transmute#tick(l:insertmode, l:entering_insert)
+    if matchup#transmute#tick(l:insertmode, 'unused')
       " no force_update here because it would screw up prior
-      return s:matchparen.highlight(0, l:entering_insert)
+      return s:matchparen.highlight(0, l:changing_insert)
     endif
   endif
 
