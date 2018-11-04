@@ -48,7 +48,7 @@ function! s:get_match_words()
   let l:match_words .= ',\\(:\\),\\\[:\\]'
 
   " simple blocks
-  let l:match_words .= ',\\if\w*\>:\\else\>:\\fi\>'
+  let l:match_words .= ',\\if\%(\w\|@\)*\>:\\else\>:\\fi\>'
   let l:match_words .= ',\\makeatletter:\\makeatother'
   let l:match_words .= ',\\begingroup:\\endgroup,\\bgroup:\\egroup'
 
