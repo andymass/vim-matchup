@@ -57,6 +57,8 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     let l:res = a:delim.get_matching(l:down, l:stopline)
     if l:res[0][1] > 0
       call extend(l:matches, l:res)
+    elseif l:down
+      let l:matches = []
     endif
   endfor
   call matchup#pos#set_cursor(l:save_pos)
