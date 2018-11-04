@@ -1,8 +1,10 @@
 *matchup.txt*    modern matching words
 *matchup* *match-up*
 
-Author:  Andy Massimino <a@normed.space>
-Web:     https://github.com/andymass/vim-matchup
+Author: Andy Massimino <a@normed.space>
+Web: https://github.com/andymass/vim-matchup
+Script ID: 5624
+Version: 0.3.a
 License: MIT license {{{
 
   Copyright (c) 2018 Andy Massimino
@@ -130,7 +132,7 @@ z%                      go to inside [count]th nearest block.  This is an
 <
                                                          *v_a%* *a%*
 a%                      select an |any-block|.
-                        This closely matches match vim's built-in |ab|.
+                        This closely matches vim's built-in |ab|.
 
                                                          *v_Na%* *Na%*
 {count}a%               select an |open-to-close-block|.
@@ -139,7 +141,7 @@ a%                      select an |any-block|.
 
                                                          *v_i%* *i%*
 i%                      select the inside of an |any-block|.
-                        This closely matches match vim's built-in |ib|.
+                        This closely matches vim's built-in |ib|.
                         See also |matchup-feat-linewise|.
 
                                                          *v_Ni%* *Ni%*
@@ -948,4 +950,4 @@ Contributing~
 Please read the contribution guidelines (CONTRIBUTING.md) before contributing.
 
 ==============================================================================
- vim:tw=78:ts=8:ft=help:norl:
+ vim:tw=78:ts=8:ft=help:norl:fen:fdl=0:fdm=marker
