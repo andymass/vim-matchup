@@ -356,6 +356,11 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   " add highlighting matches
   call s:add_matches(l:corrlist, l:current)
 
+  " highlight the background between parentheses
+  if g:matchup_matchparen_hi_background >= 1
+    call s:highlight_background(l:corrlist)
+  endif
+
   call matchup#perf#toc('matchparen.highlight', 'end')
 endfunction
 
@@ -421,6 +426,31 @@ function! s:highlight_surrounding(...) " {{{1
 
   " add highlighting matches
   call s:add_matches(l:corrlist)
+
+  " highlight the background between parentheses
+  if g:matchup_matchparen_hi_background >= 2
+    call s:highlight_background(l:corrlist)
+  endif
+endfunction
+
+" }}}1
+function! s:highlight_background(corrlist) " {{{1
+  let [l:lo1, l:lo2] = [a:corrlist[0], a:corrlist[-1]]
+
+  let l:inclusive = 0
+  if l:inclusive
+    call s:add_background_matches(
+          \ l:lo1.lnum,
+          \ l:lo1.cnum,
+          \ l:lo2.lnum,
+          \ l:lo2.cnum + matchup#delim#end_offset(l:lo2))
+  else
+  call s:add_background_matches(
+        \ l:lo1.lnum,
+        \ l:lo1.cnum + matchup#delim#end_offset(l:lo1) + 1,
+        \ l:lo2.lnum,
+        \ l:lo2.cnum - 1)
+  endif
 endfunction
 
 "}}}1
@@ -549,6 +579,31 @@ function! s:add_matches(corrlist, ...) " {{{1
     call add(w:matchup_match_id_list, matchaddpos(l:group,
           \ [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]], 0))
   endfor
+endfunction
+
+" }}}1
+function! s:add_background_matches(line1, col1, line2, col2) " {{{1
+  if a:line1 == a:line2 && a:col1 > a:col2
+    return
+  endif
+
+  let l:curline = a:line1
+  while l:curline <= a:line2
+    let l:endline = min([l:curline+7, a:line2])
+    let l:list = range(l:curline, l:endline)
+    if l:curline == a:line1
+      let l:list[0] = [a:line1, a:col1,
+            \ l:curline == a:line2 ? (a:col2-a:col1+1)
+            \ : strlen(getline(a:line1))]
+    endif
+    if l:endline == a:line2 && l:curline != a:line2
+      let l:list[-1] = [a:line2, 1, a:col2]
+    endif
+
+    call add(w:matchup_match_id_list,
+          \ matchaddpos('MatchBackground', l:list, -1))
+    let l:curline = l:endline+1
+  endwhile
 endfunction
 
 " }}}1

@@ -45,6 +45,7 @@ command! DoMatchParen call matchup#matchparen#toggle(1)
 hi def link MatchParenCur MatchParen
 hi def link MatchWord MatchParen
 " hi def link MatchWordCur MatchParenCur
+hi def link MatchBackground ColorColumn
 
 if get(g:, 'matchup_override_vimtex', 0)
   let g:vimtex_matchparen_enabled = 0

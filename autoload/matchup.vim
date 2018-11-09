@@ -31,6 +31,7 @@ function! s:init_options()
   call s:init_option('matchup_matchparen_pumvisible', 1)
   call s:init_option('matchup_matchparen_nomode', '')
   call s:init_option('matchup_matchparen_hi_surround_always', 0)
+  call s:init_option('matchup_matchparen_hi_background', 0)
 
   call s:init_option('matchup_matchparen_timeout',
     \ get(g:, 'matchparen_timeout', 300))
