@@ -650,6 +650,16 @@ will only work in nvim-0.2.1 and after.
 
   Default: 0
 
+*g:matchup_matchparen_hi_background*
+
+  Highlight buffer background between matches.  This uses the `MatchBackground`
+  highlighting group and is linked to `ColorColumn` by default but can be
+  configured with >
+
+    :hi MatchBackground guibg=grey ctermbg=grey
+<
+  Default: 0
+
 Module motion~
 
 *g:matchup_motion_override_Npercent*
