@@ -576,8 +576,14 @@ function! s:add_matches(corrlist, ...) " {{{1
       let l:group = l:wordish ? 'MatchWord' : 'MatchParen'
     endif
 
-    call add(w:matchup_match_id_list, matchaddpos(l:group,
-          \ [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]], 0))
+    if exists('*matchaddpos')
+      call add(w:matchup_match_id_list, matchaddpos(l:group,
+            \ [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]], 0))
+    else
+      call add(w:matchup_match_id_list, matchadd(l:group,
+            \ '\%'.(l:corr.lnum).'l\%'.(l:corr.cnum).'c'
+            \ . '.\{'.strlen(l:corr.match).'\}', 0))
+    endif
   endfor
 endfunction
 
