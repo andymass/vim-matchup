@@ -582,16 +582,39 @@ function! s:add_matches(corrlist, ...) " {{{1
     else
       call add(w:matchup_match_id_list, matchadd(l:group,
             \ '\%'.(l:corr.lnum).'l\%'.(l:corr.cnum).'c'
-            \ . '.\{'.strlen(l:corr.match).'\}', 0))
+            \ . '.\+\%<'.(l:corr.cnum+strlen(l:corr.match)+1).'c', 0))
     endif
   endfor
 endfunction
 
 " }}}1
-function! s:add_background_matches(line1, col1, line2, col2) " {{{1
+function! s:add_background_matches_1(line1, col1, line2, col2) " {{{1
   if a:line1 == a:line2 && a:col1 > a:col2
     return
   endif
+
+  let l:priority = -1
+
+  if a:line1 == a:line2
+    let l:match = '\%'.(a:line1).'l\&'
+          \ . '\%'.(a:col1).'c.*\%'.(a:col2).'c.'
+  else
+    let l:match = '\%>'.(a:line1).'l\(.\+\|^$\)\%<'.(a:line2).'l'
+          \ . '\|\%'.(a:line1).'l\%>'.(a:col1-1).'c.\+'
+          \ . '\|\%'.(a:line2).'l.\+\%<'.(a:col2+1).'c.'
+  endif
+
+  call add(w:matchup_match_id_list,
+        \  matchadd('MatchBackground', l:match, l:priority))
+endfunction
+
+" }}}1
+function! s:add_background_matches_2(line1, col1, line2, col2) " {{{1
+  if a:line1 == a:line2 && a:col1 > a:col2
+    return
+  endif
+
+  let l:priority = -1
 
   let l:curline = a:line1
   while l:curline <= a:line2
@@ -607,7 +630,7 @@ function! s:add_background_matches(line1, col1, line2, col2) " {{{1
     endif
 
     call add(w:matchup_match_id_list,
-          \ matchaddpos('MatchBackground', l:list, -1))
+          \ matchaddpos('MatchBackground', l:list, l:priority))
     let l:curline = l:endline+1
   endwhile
 endfunction
