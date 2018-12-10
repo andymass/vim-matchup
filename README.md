@@ -85,9 +85,8 @@ together with other plugins.
 | ([c.1]) | highlight `()`, `[]`, & `{}`     | :thumbsup:     | :x:           | :thumbsup:    |
 | ([c.2]) | highlight _all_ matches          | :thumbsup:     | :x:           | :x:           |
 | ([c.3]) | display matches off-screen       | :thumbsup:     | :x:           | :x:           |
-| ([d.1]) | parallel transmutation           | :construction: | :x:           | :x:           |
-| ([e.1]) | modern, modular coding style     | :thumbsup:     | :x:           | :x:           |
-| ([e.2]) | actively developed               | :thumbsup:     | :x:           | :x:           |
+| ([d.1]) | modern, modular coding style     | :thumbsup:     | :x:           | :x:           |
+| ([d.2]) | actively developed               | :thumbsup:     | :x:           | :x:           |
 
 [a.1]: #a1-jump-between-matching-words
 [a.2]: #a2-jump-to-open-and-close-words
@@ -96,9 +95,8 @@ together with other plugins.
 [c.1]: #c1-highlight---and-
 [c.2]: #c2-highlight-all-matches
 [c.3]: #c3-display-matches-off-screen
-[d.1]: #d1-parallel-transmutation
-[e.1]: #development
-[e.2]: #development
+[d.1]: #development
+[d.2]: #development
 [inclusive]: #inclusive-and-exclusive-motions
 [exclusive]: #inclusive-and-exclusive-motions
 
@@ -235,32 +233,6 @@ positioned outside the current window, the match is shown in the
 status line.  If both the open and close match are off-screen, the
 close match is preferred.
 (See the option `g:matchup_matchparen_status_offscreen`).
-
-#### (d.1) parallel transmutation
-
-To enable, use `let g:matchup_transmute_enabled = 1`.
-
-In insert mode, after changing text inside a word, matching words will
-be changed in parallel.  As an example,
-
-```html
-<pre>
-  text
-</pre>
-```
-
-Changing `pre` to `div` and leaving insert mode will produce:
-
-```html
-<div>
-  text
-</div>
-```
-
-Note: this currently only works for match words which define a backref
-relation like `\1`.
-
-Parallel transmutation requires the matchparen module to be enabled.
 
 ### Inclusive and exclusive motions
 
@@ -707,13 +679,36 @@ delimiters recognized may differ between the two plugins.  For example,
 the mappings `da%` and `dad` will not always match, particularly if you
 have customized vimtex's delimiters.
 
+### Surroundings
+
+match-up provides built-in support for [vim-surround]-style `ds%` and
+`cs%` operations.  If vim-surround is installed, you can use vim-surround
+replacements such as `cs%)`.  `%` cannot be used as a replacement.
+An alternative plugin is [vim-sandwich], which allows more complex
+surround replacement rules but is not currently supported.
+
+[vim-surround]: https://github.com/tpope/vim-surround
+[vim-sandwich]: https://github.com/machakann/vim-sandwich
+
+### Auto-closing plugins
+
+match-up does not provide auto-complete or auto-insertion of matches.
+See for instance one of the following plugins for this;
+
+- [vim-endwise](https://github.com/tpope/vim-endwise)
+- [auto-pairs](https://github.com/jiangmiao/auto-pairs)
+- [delimitMate](https://github.com/Raimondi/delimitMate)
+- [splitjoin.vim](https://github.com/AndrewRadev/splitjoin.vim)
+
 ### Matchit
 
-matchit.vim should not be loaded.  If it is loaded, it must be loaded
+match-up tries to work around matchit.vim in all cases, but if
+you experience problems, read the following.
+matchit.vim should not be loaded.  If it is loaded, it should be loaded
 after match-up (in this case, matchit.vim will be disabled).  Note that
 some plugins, such as
 [vim-sensible](https://github.com/tpope/vim-sensible),
-load matchit.vim so these must also be initialized after match-up.
+load matchit.vim so these should also be initialized after match-up.
 
 ### Matchparen emulation
 
@@ -740,13 +735,7 @@ heavily influenced by vimtex. :beers:
 - [matchparen](http://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt)
 - [MatchTag](https://github.com/gregsexton/MatchTag)
 - [MatchTagAlways](https://github.com/Valloric/MatchTagAlways)
-- [vim-endwise](https://github.com/tpope/vim-endwise)
-- [auto-pairs](https://github.com/jiangmiao/auto-pairs)
-- [delimitMate](https://github.com/Raimondi/delimitMate)
-- [splitjoin.vim](https://github.com/AndrewRadev/splitjoin.vim)
-- [vim-surround](https://github.com/tpope/vim-surround)
-- [vim-sandwich](https://github.com/machakann/vim-sandwich)
-
+- [vim-textobj-anyblock](https://github.com/rhysd/vim-textobj-anyblock)
 
 ## Development
 
@@ -763,13 +752,4 @@ Feature requests are also welcome.
 
 Please read the [contribution guidelines](CONTRIBUTING.md) before
 contributing.
-
-### Todo list
-
-- complete parallel transmutation in an efficient way.
-- add screenshots and animations
-- support for fenced code possible?
-- add file type `quirks` module
-- investigate whether `&selection`/`&virtualedit` options are important
-- support python (like python_match.vim)
 
