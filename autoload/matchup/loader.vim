@@ -47,7 +47,7 @@ function! matchup#loader#bufwinenter() abort " {{{1
 endfunction
 
 " }}}1
-function! matchup#loader#refresh_match_words() " {{{1
+function! matchup#loader#refresh_match_words() abort " {{{1
   if get(b:, 'match_words', ':') !~# ':'
     call matchup#perf#tic('refresh')
 
@@ -96,7 +96,9 @@ function! s:init_delim_lists(...) abort " {{{1
   " we don't explicitly check this, but the behavior might
   " be unpredictable if such groups are encountered.. (ref-1)
 
-  if exists('g:matchup_hotfix_'.&filetype)
+  if exists('g:matchup_hotfix') && has_key(g:matchup_hotfix, &filetype)
+    call call(g:matchup_hotfix[&filetype], [])
+  elseif exists('g:matchup_hotfix_'.&filetype)
     call call(g:matchup_hotfix_{&filetype}, [])
   elseif exists('b:matchup_hotfix')
     call call(b:matchup_hotfix, [])

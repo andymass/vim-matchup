@@ -769,7 +769,7 @@ HTML
 
 Customization~
 
-*g:matchup_hotfix_{&filetype}*                                   *matchup-hotfix*
+*g:matchup_hotfix[&filetype]*                                   *matchup-hotfix*
 
   For each file type, this option can be set to the string name of a function
   which will be called when loading files, prior to checking |b:match_words|
@@ -779,7 +779,7 @@ Customization~
     function! VimHotfix()
       " customization
     endfunction
-    let g:matchup_hotfix_vim = 'VimHotfix'
+    let g:matchup_hotfix['vim'] = 'VimHotfix'
 
 *b:matchup_hotfix*
 
