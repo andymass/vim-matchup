@@ -437,19 +437,19 @@ endfunction
 function! s:highlight_background(corrlist) " {{{1
   let [l:lo1, l:lo2] = [a:corrlist[0], a:corrlist[-1]]
 
-  let l:inclusive = 0
+  let l:inclusive = 1
   if l:inclusive
-    call s:add_background_matches(
+    call s:add_background_matches_1(
           \ l:lo1.lnum,
           \ l:lo1.cnum,
           \ l:lo2.lnum,
           \ l:lo2.cnum + matchup#delim#end_offset(l:lo2))
   else
-  call s:add_background_matches(
-        \ l:lo1.lnum,
-        \ l:lo1.cnum + matchup#delim#end_offset(l:lo1) + 1,
-        \ l:lo2.lnum,
-        \ l:lo2.cnum - 1)
+    call s:add_background_matches_1(
+          \ l:lo1.lnum,
+          \ l:lo1.cnum + matchup#delim#end_offset(l:lo1) + 1,
+          \ l:lo2.lnum,
+          \ l:lo2.cnum - 1)
   endif
 endfunction
 
