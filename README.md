@@ -598,7 +598,7 @@ _Options planned_.
   enough information to create proper highlights.  To fix this, you may
   need to modify `b:match_words`.
 
-  For help, please open a new issue and be a specific as possible.
+  For help, please open a new issue and be as specific as possible.
 
 - I'm having performance problems
 
