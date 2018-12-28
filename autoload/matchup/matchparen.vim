@@ -407,7 +407,7 @@ endfunction
 
 " }}}1
 function! MatchupStatusOffscreenNohl() " {{{1
-  return substitute(MatchupStatusOffscreen(), '%#\w*#', '', 'g')
+  return substitute(MatchupStatusOffscreen(), '%<\|%#\w*#', '', 'g')
 endfunction
 
 " }}}1
@@ -455,13 +455,15 @@ endfunction
 
 "}}}1
 function! s:format_statusline(offscreen) " {{{1
-  let l:line = getline(a:offscreen.lnum)
+  let l:adjust = matchup#quirks#status_adjust(a:offscreen)
+  let l:lnum = a:offscreen.lnum + l:adjust
+  let l:linenr = l:lnum     " distinct for relativenumber
+  let l:line = getline(l:linenr)
 
   let l:sl = ''
   let l:padding = wincol()-virtcol('.')
   if &number || &relativenumber
     let l:nw = max([strlen(line('$')), &numberwidth-1])
-    let l:linenr = a:offscreen.lnum
     let l:direction = l:linenr < line('.')
 
     if &relativenumber
@@ -477,10 +479,10 @@ function! s:format_statusline(offscreen) " {{{1
     let l:padding -= l:nw + 1
   endif
 
-  if empty(l:sl) && a:offscreen.lnum < line('.')
+  if empty(l:sl) && l:lnum < line('.')
     let l:sl = '%#Search#∆%#Normal#'
     let l:padding -= 1    " OK if this is negative
-    if l:padding == -1 && indent(a:offscreen.lnum) == 0
+    if l:padding == -1 && indent(l:lnum) == 0
       let l:padding = 0
     endif
   endif
@@ -489,7 +491,7 @@ function! s:format_statusline(offscreen) " {{{1
   let l:fdcstr = ''
   if &foldcolumn
     let l:fdc = max([1, &foldcolumn-1])
-    let l:fdl = foldlevel(a:offscreen.lnum)
+    let l:fdl = foldlevel(l:lnum)
     let l:fdcstr = l:fdl <= l:fdc ? repeat('|', l:fdl)
           \ : join(range(l:fdl-l:fdc+1, l:fdl), '')
     let l:padding -= len(l:fdcstr)
@@ -501,16 +503,20 @@ function! s:format_statusline(offscreen) " {{{1
   " add remaining padding (this handles rest of fdc and scl)
   let l:sl = l:fdcstr . repeat(' ', l:padding) . l:sl
 
+  " let l:room = winwidth() - (wincol()-virtcol('.')+4)
   let l:lasthi = ''
   for l:c in range(min([winwidth(0), strlen(l:line)]))
-    if a:offscreen.cnum <= l:c+1 && l:c+1 <= a:offscreen.cnum
+    if !l:adjust && a:offscreen.cnum <= l:c+1 && l:c+1 <= a:offscreen.cnum
           \ - 1 + strlen(a:offscreen.match)
       let l:wordish = a:offscreen.match !~? '^[[:punct:]]\{1,3\}$'
       " TODO: we can't overlap groups, this might not be totally correct
       let l:curhi = l:wordish ? 'MatchWord' : 'MatchParen'
     else
       let l:curhi = synIDattr(
-            \ synID(a:offscreen.lnum, l:c+1, 1), 'name')
+            \ synID(l:lnum, l:c+1, 1), 'name')
+      if empty(l:curhi)
+        let l:curhi = 'Normal'
+      endif
     endif
     let l:sl .= (l:curhi !=# l:lasthi ? '%#'.l:curhi.'#' : '')
     if l:line[l:c] ==# "\t"
@@ -521,7 +527,11 @@ function! s:format_statusline(offscreen) " {{{1
     endif
     let l:lasthi = l:curhi
   endfor
-  let l:sl .= '%#Normal#'
+  let l:sl .= '%<%#Normal#'
+  if l:adjust
+    let l:sl .= '%#LineNr# … %#Normal#'
+          \ . '%#MatchParen#' . a:offscreen.match . '%#Normal#'
+  endif
 
   if has('timers') && exists('*timer_pause')
     if !exists('s:scroll_timer')
@@ -532,7 +542,7 @@ function! s:format_statusline(offscreen) " {{{1
     endif
     if !g:matchup_matchparen_status_offscreen_manual
       let l:sl .= '%{matchup#matchparen#scroll_update('
-            \ .a:offscreen.lnum.')}'
+            \ .l:lnum.')}'
     endif
   endif
 
