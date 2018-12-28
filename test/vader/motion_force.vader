@@ -1,0 +1,23 @@
+Given text (Single-line parentheses):
+  (hello world)|
+
+Before ():
+  normal! gg0f(
+
+Do (Delete %):
+  d%
+Expect text (Verify):
+  |
+Do (Delete v%):
+  dv%
+Expect text (Verify):
+  )|
+Do (Delete V%):
+  dV%
+Expect text (Verify):
+  
+Do (Delete <c-v>%):
+  d%
+Expect text (Verify):
+  |
+
