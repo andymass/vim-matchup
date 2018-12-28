@@ -1,4 +1,4 @@
-Given text (Single-line parentheses):
+Given (Single-line parentheses):
   (hello world)|
 
 Before ():
@@ -6,18 +6,18 @@ Before ():
 
 Do (Delete %):
   d%
-Expect text (Verify):
+Expect (Verify):
   |
 Do (Delete v%):
   dv%
-Expect text (Verify):
+Expect (Verify):
   )|
 Do (Delete V%):
   dV%
-Expect text (Verify):
+Expect (Verify):
   
 Do (Delete <c-v>%):
   d%
-Expect text (Verify):
+Expect (Verify):
   |
 

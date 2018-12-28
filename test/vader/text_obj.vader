@@ -1,4 +1,4 @@
-Given text (Parentheses):
+Given (Parentheses):
    (  
 
 
@@ -25,7 +25,7 @@ Do (Delete inner %):
   3kdi%
   4kdi%
 
-Expect tex (Verify):
+Expect (Verify):
    (
      )
 
