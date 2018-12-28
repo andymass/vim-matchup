@@ -192,21 +192,28 @@ the corresponding default left-hand side will not be mapped.
   -------------------------------------------------------------------------~
    Operator pending maps~
   -------------------------------------------------------------------------~
+   %           |<plug>(matchup-%)|                         o      motion
+     ... And so on for g%, [%, ]%, z%, a%, i% ...
+
+Key: (n) normal, (x) visual, (o) operator-pending (|omap-info|).
+
+Note: Prior to vim 8.1.0648, in order to support motion forcing (see |o_v|, |o_V|,
+|o_CTRL-V|) for each operator-pending map, match-up made four maps corresponding
+to each motion type:
+
+  -------------------------------------------------------------------------~
+   Obsolete operator pending maps~
+  -------------------------------------------------------------------------~
    %           |<plug>(matchup-o_)||<plug>(matchup-%)|       o      motion
    v%          |<plug>(matchup-o_v)||<plug>(matchup-%)|      o      motion
    V%          |<plug>(matchup-o_V)||<plug>(matchup-%)|      o      motion
    <c-v>%      |<plug>(matchup-o_<c-v>)||<plug>(matchup-%)|  o      motion
      ... And so on for g%, [%, ]%, z%, a%, i% ...
 
-Key: (n) normal, (x) visual, (o) operator-pending (|omap-info|).
-
-Note: In order to support motion forcing (see |o_v|, |o_V|, |o_CTRL-V|), for each
-operator-pending map, match-up makes four maps corresponding to each motion
-type.  This means, for example, `d2v%` will work (meaning delete 2 matches
-forward, exclusively), but `dv2%` will not work as you would expect (behavior
-is undefined).  Unfortunately, this is a limitation of vim's operator-pending
-mapping capabilities and if a change is made to vim, match-up will modified
-to simplify these mappings.
+This meant, for example, `d2v%` would work (meaning delete 2 matches forward,
+exclusively), but `dv2%` would not work as you would expect (the behavior is
+undefined).  After vim version 8.1.0648, this limitation of operator-pending
+mapping was lifted and match-up is able to use simplified mappings.
 
 ------------------------------------------------------------------------------
 Features~
@@ -769,7 +776,7 @@ HTML
 
 Customization~
 
-*g:matchup_hotfix[&filetype]*                                   *matchup-hotfix*
+*g:matchup_hotfix[&filetype]*                                    *matchup-hotfix*
 
   For each file type, this option can be set to the string name of a function
   which will be called when loading files, prior to checking |b:match_words|

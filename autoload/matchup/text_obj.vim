@@ -8,6 +8,8 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
+  let l:v_motion_force = matchup#motion_force()
+
   " get the current selection, move to the _start_ the of range
   if a:visual
     let l:selection = getpos("'<")[1:2] + getpos("'>")[1:2]
@@ -15,7 +17,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   endif
 
   " motion forcing
-  let l:forced = a:visual ? '' : g:v_motion_force
+  let l:forced = a:visual ? '' : l:v_motion_force
 
   " determine if operator is able to act line-wise (i.e., for inner)
   let l:linewise_op = index(g:matchup_text_obj_linewise_operators,
@@ -151,7 +153,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
 
         " sometimes operate in visual line motion (re-purpose force)
         " cf src/normal.c:1824
-        if empty(g:v_motion_force)
+        if empty(l:v_motion_force)
               \ && l:c2 <= 1 && l:line_count > 1 && !l:inclusive
           let l:l2 -= 1
           if l:c1 <= 1 || matchup#util#in_indent(l:l1, l:c1-1)

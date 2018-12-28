@@ -7,8 +7,9 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-" TODO redo this
-function! matchup#motion#op(motion)
+" TODO this can probably be simplified
+function! matchup#motion#op(motion) abort
+  call matchup#motion_force()
   let l:sid = matchup#motion_sid()
   let s:v_operator = v:operator
   execute 'normal' l:sid.'(wise)' . (v:count > 0 ? v:count : '')

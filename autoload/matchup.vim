@@ -82,12 +82,58 @@ function! s:init_modules()
   call s:surround_init_module()
 endfunction
 
+function! s:init_oldstyle_ops() " {{{1
+  if get(g:, 'matchup_motion_enabled', 0)
+        \ || get(g:, 'matchup_text_obj_enabled', 0)
+    for l:opforce in ['', 'v', 'V', '<c-v>']
+      call s:map('onore', '<expr> <plug>(matchup-o_'.l:opforce.')',
+            \ '<sid>force('''.l:opforce.''')')
+    endfor
+  endif
+
+  if get(g:, 'matchup_motion_enabled', 0)
+    for l:opforce in ['', 'v', 'V', '<c-v>']
+      call s:map('o', l:opforce.'%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-%)')
+      call s:map('o', l:opforce.'g%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-g%)')
+      call s:map('o', l:opforce.']%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-]%)')
+      call s:map('o', l:opforce.'[%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-[%)')
+      call s:map('o', l:opforce.'z%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-z%)')
+    endfor
+  endif
+
+  if get(g:, 'matchup_text_obj_enabled', 0)
+    for l:opforce in ['', 'v', 'V', '<c-v>']
+      call s:map('o', l:opforce.'i%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-i%)')
+      call s:map('o', l:opforce.'a%',
+            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-a%)')
+    endfor
+  endif
+endfunction
+
+let s:old_style_ops = !has('patch-8.1.0648')
+
 let g:v_motion_force = ''
 function! s:force(wise)
   let g:v_motion_force = a:wise
-  " let g:v_operator = v:operator
   return ''
 endfunction
+
+function! matchup#motion_force() abort
+  if !s:old_style_ops
+    let l:mode = mode(1)
+    let g:v_motion_force = len(l:mode) >= 3
+          \ && l:mode[0:1] ==# 'no' ? l:mode[2] : ''
+  endif
+  return g:v_motion_force
+endfunction
+
+" }}}1
 
 function! s:init_default_mappings()
   if !get(g:,'matchup_mappings_enabled', 1) | return | endif
@@ -99,10 +145,9 @@ function! s:init_default_mappings()
     endif
   endfunction
 
-  for l:opforce in ['', 'v', 'V', '<c-v>']
-    call s:map('onore', '<expr> <plug>(matchup-o_'.l:opforce.')',
-          \ '<sid>force('''.l:opforce.''')')
-  endfor
+  if s:old_style_ops
+    call s:init_oldstyle_ops()
+  endif
 
   " these won't conflict since matchit should not be loaded at this point
   if get(g:, 'matchup_motion_enabled', 0)
@@ -121,18 +166,9 @@ function! s:init_default_mappings()
     call s:map('n', 'z%', '<plug>(matchup-z%)')
     call s:map('x', 'z%', '<plug>(matchup-z%)')
 
-    for l:opforce in ['', 'v', 'V', '<c-v>']
-      call s:map('o', l:opforce.'%',
-            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-%)')
-      call s:map('o', l:opforce.'g%',
-            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-g%)')
-      call s:map('o', l:opforce.']%',
-            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-]%)')
-      call s:map('o', l:opforce.'[%',
-            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-[%)')
-      call s:map('o', l:opforce.'z%',
-            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-z%)')
-    endfor
+    if !s:old_style_ops
+      call s:map('o', '%', '<plug>(matchup-%)')
+    endif
 
     call s:map('i', '<c-g>%', '<plug>(matchup-c_g%)')
   endif
@@ -140,12 +176,11 @@ function! s:init_default_mappings()
   if get(g:, 'matchup_text_obj_enabled', 0)
     call s:map('x', 'i%', '<plug>(matchup-i%)')
     call s:map('x', 'a%', '<plug>(matchup-a%)')
-    for l:opforce in ['', 'v', 'V', '<c-v>']
-      call s:map('o', l:opforce.'i%',
-            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-i%)')
-      call s:map('o', l:opforce.'a%',
-            \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-a%)')
-    endfor
+
+    if !s:old_style_ops
+      call s:map('o', 'i%', '<plug>(matchup-i%)')
+      call s:map('o', 'a%', '<plug>(matchup-a%)')
+    endif
   endif
 
   if get(g:, 'matchup_mouse_enabled', 1)
