@@ -93,7 +93,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         " and fills registers with a space (from targets.vim)
         call matchup#pos#set_cursor(l:close)
         silent! execute "normal! i \<esc>v"
-      elseif !count('<>', v:operator)
+      elseif stridx('<>', v:operator) < 0
         call feedkeys(l:close.lnum.'gg', 'n')
         call feedkeys(l:close.cnum.'|', 'n')
       endif
@@ -187,7 +187,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         if v:operator ==# 'c'
           call matchup#pos#set_cursor(l:l1, l:c1)
           silent! execute "normal! i \<esc>v"
-        elseif !count('<>', v:operator)
+        elseif stridx('<>', v:operator) < 0
           call feedkeys(l:l1.'gg', 'n')
           call feedkeys(l:c1.'|', 'n')
         endif
