@@ -1,8 +1,12 @@
 image: thinca/vim
 
-before_script:
-  - git clone https://github.com/junegunn/vader.vim.git test/vader/vader.vim
-
 job:
+  before_script:
+    - apk update
+    - apk upgrade
+    - apk add git
+    - apk add bash
+    - git clone https://github.com/junegunn/vader.vim.git test/vader/vader.vim
+
   script: test/vader/run
 

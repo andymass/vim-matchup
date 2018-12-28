@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 vim -es -Nu minvimrc +"Vader! ${1:-*}"
