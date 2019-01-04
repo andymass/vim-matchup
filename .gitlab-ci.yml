@@ -3,7 +3,7 @@ stages:
   - test
 
 before_script:
-  - apk update; apk add git bash
+  - apk update; apk add git bash neovim
   - git clone --depth=1 https://github.com/junegunn/vader.vim.git test/vader/vader.vim
 
 test-latest:
@@ -26,4 +26,8 @@ test-7.4.2273:
     name: thinca/vim:v7.4.2273-full
     entrypoint: [""]
   script: bash test/vader/run
+
+test-neovim:
+  stage: test
+  script: bash -c 'VIMCMD=nvim test/vader/run'
 
