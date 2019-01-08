@@ -20,5 +20,7 @@ endif
 filetype plugin indent on
 syntax enable
 
+set notimeout
+
 " match-up options go here
 

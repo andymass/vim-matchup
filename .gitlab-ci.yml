@@ -29,5 +29,6 @@ test-7.4.2273:
 
 test-neovim:
   stage: test
+  image: alpine:latest
   script: bash -c 'VIMCMD=nvim test/vader/run'
 
