@@ -12,6 +12,7 @@ function! matchup#motion#op(motion) abort
   call matchup#motion_force()
   let l:sid = matchup#motion_sid()
   let s:v_operator = v:operator
+  echomsg g:v_motion_force s:v_operator l:sid
   execute 'normal' l:sid.'(wise)' . (v:count > 0 ? v:count : '')
         \ . l:sid.'(matchup-'.a:motion.')'
   unlet s:v_operator
