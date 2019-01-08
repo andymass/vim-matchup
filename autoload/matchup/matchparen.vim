@@ -43,6 +43,7 @@ function! matchup#matchparen#enable() " {{{1
     if has('patch-8.0.1494')
       autocmd TextChangedP * call s:matchparen.highlight_deferred()
     endif
+    autocmd BufReadPost * call s:matchparen.transmute_reset()
     autocmd WinLeave,BufLeave * call s:matchparen.clear()
     autocmd InsertEnter,Insertchange * call s:matchparen.highlight(1, 1)
     autocmd InsertLeave * call s:matchparen.highlight(1)
@@ -324,7 +325,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
     endif
 
     " if transmuted, highlight again (will reset timeout)
-    if matchup#transmute#tick(l:insertmode, 'unused')
+    if matchup#transmute#tick(l:insertmode)
       " no force_update here because it would screw up prior
       return s:matchparen.highlight(0, l:changing_insert)
     endif
@@ -362,6 +363,12 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   endif
 
   call matchup#perf#toc('matchparen.highlight', 'end')
+endfunction
+
+function s:matchparen.transmute_reset() abort dict
+  if g:matchup_transmute_enabled
+    call matchup#transmute#reset()
+  endif
 endfunction
 
 " }}}1

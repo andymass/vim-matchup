@@ -27,7 +27,7 @@ endfunction
 
 " }}}1
 
-function! matchup#transmute#tick(insertmode, entering_insert) " {{{1
+function! matchup#transmute#tick(insertmode) " {{{1
   if !g:matchup_transmute_enabled | return 0 | endif
 
   if a:insertmode
@@ -48,6 +48,12 @@ function! matchup#transmute#tick(insertmode, entering_insert) " {{{1
 endfunction
 
 " }}}1
+function! matchup#transmute#reset() " {{{1
+  if !g:matchup_transmute_enabled | return 0 | endif
+  let w:matchup_transmute_last_changenr = changenr()
+endfunction
+
+" }}}1
 function! matchup#transmute#dochange(list, pri, cur) " {{{1
   if empty(a:list) || empty(a:pri) || empty(a:cur) | return 0 | endif
 
@@ -62,6 +68,10 @@ function! matchup#transmute#dochange(list, pri, cur) " {{{1
 
   " right now, only same-class changes are supported
   if a:pri.class[0] != l:cur.class[0]
+    return 0
+  endif
+  if (a:pri.class[1] == 0 || a:pri.class[1] == 1)
+        \ && a:pri.class[1] isnot l:cur.class[1]
     return 0
   endif
 
