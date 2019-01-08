@@ -9,6 +9,7 @@ set cpo&vim
 
 " TODO this can probably be simplified
 function! matchup#motion#op(motion) abort
+  echomsg mode(1)
   call matchup#motion_force()
   let l:sid = matchup#motion_sid()
   let s:v_operator = v:operator
