@@ -21,7 +21,8 @@ let s:adjust_max = 5
 
 function! matchup#quirks#status_adjust(offscreen) abort " {{{1
   if a:offscreen.match ==# '{' && matchup#quirks#isclike()
-        \ && getline(a:offscreen.lnum)[0:a:offscreen.cnum-2] =~# '^\s\+$'
+        \ && strpart(getline(a:offscreen.lnum),
+        \            0, a:offscreen.cnum-1) =~# '^\s*$'
     " go up to next line with same indent (up to 5)
     for l:adjust in range(-1, -s:adjust_max, -1)
       if indent(a:offscreen.lnum + l:adjust) == indent(a:offscreen.lnum)
