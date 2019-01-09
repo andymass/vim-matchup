@@ -4,10 +4,6 @@ Given (Single-line parentheses):
 Before ():
   normal! gg0f(
 
-After (messages):
-  Log execute('messages')
-  messages clear
-
 Do (Delete %):
   d%
 Expect (Verify):
