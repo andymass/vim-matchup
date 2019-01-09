@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
-${VIMCMD:-vim} -es -Nu minvimrc +"Vader! ${1:-*}"
+${VIMCMD:-vim} -Nu minvimrc +"Vader! ${1:-*}"
 
