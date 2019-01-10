@@ -70,8 +70,10 @@ function! matchup#transmute#dochange(list, pri, cur) " {{{1
   if a:pri.class[0] != l:cur.class[0]
     return 0
   endif
-  if (a:pri.class[1] == 0 || a:pri.class[1] == 1)
-        \ && a:pri.class[1] isnot l:cur.class[1]
+  if a:pri.side =~# '^open\|close$' && a:pri.side isnot l:cur.side
+    return 0
+  endif
+  if !matchup#pos#equal(a:pri, l:cur)
     return 0
   endif
 
@@ -106,7 +108,7 @@ function! matchup#transmute#dochange(list, pri, cur) " {{{1
 
       for l:dummy in range(len(l:count))
         " create a pattern which isolates the old group text
-        let l:prevtext = escape(l:groups[l:grp], '\''')
+        let l:prevtext = s:qescape(l:groups[l:grp])
         let l:pattern = substitute(l:re_anchored,
               \ g:matchup#re#not_bslash.'\\'.l:grp,
               \ '\=''\zs\V'.l:prevtext.'\m\ze''', '')
@@ -114,21 +116,26 @@ function! matchup#transmute#dochange(list, pri, cur) " {{{1
               \ l:groups, 0)
         let l:string = l:cur.groups[l:grp]
         let l:line = substitute(l:line, l:pattern,
-              \ '\='''.escape(l:string, '\''')."'", '')
+              \ '\='''.s:qescape(l:string)."'", '')
       endfor
 
       let l:groups[l:grp] = l:cur.groups[l:grp]
     endfor
 
     if getline(l:corr.lnum) !=# l:line
-      " TODO break undo option
-      " exe "normal! a\<c-g>u"
+      if g:matchup_transmute_breakundo && l:num_changes == 0
+        execute "normal! a\<c-g>u"
+      endif
       call setline(l:corr.lnum, l:line)
       let l:num_changes += 1
     endif
   endfor
 
   return l:num_changes
+endfunction
+
+function s:qescape(str)
+  return escape(substitute(a:str, "'", "''", 'g'), '\')
 endfunction
 
 " }}}1
