@@ -346,6 +346,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   let l:scrolling = g:matchup_matchparen_scrolloff
         \ && winheight(0) > 2*&scrolloff
         \ && (line('.') == line('w$')-&scrolloff
+        \     && line('$') != line('w$')
         \     || line('.') == line('w0')+&scrolloff)
 
   " show off-screen matches
