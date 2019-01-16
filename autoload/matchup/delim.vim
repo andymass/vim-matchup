@@ -156,6 +156,12 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
     endif
 
     let l:matches = matchup#delim#get_matching(l:open, 1)
+
+    " TODO: getting one match result here is surely wrong
+    if len(l:matches) == 1
+      let l:matches = []
+    endif
+
     if has_key(l:opts, 'matches')
       let l:opts.matches = l:matches
     endif
@@ -163,7 +169,7 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
     if len(l:matches)
       let l:close = l:local ? l:open.links.next : l:open.links.close
       let l:pos_val_try = matchup#pos#val(l:close)
-          \ + matchup#delim#end_offset(l:close)
+            \ + matchup#delim#end_offset(l:close)
     endif
 
     if len(l:matches) && l:pos_val_try >= l:pos_val_cursor

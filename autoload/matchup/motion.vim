@@ -148,12 +148,12 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
   " set the timeout fairly high
   call matchup#perf#timeout_start(750)
 
-  for l:second_try in range(2)
+  for l:tries in range(3)
     let [l:open, l:close] = matchup#delim#get_surrounding('delim_all',
-          \ l:second_try ? l:count : 1)
+          \ l:tries ? l:count : 1)
 
     if empty(l:open) || empty(l:close)
-      call matchup#perf#toc('motion#find_unmatched', 'fail'.l:second_try)
+      call matchup#perf#toc('motion#find_unmatched', 'fail'.l:tries)
       return
     endif
 
@@ -167,7 +167,11 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
       if l:exclusive
         let l:new_pos[1] -= 1
       else
-        let l:new_pos[1] += matchup#delim#end_offset(l:delim)
+        if l:is_oper
+          let l:new_pos[1] += matchup#delim#end_offset(l:delim)
+        else
+          let l:new_pos[1] = matchup#delim#jump_target(l:delim)
+        endif
       endif
     endif
 
