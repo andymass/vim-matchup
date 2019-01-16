@@ -101,9 +101,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
   " set up links between matches
   for l:i in range(len(l:matching_list))
     let l:c = l:matching_list[l:i]
-    if !has_key(l:c, 'links')
-      let l:c.links = {}
-    endif
+    let l:c.links = {}
     let l:c.links.next = l:matching_list[(l:i+1) % len(l:matching_list)]
     let l:c.links.prev = l:matching_list[l:i-1]
     let l:c.links.open = l:matching_list[0]
