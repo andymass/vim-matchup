@@ -7,7 +7,7 @@ Script ID: 5624
 Version: 0.3.a
 License: MIT license {{{
 
-  Copyright (c) 2018 Andy Massimino
+  Copyright (c) 2019 Andy Massimino
 
   Copyright (c) 2016 Karl Yngve Lervåg
 
@@ -92,8 +92,10 @@ Default mappings~
 For customization, see |matchup-custom-mappings|.
 
                                                          *matchup-%*
-%                       Go forwards to next matching word.  If at a close word,
-                        cycle back to the corresponding open word.
+%                       When on a recognized word, go forwards to its next
+                        matching word.  If at a close word, cycle back to the
+                        corresponding open word.  If the cursor is not on a
+                        word, seek forwards to one and then jump to its match.
                         This is an |inclusive| motion.
 
                                                          *matchup-N%*
@@ -102,24 +104,26 @@ For customization, see |matchup-custom-mappings|.
                         See |g:matchup_motion_override_Npercent|.
 
                                                          *g%*
-g%                      Go backwards to [count]th previous matching word.  If
-                        at an open word, cycle around to the corresponding
-                        close word.
+g%                      When on a recognized word, go backwards to [count]th
+                        previous matching word.  If at an open word, cycle
+                        around to the corresponding open word.  If the cursor
+                        is not on a word, seek forwards to one and then jump
+                        to its match.
 
                                                          *[%*
-[%                      go to [count]th previous outer open word.  Allows
+[%                      Go to [count]th previous outer open word.  Allows
                         navigation to the start of blocks surrounding the
                         cursor. This is similar to vim's built-in |[(| and |[{|
                         and is an |exclusive| motion (|matchup-feat-exclusive|).
 
                                                          *]%*
-]%                      go to [count]th next outer close word.  Allows
+]%                      Go to [count]th next outer close word.  Allows
                         navigation to the end of blocks surrounding the
-                        cursor. This is similar to vim's built-in |](| and |]{|
+                        cursor. This is similar to vim's built-in |])| and |]}|
                         and is an |exclusive| motion (|matchup-feat-exclusive|).
 
                                                          *z%*
-z%                      go to inside [count]th nearest block.  This is an
+z%                      Go to inside [count]th nearest block.  This is an
                         |exclusive| motion when used with operators,
                         except it eats white-space.  For example, where `█` is
                         the cursor position, >
@@ -131,36 +135,36 @@ z%                      go to inside [count]th nearest block.  This is an
                         param1, param2)
 <
                                                          *v_a%* *a%*
-a%                      select an |any-block|.
+a%                      Select an |any-block|.
                         This closely matches vim's built-in |ab|.
 
                                                          *v_Na%* *Na%*
-{count}a%               select an |open-to-close-block|.
+{count}a%               Select an |open-to-close-block|.
                         When {count} is greater than 1, select the {count}th
                         surrounding open-to-close block.
 
                                                          *v_i%* *i%*
-i%                      select the inside of an |any-block|.
+i%                      Select the inside of an |any-block|.
                         This closely matches vim's built-in |ib|.
                         See also |matchup-feat-linewise|.
 
                                                          *v_Ni%* *Ni%*
-{count}i%               select the inside of an |open-to-close-block|.
+{count}i%               Select the inside of an |open-to-close-block|.
                         When {count} is greater than 1, select the inside of
                         the {count}th surrounding open-to-close block.
 
                                                          *ds%*
-{count}ds%              delete {count}th surrounding matching words.  This
+{count}ds%              Delete {count}th surrounding matching words.  This
                         only works for open and close words.
                         Requires |g:matchup_surround_enabled| = 1.
 
                                                          *cs%*
-{count}cs%              change {count}th surrounding matching words.  This
+{count}cs%              Change {count}th surrounding matching words.  This
                         only works for open and close words.  If vim-surround
                         is installed, you can type replacements according to
                         that plugin's rules.  Otherwise, match-up will give
-                        you the opportunity to type open and close
-                        replacements.
+                        you the opportunity to type a single character.  Some
+                        simple replacement pairs are supported.
                         Requires |g:matchup_surround_enabled| = 1.
 
 ------------------------------------------------------------------------------
