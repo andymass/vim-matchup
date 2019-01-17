@@ -169,6 +169,10 @@ function! s:init_default_mappings()
 
     if !s:old_style_ops
       call s:map('o', '%', '<plug>(matchup-%)')
+      call s:map('o', 'g%', '<plug>(matchup-g%)')
+      call s:map('o', ']%', '<plug>(matchup-]%)')
+      call s:map('o', '[%', '<plug>(matchup-[%)')
+      call s:map('o', 'z%', '<plug>(matchup-z%)')
     endif
 
     call s:map('i', '<c-g>%', '<plug>(matchup-c_g%)')
