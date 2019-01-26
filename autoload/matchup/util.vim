@@ -135,6 +135,16 @@ function! matchup#util#check_match_words(sha256) " {{{1
 endfunction
 
 " }}}1
+function! matchup#util#append_match_words(str) abort " {{{1
+  if !exists('b:match_words') | return | endif
+
+  if len(b:match_words) && b:match_words[-1] !=# ',' && a:str[0] !=# ','
+    let b:match_words .= ','
+  endif
+  let b:match_words .= a:str
+endfunction
+
+" }}}1
 
 function! matchup#util#matchpref(id, default) " {{{1
   return get(get(g:matchup_matchpref, &filetype, {}), a:id, a:default)
