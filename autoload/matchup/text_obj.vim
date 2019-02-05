@@ -96,8 +96,8 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         call matchup#pos#set_cursor(l:close)
         silent! execute "normal! i \<esc>v"
       elseif stridx('<>', v:operator) < 0
-        call feedkeys(l:close.lnum.'gg', 'n')
-        call feedkeys(l:close.cnum.'|', 'n')
+        let l:byte = line2byte(l:close.lnum) + l:close.cnum - 1
+        call feedkeys(l:byte.'go', 'n')
       endif
 
       return
@@ -190,8 +190,8 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
           call matchup#pos#set_cursor(l:l1, l:c1)
           silent! execute "normal! i \<esc>v"
         elseif stridx('<>', v:operator) < 0
-          call feedkeys(l:l1.'gg', 'n')
-          call feedkeys(l:c1.'|', 'n')
+          let l:byte = line2byte(l:l1) + l:c1 - 1
+          call feedkeys(l:byte.'go', 'n')
         endif
         return
       endif
