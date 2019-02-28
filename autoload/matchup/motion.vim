@@ -167,23 +167,25 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
       if l:exclusive
         let l:new_pos[1] -= 1
       else
-        if l:is_oper
-          let l:new_pos[1] += matchup#delim#end_offset(l:delim)
-        else
-          let l:new_pos[1] = matchup#delim#jump_target(l:delim)
-        endif
+        let l:new_pos[1] += matchup#delim#end_offset(l:delim)
       endif
     endif
 
     " if the cursor didn't move, increment count
     if matchup#pos#equal(l:save_pos, l:new_pos)
       let l:count += 1
+    elseif l:tries
+      break
     endif
 
     if l:count <= 1
       break
     endif
   endfor
+
+  if a:down && !l:is_oper
+    let l:new_pos[1] = matchup#delim#jump_target(l:delim)
+  endif
 
   " this is an exclusive motion, [%
   if !a:down && l:exclusive
