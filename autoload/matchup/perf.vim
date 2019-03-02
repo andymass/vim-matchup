@@ -39,6 +39,10 @@ endfunction
 function! matchup#perf#show_times()
   let l:keys = keys(g:matchup#perf#times)
   let l:contexts = uniq(sort(map(copy(l:keys), 'split(v:val, "#")[0]')))
+  if empty(l:contexts)
+    echo 'no times'
+    return
+  end
 
   echo printf("%42s%11s%17s", 'average', 'last', 'maximum')
   for l:c in l:contexts

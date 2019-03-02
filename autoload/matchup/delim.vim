@@ -321,7 +321,9 @@ function! s:get_delim(opts) " {{{1
 
   if a:opts.direction ==# 'current'
     let l:check_skip = get(a:opts, 'check_skip',
-          \ g:matchup_delim_noskips >= 2)
+          \ g:matchup_delim_noskips >= 2
+          \ || g:matchup_delim_noskips >= 1
+          \     && getline(line('.'))[l:cursorpos-1] =~ '[^[:punct:]]')
     if l:check_skip && matchup#delim#skip(line('.'), l:cursorpos)
       return {}
     endif
@@ -351,8 +353,6 @@ function! s:get_delim(opts) " {{{1
     let l:re .= '\&'
   endif
 
-  " use b:match_ignorecase (defunct)
-
   " move cursor one left for searchpos if necessary
   let l:need_restore_cursor = 0
   if l:insertmode
@@ -369,23 +369,20 @@ function! s:get_delim(opts) " {{{1
   " or forwards or backwards (if direction == next or prev)
   " for current, we actually search leftwards from the cursor
   while 1
+    let l:to = matchup#perf#timeout()
     let [l:lnum, l:cnum] = a:opts.direction ==# 'next'
-          \ ? searchpos(l:re, 'cnW', line('.') + l:stopline)
+          \ ? searchpos(l:re, 'cnW', line('.') + l:stopline, l:to)
           \ : a:opts.direction ==# 'prev'
-          \   ? searchpos(l:re, 'bcnW', max([line('.') - l:stopline, 1]))
-          \   : searchpos(l:re, 'bcnW', line('.'))
+          \   ? searchpos(l:re, 'bcnW',
+          \               max([line('.') - l:stopline, 1]), l:to)
+          \   : searchpos(l:re, 'bcnW', line('.'), l:to)
     if l:lnum == 0 | break | endif
-
-    let l:wordish_skip = g:matchup_delim_noskips == 1
-          \ && getline(l:lnum)[l:cnum-1] =~ '[^[:punct:]]'
-    if a:opts.direction ==# 'current' && l:wordish_skip
-      return {}
-    endif
 
     " note: the skip here should not be needed
     " in 'current' mode, but be explicit
     if a:opts.direction !=# 'current'
-          \ && (l:check_skip || l:wordish_skip)
+          \ && (l:check_skip || g:matchup_delim_noskips == 1
+          \     && getline(l:lnum)[l:cnum-1] =~ '[^[:punct:]]')
           \ && matchup#delim#skip(l:lnum, l:cnum)
           \ && (a:opts.direction ==# 'prev' ? (l:lnum > 1 || l:cnum > 1)
           \     : (l:lnum < line('$') || l:cnum < len(getline('$'))))
@@ -408,8 +405,6 @@ function! s:get_delim(opts) " {{{1
     let l:need_restore_cursor = 1
   endif
 
-  " reset ignorecase (defunct)
-
   " restore cursor
   if l:need_restore_cursor
     call matchup#pos#set_cursor(l:save_pos)
@@ -423,12 +418,21 @@ function! s:get_delim(opts) " {{{1
     return {}
   endif
 
-  " XXX: workaround an apparent obscure vim bug where the
-  " reported syntax id is incorrect on the first synID() call
-  call matchup#delim#skip(l:lnum, l:cnum)
+  if matchup#perf#timeout_check()
+    return {}
+  endif
 
-  let l:skip_state = l:check_skip ? 0
-        \ : matchup#delim#skip(l:lnum, l:cnum)
+  let l:skip_state = 0
+  if !l:check_skip && (!&synmaxcol || l:cnum <= &synmaxcol)
+    " XXX: workaround an apparent obscure vim bug where the
+    " reported syntax id is incorrect on the first synID() call
+    call matchup#delim#skip(l:lnum, l:cnum)
+    if matchup#perf#timeout_check()
+      return {}
+    endif
+
+    let l:skip_state = matchup#delim#skip(l:lnum, l:cnum)
+  endif
 
   " now we get more data about the match in this position
   " there may be capture groups which need to be stored

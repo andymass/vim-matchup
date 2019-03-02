@@ -270,6 +270,11 @@ function! s:matchparen.highlight(...) abort dict " {{{1
     return
   endif
 
+  " give up when cursor is far into a very long line
+  if &synmaxcol && col('.') > &synmaxcol
+    return
+  endif
+
   " in insert mode, cursor is treated as being one behind
   let l:insertmode = l:real_mode ==# 'i'
 
