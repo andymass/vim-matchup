@@ -36,6 +36,12 @@ function! matchup#perf#toc(context, state)
   endif
 endfunction
 
+function! s:sort_by_last(a, b)
+  let l:a = g:matchup#perf#times[a:a].last
+  let l:b = g:matchup#perf#times[a:b].last
+  return l:a == l:b ? 0 : l:a > l:b ? 1 : -1
+endfunction
+
 function! matchup#perf#show_times()
   let l:keys = keys(g:matchup#perf#times)
   let l:contexts = uniq(sort(map(copy(l:keys), 'split(v:val, "#")[0]')))
@@ -44,10 +50,15 @@ function! matchup#perf#show_times()
     return
   end
 
+  echohl Title
   echo printf("%42s%11s%17s", 'average', 'last', 'maximum')
+  echohl None
   for l:c in l:contexts
+    echohl Title
     echo '['.l:c.']'
+    echohl None
     let l:states = filter(copy(l:keys), 'v:val =~# "^\\V'.l:c.'#"')
+    call sort(l:states, 's:sort_by_last')
     for l:s in l:states
       echo printf("  %-25s%12.2gms%12.2gms%12.2gms",
             \ join(split(l:s,'#')[1:],'#'),
