@@ -156,7 +156,6 @@ function! s:timer_callback(win_id, timer_id) abort " {{{1
   " if we timed out, do a highlight and pause the timer
   let l:elapsed = 1000*s:reltimefloat(reltime(w:matchup_pulse_time))
   if l:elapsed >= s:show_delay
-    let w:matchup_timer_paused = 1
     call timer_pause(a:timer_id, 1)
     if exists('#TextYankPost') && !has('patch-8.1.0192')
       " workaround crash with autocmd trigger during regex match (#3175)
@@ -176,6 +175,92 @@ function! s:timer_callback(win_id, timer_id) abort " {{{1
     if l:elapsed >= s:hide_delay
       call s:matchparen.clear()
     endif
+  endif
+endfunction
+
+" }}}1
+
+""
+" fade feature: remove highlights after a certain time
+" {level}
+"   =  0: prepare for possible loss of cursor support
+"   =  1: new highlights are coming (cancel prior fade)
+"   =  2: end of new highlights
+" {pos}     [lnum, column] of current match
+" {token}   in/out saves state between calls
+"
+" returns 1 if highlighting should be canceled
+function! s:matchparen.fade(level, pos, token) abort dict " {{{1
+  if !g:matchup_matchparen_deferred || !exists('w:matchup_fade_timer')
+    if a:level <= 0
+      call s:matchparen.clear()
+    endif
+    return 0
+  endif
+
+  " jumping between windows
+  if a:level == 0 && win_getid() != get(s:, 'save_win')
+    call timer_pause(w:matchup_fade_timer, 1)
+    if exists('w:matchup_fade_pos')
+      unlet w:matchup_fade_pos
+    endif
+    call s:matchparen.clear()
+    let s:save_win = win_getid()
+  endif
+
+  " highlighting might be stale
+  if a:level == 0
+    if exists('w:matchup_fade_pos')
+      let a:token.save_pos = w:matchup_fade_pos
+      unlet w:matchup_fade_pos
+    endif
+    if !w:matchup_need_clear
+      call timer_pause(w:matchup_fade_timer, 1)
+    endif
+    return 0
+  endif
+
+  " prepare for new highlighting
+  if a:level == 1
+    " if token has no save_pos, cursor was previously off of a match
+    if !has_key(a:token, 'save_pos') || a:pos != a:token.save_pos
+      " clear immediately
+      call timer_pause(w:matchup_fade_timer, 1)
+      call s:matchparen.clear()
+      return 0
+    endif
+    let w:matchup_fade_pos = a:token.save_pos
+    return 1
+  endif
+
+  " new highlighting is active
+  if a:level == 2 && a:pos != get(w:, 'matchup_fade_pos', [])
+    " init fade request
+    let w:matchup_fade_pos = a:pos
+    let w:matchup_fade_start = reltime()
+    call timer_pause(w:matchup_fade_timer, 0)
+  endif
+
+  return 0
+endfunction
+
+" }}}1
+
+function! s:fade_timer_callback(win_id, timer_id) abort " {{{1
+  if a:win_id != win_getid()
+    call timer_pause(a:timer_id, 1)
+    return
+  endif
+
+  if !exists('w:matchup_fade_start') || !w:matchup_need_clear
+    call timer_pause(a:timer_id, 1)
+    return
+  endif
+
+  let l:elapsed = 1000*s:reltimefloat(reltime(w:matchup_fade_start))
+  if l:elapsed >= s:fade_time
+    call s:matchparen.clear()
+    call timer_pause(a:timer_id, 1)
   endif
 endfunction
 
@@ -208,6 +293,13 @@ function! s:matchparen.highlight_deferred() abort dict " {{{1
           \ {'repeat': -1})
     if !exists('w:matchup_need_clear')
       let w:matchup_need_clear = 0
+    endif
+    let s:fade_time = g:matchup_matchparen_deferred_fade_time
+    if s:fade_time > 0
+      let w:matchup_fade_timer = timer_start(s:fade_time,
+            \ function('s:fade_timer_callback', [ win_getid() ]),
+            \ {'repeat': -1})
+      call timer_pause(w:matchup_fade_timer, 1)
     endif
   endif
 
@@ -255,7 +347,9 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
   call matchup#perf#tic('matchparen.highlight')
 
-  call self.clear()
+  " request eventual clearing of stale matches
+  let l:token = {}
+  call self.fade(0, [], l:token)
 
   let l:modes = g:matchup_matchparen_nomode
   if get(g:, 'matchup_matchparen_novisual', 0)  " deprecated option name
@@ -344,6 +438,12 @@ function! s:matchparen.highlight(...) abort dict " {{{1
     return
   endif
 
+  " prepare for (possibly) new highlights
+  let l:pos = [l:current.lnum, l:current.cnum]
+  if self.fade(1, l:pos, l:token)
+    return
+  endif
+
   " store flag meaning highlighting is active
   let w:matchup_need_clear = 1
 
@@ -367,6 +467,9 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   if g:matchup_matchparen_hi_background >= 1
     call s:highlight_background(l:corrlist)
   endif
+
+  " new highlights done, request fade away
+  call self.fade(2, l:pos, l:token)
 
   call matchup#perf#toc('matchparen.highlight', 'end')
 endfunction

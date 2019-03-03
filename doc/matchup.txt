@@ -629,6 +629,28 @@ will only work in nvim-0.2.1 and after.
 
   Defaults: 50, 700
 
+*g:matchup_matchparen_deferred_fade_time*         *matchup-fading*
+
+  When set to {time} in milliseconds, the deferred highlighting behavior
+  is changed in two ways:
+    1. Highlighting of matches is preserved for at least {time} even when
+       the cursor is moved away.
+    2. If the cursor stays on the same match for longer than {time},
+       highlighting is cleared.
+  The effect is that highlighting occurs momentarily and then disappears,
+  regardless of where the cursor is.  It is possible that fading takes
+  longer than {time}, if vim is busy doing other things.
+
+  This value should be greater than the deferred show delay.
+  Note: this option cannot be changed dynamically.
+
+  Example: >
+
+    let g:matchup_matchparen_deferred = 1
+    let g:matchup_matchparen_deferred_fade_time = 450
+<
+  Default: 0 (fading disabled)
+
 *g:matchup_matchparen_pumvisible*
 
   If set to 1, matches will be made even when the |popupmenu-completion| is
