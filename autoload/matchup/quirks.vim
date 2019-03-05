@@ -17,19 +17,18 @@ let s:clikeft = [ 'arduino', 'c', 'cpp', 'cuda',
 
 " }}}1
 
-let s:adjust_max = 5
+let s:adjust_max = 7
 
 function! matchup#quirks#status_adjust(offscreen) abort " {{{1
   if a:offscreen.match ==# '{' && matchup#quirks#isclike()
         \ && strpart(getline(a:offscreen.lnum),
         \            0, a:offscreen.cnum-1) =~# '^\s*$'
-    " go up to next line with same indent (up to 5)
+    " go up to next line with same indent (up to s:adjust_max)
     for l:adjust in range(-1, -s:adjust_max, -1)
       if indent(a:offscreen.lnum + l:adjust) == indent(a:offscreen.lnum)
-        break
+        return l:adjust
       endif
     endfor
-    return l:adjust
   endif
 
   return 0
