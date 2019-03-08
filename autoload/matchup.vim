@@ -118,6 +118,17 @@ function! s:init_oldstyle_ops() " {{{1
   endif
 endfunction
 
+function! s:make_oldstyle_omaps(lhs, rhs)
+  if !s:old_style_ops
+    return 0
+  endif
+  for l:opforce in ['', 'v', 'V', '<c-v>']
+    silent! execute 'omap' l:opforce.a:lhs
+          \ '<plug>(matchup-o_'.l:opforce.')<plug>(matchup-'.a:rhs.')'
+  endfor
+  return 1
+endfunction
+
 let s:old_style_ops = !has('patch-8.1.0648')
 
 let g:v_motion_force = ''

@@ -33,6 +33,12 @@ endfunction
 
 " }}}1
 
+function! matchup#pos#(...) abort " {{{1
+  let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
+  return [l:lnum, l:cnum]
+endfunction
+
+" }}}1
 function! matchup#pos#val(...) " {{{1
   let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
 

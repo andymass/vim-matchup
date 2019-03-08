@@ -4,7 +4,7 @@
 Author: Andy Massimino <a@normed.space>
 Web: https://github.com/andymass/vim-matchup
 Script ID: 5624
-Version: 0.3.a
+Version: 0.4.1-git
 License: MIT license {{{
 
   Copyright (c) 2019 Andy Massimino

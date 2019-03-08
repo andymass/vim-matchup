@@ -17,6 +17,10 @@ function! matchup#motion#op(motion) abort
   unlet s:v_operator
 endfunction
 
+function matchup#motion#getoper()
+  return get(s:, 'v_operator', '')
+endfunction
+
 function! matchup#motion#find_matching_pair(visual, down) " {{{1
   let [l:count, l:count1] = [v:count, v:count1]
 
