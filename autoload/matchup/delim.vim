@@ -261,6 +261,11 @@ function! matchup#delim#end_offset(delim) " {{{1
 endfunction
 
 " }}}1
+function! matchup#delim#end_pos(delim) abort " {{{1
+  return [a:delim.lnum, a:delim.cnum + matchup#delim#end_offset(a:delim)]
+endfunction
+
+" }}}1
 
 function! s:get_delim(opts) " {{{1
   " arguments: {{{2

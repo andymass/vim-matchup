@@ -41,7 +41,16 @@ function! matchup#custom#example_motion(info, opts) abort
   endif
   let l:delim = a:opts.down ? l:close : l:open
 
-  return matchup#custom#suggest_pos(l:delim, a:opts)
+  " exclude delim in operators unless v is given
+  if !empty(a:info.operator) && a:info.motion_force !=# 'v'
+    if a:opts.down
+      return matchup#pos#prev(l:delim)
+    else
+      return matchup#pos#next(matchup#delim#end_pos(l:delim))
+    endif
+  else
+    return matchup#custom#suggest_pos(l:delim, a:opts)
+  endif
 endfunction
 
 ""
@@ -132,7 +141,7 @@ function! matchup#custom#wrap(visual, id) abort
     if !a:visual || l:is_oper
       execute "normal! \<esc>"
     endif
-  elseif type(l:ret) == type([]) && len(l:ret) == 2
+  elseif type(l:ret) == type([]) && len(l:ret) >= 2
     call matchup#pos#set_cursor(l:ret)
   endif
 endfunction
