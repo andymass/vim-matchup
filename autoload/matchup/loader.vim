@@ -164,9 +164,10 @@ function! s:init_delim_lists(...) abort " {{{1
       let l:words[l:i] = substitute(l:words[l:i],
             \ g:matchup#re#gspec,
             \ '\=[get(l:replacement,submatch(1),""),'
-            \ . 'add(l:special_flags,submatch(1))][0]', 'g')
-      for l:f in l:special_flags
-        let l:extra_list[l:i][l:f] = 1
+            \ . 'add(l:special_flags,'
+            \ . '[submatch(1),submatch(2)])][0]', 'g')
+      for [l:f, l:a] in l:special_flags
+        let l:extra_list[l:i][l:f] = len(l:a) ? l:a : 1
       endfor
     endfor
 
