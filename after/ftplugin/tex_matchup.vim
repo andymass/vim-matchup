@@ -25,10 +25,10 @@ function! s:get_match_words()
 
   " un-sided sized, left and right delimiters
   let l:mod = '\(\\[bB]igg\?\)'
-  let l:wdelim = '\%(angle\|floor\|ceil\|[vV]ert\)\>'
-  let l:ldelim = '\%(\\l'.l:wdelim.'\|\\ulcorner\>\|(\|\[\|\\{\)'
+  let l:wdelim = '\%(angle\|floor\|ceil\|[vV]ert\|brace\)\>'
+  let l:ldelim = '\%(\\l'.l:wdelim.'\|\\[lu]lcorner\>\|(\|\[\|\\{\)'
   let l:mdelim = '\%(\\vert\>\||\|\\|\)'
-  let l:rdelim = '\%(\\r'.l:wdelim.'\|\\urcorner\>\|)\|]\|\\}\)'
+  let l:rdelim = '\%(\\r'.l:wdelim.'\|\\[lu]rcorner\>\|)\|]\|\\}\)'
   let l:mtopt = '\%(\%(\w\[\)\@2<!\|\%(\\[bB]igg\?\[\)\@6<=\)'
   let l:match_words .= ','.l:mod.l:ldelim
         \ . ':\1'.l:mdelim
@@ -36,10 +36,13 @@ function! s:get_match_words()
 
   " unmodified delimiters
   let l:nomod = '\%(\\left\|\\right\|\[\@1<!\\[bB]igg\?[lr]\?\)\@6<!'
-  for l:pair in [['\\{', '\\}'], ['\[', ']'], ['(', ')']]
+  for l:pair in [['\\{', '\\}'], ['\[', ']'], ['(', ')'],
+        \ ['\\[lu]lcorner', '\\[lu]rcorner']]
     let l:match_words .= ','.l:nomod.s:not_bslash.l:pair[0]
           \ . ':'.l:nomod.s:not_bslash.l:pair[1]
   endfor
+  let l:match_words .= ','.l:nomod.s:not_bslash.'\\l\('.l:wdelim.'\)'
+        \ . ':'.l:nomod.s:not_bslash.'\\r\1\>'
 
   " the curly braces
   let l:match_words .= ',{:}'
