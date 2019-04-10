@@ -1,0 +1,15 @@
+Given ruby (Ruby for if):
+  for i in 0..5
+     if i < 2 then
+        next
+     end
+     puts "Value of local variable is #{i}"
+  end
+
+Do (Motion %):
+  go
+  %
+
+Then (Verify):
+  AssertEqual 'next', expand('<cword>')
+

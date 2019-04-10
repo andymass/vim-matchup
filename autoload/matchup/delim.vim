@@ -34,6 +34,7 @@ function! matchup#delim#get_current(type, side, ...) " {{{1
 endfunction
 
 " }}}1
+
 function! matchup#delim#get_matching(delim, ...) " {{{1
   if empty(a:delim) || !has_key(a:delim, 'lnum') | return {} | endif
 
@@ -112,7 +113,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     return l:matching_list
   else
     " old syntax: open->close, close->open
-    if !len(l:matching_list) | return {} | endif
+    if len(l:matching_list) < 2 | return {} | endif
     return a:delim.side ==# 'open' ? l:matching_list[-1]
        \ : l:matching_list[0]
   endif
@@ -120,6 +121,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
 endfunction
 
 " }}}1
+
 function! matchup#delim#get_surrounding(type, ...) " {{{1
   call matchup#perf#tic('delim#get_surrounding')
 
@@ -607,6 +609,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
         \ 'get_matching' : s:basetypes['delim_tex'].get_matching,
         \ 'regexone'     : l:thisre,
         \ 'regextwo'     : l:thisrebr,
+        \ 'midmap'       : get(l:list, 'midmap', {}),
         \ 'rematch'      : l:re,
         \ 'highlighting' : get(a:opts, 'highlighting', 0),
         \}
@@ -657,6 +660,27 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
     let l:skip = 'matchup#delim#skip_default()'
   else
     let l:skip = 'matchup#delim#skip0()'
+  endif
+
+  " disambiguate matches for languages like julia, matlab, ruby, etc
+  if !empty(self.midmap)
+    let l:midmap = self.midmap.elements
+    if self.side ==# 'mid'
+      let l:idx = filter(range(len(l:midmap)),
+            \ 'self.match =~# l:midmap[v:val][1]')
+    else
+      let l:syn = synIDattr(synID(self.lnum, self.cnum, 0), 'name')
+      let l:idx = filter(range(len(l:midmap)),
+            \ 'l:syn =~# l:midmap[v:val][0]')
+    endif
+    if len(l:idx)
+      let l:valid = l:midmap[l:idx[0]]
+      let l:skip = printf("matchup#delim#skip1(%s, %s)",
+            \ string(l:midmap[l:idx[0]]), string(l:skip))
+    else
+      let l:skip = printf("matchup#delim#skip2(%s, %s)",
+            \ string(self.midmap.strike), string(l:skip))
+    endif
   endif
 
   if matchup#perf#timeout_check() | return [['', 0, 0]] | endif
@@ -738,7 +762,7 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
     if matchup#perf#timeout_check() | break | endif
 
     let [l:lnum, l:cnum] = searchpairpos(l:open, l:mids, l:close,
-      \ l:flags, l:skip, l:lnum_corr, matchup#perf#timeout())
+          \ l:flags, l:skip, l:lnum_corr, matchup#perf#timeout())
     if l:lnum <= 0 | break | endif
 
     if a:down
@@ -751,6 +775,10 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
 
     let l:re_anchored = s:anchor_regex(l:re, l:cnum, l:has_zs)
     let l:matches = matchlist(getline(l:lnum), l:re_anchored)
+    if empty(l:matches)
+      " this should never happen
+      continue
+    endif
     let l:match = l:matches[0]
 
     call add(l:list, [l:match, l:lnum, l:cnum])
@@ -792,6 +820,26 @@ endfunction
 function! matchup#delim#skip0()
   let s:eff_curpos = [line('.'), col('.')]
   execute 'return' (s:invert_skip ? '!(' : '(') b:matchup_delim_skip ')'
+endfunction
+
+""
+" advanced mid/syntax skip when found in midmap
+" {val} is a 2 element array of allowed [syntax, words]
+" {def} is the fallback skip expression
+function! matchup#delim#skip1(val, def)
+  if getline('.')[col('.')-1:] =~# '^'.a:val[1]
+    return eval(a:def)
+  endif
+  let l:s = synIDattr(synID(line('.'),col('.'), 0), 'name')
+  return l:s !~# a:val[0] || eval(a:def)
+endfunction
+
+""
+" advanced mid/syntax skip when word is not in midmap
+" {strike} pattern of disallowed mid words
+" {def} is the fallback skip expression
+function! matchup#delim#skip2(strike, def)
+  return getline('.')[col('.')-1:] =~# '^'.a:strike || eval(a:def)
 endfunction
 
 let s:invert_skip = 0
