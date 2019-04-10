@@ -120,6 +120,11 @@ function! matchup#matchparen#reload() " {{{1
 endfunction
 
 " }}}1
+function! matchup#matchparen#update() " {{{1
+  call s:matchparen.highlight(1)
+endfunction
+
+" }}}1
 
 let s:matchparen = {}
 

@@ -623,22 +623,22 @@ will only work in nvim-0.2.1 and after.
 *g:matchup_matchparen_deferred_show_delay*
 
   Delay, in milliseconds, between when the cursor moves and when we start
-  checking if the cursor is on a match. Applies to both making highlights and
+  checking if the cursor is on a match.  Applies to both making highlights and
   clearing them for deferred highlighting.
 
   Note: these delays cannot be changed dynamically and should be configured
   before the plugin loads (e.g., in your vimrc).
 
-  Defaults: 50
+  Default: 50
 
 *g:matchup_matchparen_deferred_hide_delay*
 
   If the cursor has not stopped moving, assume highlight is stale after this
-  many milliseconds. Stale highlights are hidden.
+  many milliseconds.  Stale highlights are hidden.
 
   Note: this option cannot be changed dynamically.
 
-  Defaults: 700
+  Default: 700
 
 *g:matchup_matchparen_deferred_fade_time*         *matchup-fading*
 

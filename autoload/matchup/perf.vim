@@ -54,7 +54,7 @@ function! matchup#perf#show_times()
   echo printf("%42s%11s%17s", 'average', 'last', 'maximum')
   echohl None
   for l:c in l:contexts
-    echohl Title
+    echohl Special
     echo '['.l:c.']'
     echohl None
     let l:states = filter(copy(l:keys), 'v:val =~# "^\\V'.l:c.'#"')
