@@ -40,6 +40,7 @@ CONTENTS                                                     *matchup-contents*
     Default mappings                            |matchup-default-mappings|
     Customizing mappings                        |matchup-custom-mappings|
     Features                                    |matchup-features|
+    Commands                                    |matchup-commands|
     Options                                     |matchup-options|
     File type options                           |matchup-file-types|
   FAQ                                           |matchup-faq|
@@ -423,6 +424,40 @@ A second special case involves `da%`.  In this example, >
 <
 pressing `da%` will delete all four lines and leave no white-space.  This is
 compatible with vim's `da(`, `dab`, etc.
+
+------------------------------------------------------------------------------
+Commands~
+                                                             *matchup-commands*
+
+                                          *:NoMatchParen* *matchup-:NoMatchParen*
+:NoMatchParen       Disable matching after the plugin was loaded.
+                                          *:DoMatchParen* *matchup-:DoMatchParen*
+:DoMatchParen       Enable matching again.
+
+                                          *:MatchupShowTimes*
+:MatchupShowTimes   Display performance data, useful for debugging slow
+                    matching.  Shows last, average, and maximum times.
+                                          *:MatchupClearTimes*
+:MatchupClearTimes  Reset performance counters to zero.
+
+                                          *:MatchupWhereAmI*
+:MatchupWhereAmI?   Echos your position in code by finding successive matching
+                    words, like doing `[%` repeatedly.  Example:
+>
+  1310 do_pending_operator( … { ⯈ if ((finish_op || VIsual_active) && oap- … {
+<
+                    Running this command twice in the same position will give
+                    more verbose output.
+
+:MatchupWhereAmI??  Be more verbose about your position in code by displaying
+                    several lines.  Example:
+>
+  1310 do_pending_operator(cmdarg_T *cap, int old_col, int gui_yank) … {
+  1349     if ((finish_op || VIsual_active) && oap->op_type != OP_NOP) … {
+<
+                                          *:MatchupReload*
+:MatchupReload      Reload the plugin, mostly for debugging.  Note that
+                    this does not reload 'matchpairs' or `b:match_word`.
 
 ------------------------------------------------------------------------------
 Options~

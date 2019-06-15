@@ -58,6 +58,8 @@ function! s:init_options()
 
   call s:init_option('matchup_surround_enabled', 0)
 
+  call s:init_option('matchup_where_enabled', 1)
+
   call s:init_option('matchup_matchpref', {})
 endfunction
 
@@ -82,6 +84,7 @@ function! s:init_modules()
   call s:text_obj_init_module()
   call s:misc_init_module()
   call s:surround_init_module()
+  call s:where_init_module()
 endfunction
 
 function! s:init_oldstyle_ops() " {{{1
@@ -332,6 +335,14 @@ function! s:surround_init_module() " {{{1
   endfor
 
   call matchup#perf#toc('loading_module', 'surround')
+endfunction
+
+" }}}1
+function! s:where_init_module() " {{{1
+  if !g:matchup_where_enabled | return | endif
+
+  command! -nargs=? -bang MatchupWhereAmI
+        \ call matchup#where#print('<bang>' . <q-args>)
 endfunction
 
 " }}}1

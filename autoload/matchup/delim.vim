@@ -141,6 +141,10 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
   if matchup#delim#skip() " TODO: check for insert mode (?)
     let l:delimopts.check_skip = 0
   endif
+  " TODO: pin skip
+  if get(l:opts, 'check_skip', 0)
+    let l:delimopts.check_skip = 1
+  endif
 
   " keep track of the outermost pair found so far
   " returned when g:matchup_delim_count_fail = 1

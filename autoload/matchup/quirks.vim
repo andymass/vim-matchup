@@ -25,7 +25,9 @@ function! matchup#quirks#status_adjust(offscreen) abort " {{{1
         \            0, a:offscreen.cnum-1) =~# '^\s*$'
     " go up to next line with same indent (up to s:adjust_max)
     for l:adjust in range(-1, -s:adjust_max, -1)
-      if indent(a:offscreen.lnum + l:adjust) == indent(a:offscreen.lnum)
+      let l:lnum = a:offscreen.lnum + l:adjust
+      if indent(l:lnum) == indent(a:offscreen.lnum)
+            \ && getline(l:lnum) !~ '^\s*\%(#\|/\*\|//\)'
         return l:adjust
       endif
     endfor

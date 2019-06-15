@@ -136,9 +136,10 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
 endfunction
 
 " }}}1
-function! matchup#motion#find_unmatched(visual, down) " {{{1
+function! matchup#motion#find_unmatched(visual, down, ...) " {{{1
   call matchup#perf#tic('motion#find_unmatched')
 
+  let l:opts = a:0 ? a:1 : {}
   let l:count = v:count1
 
   let l:is_oper = !empty(get(s:, 'v_operator', ''))
@@ -149,12 +150,14 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
     normal! gv
   endif
 
-  " set the timeout fairly high
-  call matchup#perf#timeout_start(750)
+  " set the timeout fairly high by default
+  let l:timeout = get(l:opts, 'timeout', 750)
+  call matchup#perf#timeout_start(l:timeout)
 
   for l:tries in range(3)
     let [l:open, l:close] = matchup#delim#get_surrounding('delim_all',
-          \ l:tries ? l:count : 1)
+          \ l:tries ? l:count : 1,
+          \ { 'check_skip': get(l:opts, '__where_impl__', 0) })
 
     if empty(l:open) || empty(l:close)
       call matchup#perf#toc('motion#find_unmatched', 'fail'.l:tries)
@@ -212,7 +215,11 @@ function! matchup#motion#find_unmatched(visual, down) " {{{1
     let l:new_pos = matchup#pos#next_eol(l:new_pos)[1:2]
   endif
 
-  normal! m`
+  if get(l:opts, '__where_impl__', 0)
+    let l:opts.delim = l:delim
+  else
+    normal! m`
+  endif
   call matchup#pos#set_cursor(l:new_pos)
 
   call matchup#perf#toc('motion#find_unmatched', 'done')
