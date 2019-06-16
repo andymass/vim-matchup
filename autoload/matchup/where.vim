@@ -9,10 +9,9 @@ scriptencoding utf8
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:arrow = '⯈'
 let s:curpos = []
 
-function! matchup#where#get(timeout)
+function! matchup#where#get(timeout) abort " {{{1
   let l:save_view = winsaveview()
   let l:trail = []
 
@@ -38,6 +37,8 @@ function! matchup#where#get(timeout)
   call winrestview(l:save_view)
   return reverse(l:trail)
 endfunction
+
+" }}}1
 
 function! s:print_verbose() " {{{1
   let l:trail = matchup#where#get(400)
@@ -77,7 +78,7 @@ function! s:print_short() " {{{1
       continue
     endif
     if l:prev != -1
-      let l:fullstr .= ' %#Title#'.s:arrow.'%#Normal# '
+      let l:fullstr .= ' %#Title#' . s:arrow() . '%#Normal# '
     endif
     let l:fullstr .= l:str
     let l:prev = l:adj
@@ -85,6 +86,13 @@ function! s:print_short() " {{{1
   call matchup#perf#tic('where')
   call s:EchoHLString(l:fullstr)
   call matchup#perf#toc('where', 'echohlstring')
+endfunction
+
+function! s:arrow()
+  if empty(g:matchup_where_separator)
+    return '▶'
+  endif
+  return g:matchup_where_separator
 endfunction
 
 " }}}1

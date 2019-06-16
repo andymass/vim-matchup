@@ -59,6 +59,7 @@ function! s:init_options()
   call s:init_option('matchup_surround_enabled', 0)
 
   call s:init_option('matchup_where_enabled', 1)
+  call s:init_option('matchup_where_separator', '')
 
   call s:init_option('matchup_matchpref', {})
 endfunction
