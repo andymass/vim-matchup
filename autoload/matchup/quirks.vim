@@ -21,11 +21,15 @@ let s:adjust_max = 7
 
 function! matchup#quirks#status_adjust(offscreen) abort " {{{1
   if a:offscreen.match ==# '{' && matchup#quirks#isclike()
+    let [l:a, l:b] = [indent(a:offscreen.lnum),
+          \ indent(a:offscreen.links.close.lnum)]
     if strpart(getline(a:offscreen.lnum),
           \            0, a:offscreen.cnum-1) =~# '^\s*$'
-      let l:target = indent(a:offscreen.lnum)
+      let l:target = l:a
+    elseif l:a != l:b
+      let l:target = l:b
     else
-      let l:target = indent(a:offscreen.links.close.lnum)
+      return 0
     endif
     " go up to next line with same indent (up to s:adjust_max)
     for l:adjust in range(-1, -s:adjust_max, -1)
