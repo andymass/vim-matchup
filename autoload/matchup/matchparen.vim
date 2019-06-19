@@ -185,17 +185,18 @@ endfunction
 
 " }}}1
 
-""
-" fade feature: remove highlights after a certain time
-" {level}
-"   =  0: prepare for possible loss of cursor support
-"   =  1: new highlights are coming (cancel prior fade)
-"   =  2: end of new highlights
-" {pos}     [lnum, column] of current match
-" {token}   in/out saves state between calls
-"
-" returns 1 if highlighting should be canceled
 function! s:matchparen.fade(level, pos, token) abort dict " {{{1
+  ""
+  " fade feature: remove highlights after a certain time
+  " {level}
+  "   =  0: prepare for possible loss of cursor support
+  "   =  1: new highlights are coming (cancel prior fade)
+  "   =  2: end of new highlights
+  " {pos}     [lnum, column] of current match
+  " {token}   in/out saves state between calls
+  "
+  " returns 1 if highlighting should be canceled
+
   if !g:matchup_matchparen_deferred || !exists('w:matchup_fade_timer')
     if a:level <= 0
       call s:matchparen.clear()
@@ -501,7 +502,22 @@ function! s:do_offscreen(current) " {{{1
 
   if empty(l:offscreen) | return | endif
 
-  let w:matchup_statusline = s:format_statusline(l:offscreen)
+  call s:do_offscreen_statusline(l:offscreen)
+endfunction
+
+" }}}1
+function! s:do_offscreen_statusline(offscreen) " {{{1
+  let l:opts = {}
+  if g:matchup_matchparen_status_offscreen_manual
+    let l:opts.compact = 1
+  endif
+  let [l:sl, l:lnum] = matchup#matchparen#status_str(a:offscreen, l:opts)
+  if s:ensure_scroll_timer() &&
+        \ !g:matchup_matchparen_status_offscreen_manual
+    let l:sl .= '%{matchup#matchparen#scroll_update('.l:lnum.')}'
+  endif
+
+  let w:matchup_statusline = l:sl
   if !exists('w:matchup_oldstatus')
     let w:matchup_oldstatus = &l:statusline
   endif
@@ -515,20 +531,17 @@ function! s:do_offscreen(current) " {{{1
 endfunction
 
 " }}}1
-function! matchup#matchparen#highlight_surrounding() " {{{1
-  call matchup#perf#timeout_start(500)
-  call s:highlight_surrounding()
-endfunction
-
-" }}}1
 
 function! MatchupStatusOffscreen() " {{{1
-  return get(w:, 'matchup_statusline', '')
+  return substitute(get(w:, 'matchup_statusline', ''),
+        \ '%<\|%#\w*#', '', 'g')
 endfunction
 
 " }}}1
-function! MatchupStatusOffscreenNohl() " {{{1
-  return substitute(MatchupStatusOffscreen(), '%<\|%#\w*#', '', 'g')
+
+function! matchup#matchparen#highlight_surrounding() abort " {{{1
+  call matchup#perf#timeout_start(500)
+  call s:highlight_surrounding()
 endfunction
 
 " }}}1
@@ -689,9 +702,8 @@ function! matchup#matchparen#status_str(offscreen, ...) abort " {{{1
 endfunction
 
 " }}}1
-function! s:format_statusline(offscreen) " {{{1
-  let [l:sl, l:lnum] = matchup#matchparen#status_str(a:offscreen)
 
+function! s:ensure_scroll_timer() " {{{1
   if has('timers') && exists('*timer_pause')
     if !exists('s:scroll_timer')
       let s:scroll_timer = timer_start(50,
@@ -699,20 +711,19 @@ function! s:format_statusline(offscreen) " {{{1
             \ { 'repeat': -1 })
       call timer_pause(s:scroll_timer, 1)
     endif
-    if !g:matchup_matchparen_status_offscreen_manual
-      let l:sl .= '%{matchup#matchparen#scroll_update('.l:lnum.')}'
-    endif
   endif
 
-  return l:sl
+  return exists('s:scroll_timer')
 endfunction
 
-function! matchup#matchparen#scroll_callback(tid)
+" }}}1
+function! matchup#matchparen#scroll_callback(tid) " {{{1
   call timer_pause(a:tid, 1)
   call s:matchparen.highlight(1)
 endfunction
 
-function! matchup#matchparen#scroll_update(lnum)
+" }}}1
+function! matchup#matchparen#scroll_update(lnum) " {{{1
   if line('w0') <= a:lnum && a:lnum <= line('w$')
         \ && exists('s:scroll_timer')
     call timer_pause(s:scroll_timer, 0)
