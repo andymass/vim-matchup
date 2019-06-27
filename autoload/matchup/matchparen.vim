@@ -49,6 +49,8 @@ function! matchup#matchparen#enable() " {{{1
     autocmd InsertLeave * call s:matchparen.highlight(1)
   augroup END
 
+  call s:init_match_popup()
+
   if has('vim_starting')
     " prevent this from autoloading during timer callback at startup
     if g:matchup_matchparen_deferred
@@ -136,9 +138,7 @@ function! s:matchparen.clear() abort dict " {{{1
     unlet! w:matchup_match_id_list
   endif
 
-  if exists('w:match_popup')
-    call popup_hide(w:match_popup)
-  endif
+  call popup_hide(s:match_popup)
   if exists('w:matchup_oldstatus')
     let &l:statusline = w:matchup_oldstatus
     unlet w:matchup_oldstatus
@@ -490,19 +490,6 @@ function s:matchparen.transmute_reset() abort dict
 endfunction
 
 " }}}1
-function! s:init_popup() abort " {{{1
-  if exists('w:match_popup')
-    " echoerr 'Match popup already exists in this window.'
-    return
-  endif
-  " Create a popup and store its winid
-  let w:match_popup = popup_create('', {
-        \ 'hidden': v:true,
-        \ })
-  call popup_hide(w:match_popup) " TODO 'hidden' in popup_create-usage unimplemented
-endfunction
-
-" }}}1
 function! s:do_offscreen(current) " {{{1
   let l:offscreen = {}
 
@@ -548,9 +535,17 @@ function! s:do_offscreen_statusline(offscreen) " {{{1
 endfunction
 
 " }}}1
-function! s:do_offscreen_popup(offscreen) " {{{1
-  call s:init_popup() " TODO Do in WinNew autocmd
+function! s:init_match_popup() abort " {{{1
+  call assert_false(exists('s:match_popup'), 'Popup already exists.')
+  " Create a popup and store its winid
+  let s:match_popup = popup_create('', {
+        \ 'hidden': v:true,
+        \ })
+  call popup_hide(s:match_popup) " TODO 'hidden' in popup_create-usage unimplemented
+endfunction
 
+" }}}1
+function! s:do_offscreen_popup(offscreen) " {{{1
   " Screen position of top-left corner of current window
   let [l:row, l:col] = win_screenpos(winnr())
   let l:col += (&number || &relativenumber ? &numberwidth : 0)
@@ -559,14 +554,14 @@ function! s:do_offscreen_popup(offscreen) " {{{1
   let l:line = a:offscreen.lnum < line('.') ? l:row : l:row + l:height - 1
   if l:line == winline() | return | endif " If popup would overlap with cursor
 
-  call popup_move(w:match_popup, {
+  call popup_move(s:match_popup, {
         \ 'line': line,
         \ 'col': col,
         \ 'maxheight': 1,
         \ })
   " Set popup text
-  call setbufline(winbufnr(w:match_popup), 1, getline(a:offscreen.lnum))
-  call popup_show(w:match_popup)
+  call setbufline(winbufnr(s:match_popup), 1, getline(a:offscreen.lnum))
+  call popup_show(s:match_popup)
 endfunction
 
 " }}}1
