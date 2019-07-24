@@ -314,7 +314,8 @@ following rules apply:
   particular, `di%` involving a `(`...`)` block will not be subject to
   these special rules.
 
-To prevent this behavior for a particular sequence `dvi%` or `vdi%`.
+To prevent this behavior for a particular operation, use `vi%d`.  Note that
+special cases involving indentation still apply (like with |i)| etc).
 
 To disable this entirely, remove the operator from the following variable,
 ```vim
