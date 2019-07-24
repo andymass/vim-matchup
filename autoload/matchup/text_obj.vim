@@ -24,6 +24,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         \ v:operator) >= 0
 
   if v:operator ==# 'g@'
+    let l:save_reg = v:register
     let l:spec = matchlist(g:matchup_text_obj_linewise_operators,
           \ '^g@\%(,\(.\+\)\)\?')
     if !empty(l:spec)
@@ -243,6 +244,9 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
   call matchup#pos#set_cursor(l:l1, l:c1)
   normal! o
   call matchup#pos#set_cursor(l:l2, l:c2)
+  if exists('l:save_reg')
+    execute 'normal! "' . l:save_reg
+  endif
 endfunction
 
 function! matchup#text_obj#undo(seq)
