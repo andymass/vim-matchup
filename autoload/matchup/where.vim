@@ -41,7 +41,7 @@ endfunction
 " }}}1
 
 function! s:print_verbose() " {{{1
-  let l:trail = matchup#where#get(400)
+  let l:trail = matchup#where#get(500)
   let l:last = -1
   for l:t in l:trail
     let l:opts = {

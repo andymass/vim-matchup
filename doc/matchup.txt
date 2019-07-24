@@ -4,7 +4,6 @@
 Author: Andy Massimino <a@normed.space>
 Web: https://github.com/andymass/vim-matchup
 Script ID: 5624
-Version: 0.4.1-git
 License: MIT license {{{
 
   Copyright (c) 2019 Andy Massimino
@@ -406,7 +405,8 @@ following rules apply:
    particular, `di%` involving a `(`...`)` block will not be subject to
    these special rules.
 
-To prevent this behavior for a particular sequence `dvi%` or `vdi%`.
+To prevent this behavior for a particular operation, use `vi%d`.  Note that
+special cases involving indentation still apply (like with |i)| etc).
 
 To disable this entirely, remove the operator from the following variable, >
 
@@ -843,6 +843,17 @@ HTML
     </ul>
 <
   By default, `%` will navigate from `<ul>` to `<li>` to `<li>` to `</ul>`.
+
+  Default: 0
+
+*g:matchup_matchpref.html.tagnameonly*
+
+  When set to 1, only the tag name will be highlighted, not the rest of the
+  tag, e.g., the "a" in >
+
+  <a href="http://example.com">Link</a>
+<
+  This works for xml, html, and some other html-based types.
 
   Default: 0
 

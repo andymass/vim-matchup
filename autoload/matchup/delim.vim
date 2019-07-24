@@ -155,6 +155,7 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
           \ l:local ? 'open_mid' : 'open', l:delimopts)
     if empty(l:open) | break | endif
 
+    " if configured, we may still accept this match
     if matchup#perf#timeout_check() && !g:matchup_delim_count_fail
       break
     endif
@@ -485,7 +486,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
   let l:cursorpos = a:opts.cursorpos
   let l:found = 0
 
-  let l:sides = s:sidedict[a:opts.side]
+  let l:sides = matchup#loader#sidedict()[a:opts.side]
   let l:rebrs = b:matchup_delim_lists[a:opts.type].regex_backref
 
   " use b:match_ignorecase
@@ -865,15 +866,6 @@ endfunction
 " initialize script variables
 let s:stopline = get(g:, 'matchup_delim_stopline', 1500)
 
-let s:sidedict = {
-      \ 'open'     : ['open'],
-      \ 'mid'      : ['mid'],
-      \ 'close'    : ['close'],
-      \ 'both'     : ['close', 'open'],
-      \ 'both_all' : ['close', 'mid', 'open'],
-      \ 'open_mid' : ['mid', 'open'],
-      \}
-
 let s:basetypes = {
       \ 'delim_tex': {
       \   'parser'       : function('s:parser_delim_new'),
@@ -886,7 +878,6 @@ let s:types = {
       \ 'delim_all' : [ s:basetypes.delim_tex ],
       \ 'delim_tex' : [ s:basetypes.delim_tex ],
       \}
-
 
 let &cpo = s:save_cpo
 

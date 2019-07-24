@@ -689,6 +689,10 @@ let s:sidedict = {
       \ 'open_mid' : ['mid', 'open'],
       \}
 
+function! matchup#loader#sidedict() abort
+  return s:sidedict
+endfunction
+
 " in case the 'N' sort flag is not available (compatibility for 7.4.898)
 let s:Nsort = has('patch-7.4.951') ? 'N' : 's:Nsort_func'
 
