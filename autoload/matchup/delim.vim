@@ -183,14 +183,17 @@ function! matchup#delim#get_surrounding(type, ...) " {{{1
         call matchup#perf#toc('delim#get_surrounding', 'accept')
         return [l:open, l:close]
       endif
-      call matchup#pos#set_cursor(matchup#pos#prev(l:open))
       let l:counter -= 1
       let l:best = [l:open, l:close]
     else
-      call matchup#pos#set_cursor(matchup#pos#prev(l:open))
       let l:pos_val_last = l:pos_val_open
       let l:pos_val_open = matchup#pos#val(l:open)
     endif
+
+    if l:open.lnum == 1 && l:open.cnum == 1
+      break
+    endif
+    call matchup#pos#set_cursor(matchup#pos#prev(l:open))
   endwhile
 
   if !empty(l:best) && g:matchup_delim_count_fail
