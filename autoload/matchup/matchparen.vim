@@ -454,16 +454,17 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   let w:matchup_need_clear = 1
 
   " disable off-screen when scrolling with j/k
-  let l:scrolling = g:matchup_matchparen_scrolloff
+  let l:scrolling = get(g:matchup_matchparen_offscreen, 'scrolloff', 0)
         \ && winheight(0) > 2*&scrolloff
         \ && (line('.') == line('w$')-&scrolloff
         \     && line('$') != line('w$')
         \     || line('.') == line('w0')+&scrolloff)
 
   " show off-screen matches
-  if g:matchup_matchparen_status_offscreen
+  let l:method = get(g:matchup_matchparen_offscreen, 'method', '')
+  if !empty(l:method) && l:method !=# 'none'
         \ && !l:current.skip && !l:scrolling
-    call s:do_offscreen(l:current)
+    call s:do_offscreen(l:current, l:method)
   endif
 
   " add highlighting matches
@@ -487,7 +488,8 @@ function s:matchparen.transmute_reset() abort dict
 endfunction
 
 " }}}1
-function! s:do_offscreen(current) " {{{1
+
+function! s:do_offscreen(current, method) " {{{1
   let l:offscreen = {}
 
   if !has_key(a:current, 'links') | return | endif
@@ -502,18 +504,21 @@ function! s:do_offscreen(current) " {{{1
 
   if empty(l:offscreen) | return | endif
 
-  call s:do_offscreen_statusline(l:offscreen)
+  if a:method ==# 'status'
+    call s:do_offscreen_statusline(l:offscreen, 0)
+  elseif a:method ==# 'status_manual'
+    call s:do_offscreen_statusline(l:offscreen, 1)
+  endif
 endfunction
 
 " }}}1
-function! s:do_offscreen_statusline(offscreen) " {{{1
+function! s:do_offscreen_statusline(offscreen, manual) " {{{1
   let l:opts = {}
-  if g:matchup_matchparen_status_offscreen_manual
+  if a:manual
     let l:opts.compact = 1
   endif
   let [l:sl, l:lnum] = matchup#matchparen#status_str(a:offscreen, l:opts)
-  if s:ensure_scroll_timer() &&
-        \ !g:matchup_matchparen_status_offscreen_manual
+  if s:ensure_scroll_timer() && !a:manual
     let l:sl .= '%{matchup#matchparen#scroll_update('.l:lnum.')}'
   endif
 
@@ -521,7 +526,7 @@ function! s:do_offscreen_statusline(offscreen) " {{{1
   if !exists('w:matchup_oldstatus')
     let w:matchup_oldstatus = &l:statusline
   endif
-  if !g:matchup_matchparen_status_offscreen_manual
+  if !a:manual
     let &l:statusline =  w:matchup_statusline
   endif
 

@@ -292,10 +292,11 @@ make sure not to leave stale matches around.
 
 Display matches off screen~
 
-If a open or close which would have been highlighted is on a line positioned
-outside the current window, the match is shown in the status line.  If both
-the open and close match are off-screen, the close match is preferred.
-See |g:matchup_matchparen_status_offscreen|.
+If an open or close match which would have been highlighted is on a line
+positioned outside of the current window, the match is shown in the status
+line (the default).  If both the open and close match are off-screen, the
+close match is preferred.
+See |g:matchup_matchparen_offscreen| for configuration.
 
                                                   *<plug>(matchup-hi-surround)*
 Highlight surrounding~
@@ -602,25 +603,34 @@ Module matchparen~
 
   Default: 0
 
-*g:matchup_matchparen_status_offscreen*
+*g:matchup_matchparen_offscreen*
 
-  Whether to replace the |statusline| for off-screen matches.
+  Dictionary controlling the behavior with off-screen matches.  If empty, this
+  feature is disabled.  Else, it should contain the following optional keys:
 
-  If a match is off of the screen, the line belonging to that match will be
-  displayed syntax-highlighted in the status line along with the line number
-  (if line numbers are enabled).  If the match is above the screen border, an
-  additional Δ symbol will be shown to indicate that the matching line is
-  really above the cursor line.
+  method~
+    Sets the method to use to show off-screen matches.
+    Possible values are:
 
-  Default: 1
+    `'status' (default): Replace the |status-line| for off-screen matches.
 
-*g:matchup_matchparen_scrolloff*
+    If a match is off of the screen, the line belonging to that match will be
+    displayed syntax-highlighted in the status line along with the line number
+    (if line numbers are enabled).  If the match is above the screen border,
+    an additional Δ symbol will be shown to indicate that the matching line is
+    really above the cursor line.
 
-  When enabled, off-screen matches will not be shown in the statusline
-  while the cursor is at the screen edge (respects the value of 'scrolloff').
-  This is intended to prevent flickering while scrolling with j and k.
+    `'status_manual'`: Compute the status-line but do not display it (future
+    extension).
 
-  Default: 0
+  scrolloff~
+    When enabled, off-screen matches will not be shown in the statusline while
+    the cursor is at the screen edge (respects the value of 'scrolloff').
+    This is intended to prevent flickering while scrolling with j and k.
+
+    Default: 0
+
+  Default: `{'method': 'status'}`
 
 *g:matchup_matchparen_stopline*
 
@@ -933,7 +943,7 @@ Q Why is there a weird entry on the status line?
 A This is a feature which helps you see matches that are outside of the
   vim screen, similar to some IDEs.  If you wish to disable it, use >
 
-  let g:matchup_matchparen_status_offscreen = 0
+  let g:matchup_matchparen_offscreen = {}
 <
 Q Matching does not work when lines are too far apart.
 

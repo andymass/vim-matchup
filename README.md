@@ -232,7 +232,7 @@ If a open or close which would have been highlighted is on a line
 positioned outside the current window, the match is shown in the
 status line.  If both the open and close match are off-screen, the
 close match is preferred.
-(See the option `g:matchup_matchparen_status_offscreen`).
+(See the option `g:matchup_matchparen_offscreen`).
 
 ### Inclusive and exclusive motions
 
@@ -463,18 +463,37 @@ let g:matchup_matchparen_singleton = 1
 ```
 default: 0
 
-Whether to replace the statusline for off-screen matches:
+Dictionary controlling the behavior with off-screen matches.
 ```vim
-let g:matchup_matchparen_status_offscreen = 0
+let g:matchup_matchparen_offscreen = { ... }
 ```
 
-If a match is off of the screen, the line belonging to that match will be
-displayed syntax-highlighted in the status line along with the line number
-(if line numbers are enabled).  If the match is above the screen border,
-an additional Δ symbol will be shown to indicate that the matching line is
-really above the cursor line.
+default: `{'method': 'status'}`
 
-default: 1
+If empty, this feature is disabled.  Else, it should contain the
+following optional keys:
+
+- `method`:
+  Sets the method to use to show off-screen matches.
+  Possible values are:
+
+  `'status'` (default): Replace the |status-line| for off-screen matches.
+
+  If a match is off of the screen, the line belonging to that match will be
+  displayed syntax-highlighted in the status line along with the line number
+  (if line numbers are enabled).  If the match is above the screen border,
+  an additional Δ symbol will be shown to indicate that the matching line is
+  really above the cursor line.
+
+  `'status_manual'`: Compute the status-line but do not display it (future
+  extension).
+
+- `scrolloff`:
+  When enabled, off-screen matches will not be shown in the statusline while
+  the cursor is at the screen edge (respects the value of 'scrolloff').
+  This is intended to prevent flickering while scrolling with j and k.
+
+  default: 0.
 
 The number of lines to search in either direction while highlighting
 matches.  Set this conservatively since high values may cause performance
@@ -625,7 +644,7 @@ _Options planned_.
   vim screen, similar to some IDEs.  If you wish to disable it, use
 
   ```vim
-  let g:matchup_matchparen_status_offscreen = 0
+  let g:matchup_matchparen_offscreen = {}
   ```
 
 - Matching does not work when lines are too far apart.

@@ -20,9 +20,17 @@ endfunction
 function! s:init_options()
   call s:init_option('matchup_matchparen_enabled',
     \ !(&t_Co < 8 && !has('gui_running')))
-  call s:init_option('matchup_matchparen_status_offscreen', 1)
-  call s:init_option('matchup_matchparen_status_offscreen_manual', 0)
-  call s:init_option('matchup_matchparen_scrolloff', 0)
+  let l:offs = {'method': 'status'}
+  if !get(g:, 'matchup_matchparen_status_offscreen', 1)
+    let l:offs = {}
+  endif
+  if get(g:, 'matchup_matchparen_status_offscreen_manual', 0)
+    let l:offs.method = 'status_manual'
+  endif
+  if exists('g:matchup_matchparen_scrolloff')
+    let l:offs.scrolloff = g:matchup_matchparen_scrolloff
+  endif
+  call s:init_option('matchup_matchparen_offscreen', l:offs)
   call s:init_option('matchup_matchparen_singleton', 0)
   call s:init_option('matchup_matchparen_deferred', 0)
   call s:init_option('matchup_matchparen_deferred_show_delay', 50)
