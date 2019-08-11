@@ -612,7 +612,7 @@ function! s:format_gutter(lnum, ...) " {{{1
     if l:direction && !get(l:opts, 'noshowdir', 0)
       let l:sl = '%#Search#' . l:sl . '∆%#Normal#'
     else
-      let l:sl = '%#LineNr#' . l:sl . ' %#Normal#'
+      let l:sl = '%#CursorLineNr#' . l:sl . ' %#Normal#'
     endif
     let l:padding -= l:nw + 1
   endif
