@@ -17,7 +17,7 @@ let g:matchup#re#zs = s:nbsl . '\\zs'
 let g:matchup#re#ze = s:nbsl . '\\ze'
 
 " \g{special}, \g{special:arg}
-let g:matchup#re#gspec = s:nbsl . '\\g{\(\w\+\):\?\(.\{-}\)\?}'
+let g:matchup#re#gspec = s:nbsl . '\\g{\(\w\+\);\?\(.\{-}\)\?}'
 
 " vim: fdm=marker sw=2
 

@@ -159,7 +159,10 @@ function! s:init_delim_lists(...) abort " {{{1
     let l:extra_list = map(range(len(l:words)), '{}')
 
     " pre-process various \g{special} instructions
-    let l:replacement = { 'hlend': '\%(hlend\)\{0}' }
+    let l:replacement = {
+          \ 'hlend': '\%(hlend\)\{0}',
+          \ 'syn': ''
+          \}
     for l:i in range(len(l:words))
       let l:special_flags = []
       let l:words[l:i] = substitute(l:words[l:i],
