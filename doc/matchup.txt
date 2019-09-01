@@ -894,6 +894,12 @@ Customization~
   `after/ftplugin/{&filetype}.vim`, it can be used to customize the matching
   regular expressions for a particular file type.
 
+*matchup#util#append_match_words*                                 *matchup-append*
+>
+  call matchup#util#append_match_words(str)
+<
+  Adds a set of patterns to |b:match_words|, adding a comma if necessary.
+
 ==============================================================================
 FAQ                                                               *matchup-faq*
 
