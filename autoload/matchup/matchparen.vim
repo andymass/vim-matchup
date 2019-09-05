@@ -45,7 +45,7 @@ function! matchup#matchparen#enable() " {{{1
     endif
     autocmd BufReadPost * call s:matchparen.transmute_reset()
     autocmd WinLeave,BufLeave * call s:matchparen.clear()
-    autocmd InsertEnter,Insertchange * call s:matchparen.highlight(1, 1)
+    autocmd InsertEnter,InsertChange * call s:matchparen.highlight(1, 1)
     autocmd InsertLeave * call s:matchparen.highlight(1)
   augroup END
 
@@ -138,7 +138,10 @@ function! s:matchparen.clear() abort dict " {{{1
     unlet! w:matchup_match_id_list
   endif
 
-  call popup_hide(s:match_popup)
+  if exists('s:match_popup')
+    call popup_hide(s:match_popup)
+  endif
+
   if exists('w:matchup_oldstatus')
     let &l:statusline = w:matchup_oldstatus
     unlet w:matchup_oldstatus
@@ -542,31 +545,42 @@ endfunction
 
 " }}}1
 function! s:init_match_popup() abort " {{{1
-  call assert_false(exists('s:match_popup'), 'Popup already exists.')
-  " Create a popup and store its winid
+  if exists('s:match_popup')
+    return
+  endif
+
+  " create a popup and store its winid
   let s:match_popup = popup_create('', {
         \ 'hidden': v:true,
-        \ })
-  call popup_hide(s:match_popup) " TODO 'hidden' in popup_create-usage unimplemented
+        \})
+
+  " in case 'hidden' in popup_create-usage is unimplemented
+  call popup_hide(s:match_popup)
 endfunction
 
 " }}}1
 function! s:do_offscreen_popup(offscreen) " {{{1
-  " Screen position of top-left corner of current window
+  " screen position of top-left corner of current window
   let [l:row, l:col] = win_screenpos(winnr())
-  let l:col += (&number || &relativenumber ? &numberwidth : 0)
-        \ + &foldcolumn " TODO Take signcolumn into consideration
-  let l:height = winheight(0) " Height of current window
+  let l:height = winheight(0) " height of current window
   let l:line = a:offscreen.lnum < line('.') ? l:row : l:row + l:height - 1
-  if l:line == winline() | return | endif " If popup would overlap with cursor
+
+  " if popup would overlap with cursor
+  if l:line == winline() | return | endif
 
   call popup_move(s:match_popup, {
-        \ 'line': line,
-        \ 'col': col,
+        \ 'line': l:line,
+        \ 'col': l:col,
         \ 'maxheight': 1,
-        \ })
-  " Set popup text
-  call setbufline(winbufnr(s:match_popup), 1, getline(a:offscreen.lnum))
+        \})
+
+  " set popup text
+  let l:text = ''
+  if &number || &relativenumber
+    let l:text = printf('%*S ', wincol()-virtcol('.')-1, a:offscreen.lnum)
+  endif
+  let l:text .= getline(a:offscreen.lnum) . ' '
+  call setbufline(winbufnr(s:match_popup), 1, l:text)
   call popup_show(s:match_popup)
 endfunction
 
