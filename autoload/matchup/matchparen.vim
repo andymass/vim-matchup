@@ -9,8 +9,6 @@ scriptencoding utf-8
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:winid = 0
-
 function! matchup#matchparen#init_module() " {{{1
   if !g:matchup_matchparen_enabled | return | endif
 
@@ -517,7 +515,11 @@ function! s:do_offscreen(current, method) " {{{1
   elseif a:method ==# 'status_manual'
     call s:do_offscreen_statusline(l:offscreen, 1)
   elseif a:method ==# 'popup'
-    call s:do_offscreen_popup(l:offscreen)
+    if has('nvim')
+      call s:do_offscreen_popup_nvim(l:offscreen)
+    else
+      call s:do_offscreen_popup(l:offscreen)
+    endif
   endif
 endfunction
 
@@ -547,7 +549,7 @@ endfunction
 
 " }}}1
 function! s:init_match_popup() abort " {{{1
-  if exists('s:match_popup')
+  if !exists('*popup_create') || exists('s:match_popup')
     return
   endif
 
@@ -613,18 +615,7 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
 
     " assumes cursor is in original window
     autocmd matchup_matchparen CursorMoved <buffer> ++once
-      \ call s:close_floating_win()
-
-  elseif exists('*popup_create')
-    " vim8 popup
-    let s:winid = popup_create('', {
-          \ 'line': 'cursor+1',
-          \ 'col': 'cursor',
-          \ 'moved': 'any',
-          \ })
-
-    call setbufvar(winbufnr(s:winid), 'cursorword', 0)
-    call setbufvar(winbufnr(s:winid), '&filetype', l:original_filetype)
+          \ call s:close_floating_win()
   endif
 
   call s:populate_floating_win(a:offscreen)
@@ -643,25 +634,24 @@ function! s:populate_floating_win(offscreen) " {{{1
   if exists('*nvim_open_win')
     " neovim floating win
     let width = max(map(copy(l:body), 'strdisplaywidth(v:val)'))
-    call nvim_win_set_width(s:winid, width)
-    call nvim_win_set_height(s:winid, height)
+    call nvim_win_set_width(s:float_id, width)
+    call nvim_win_set_height(s:float_id, height)
 
-    call nvim_buf_set_lines(winbufnr(s:winid), 0, -1, v:false, [])
-    call nvim_buf_set_lines(winbufnr(s:winid), 0, -1, v:false, l:body)
-    call nvim_win_set_cursor(s:winid, [1,0])
-
-  elseif exists('*popup_create')
-    " vim8 popup
-    call popup_settext(s:winid, l:body)
+    call nvim_buf_set_lines(winbufnr(s:float_id), 0, -1, v:false, [])
+    call nvim_buf_set_lines(winbufnr(s:float_id), 0, -1, v:false, l:body)
+    call nvim_win_set_cursor(s:float_id, [1,0])
   endif
 endfunction
 
 " }}}1
 function! s:close_floating_win() " {{{1
-  if win_id2win(s:winid) > 0
-    execute win_id2win(s:winid) . 'wincmd c'
+  if !exists('s:float_id')
+    return
   endif
-  let s:winid = 0
+  if win_id2win(s:float_id) > 0
+    execute win_id2win(s:float_id) . 'wincmd c'
+  endif
+  let s:float_id = 0
 endfunction
 
 " }}}1

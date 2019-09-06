@@ -623,7 +623,8 @@ Module matchparen~
     `'status_manual'`: Compute the status-line but do not display it (future
     extension).
 
-    `'popup'`: Use neovim floating window or vim8 popup to show match.
+    `'popup'`: Use a popup window (requires at least vim 8.1.1406) or
+    a floating window (in neovim) to show the off-screen match.
 
   scrolloff~
     When enabled, off-screen matches will not be shown in the statusline while
