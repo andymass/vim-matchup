@@ -567,7 +567,9 @@ function! s:do_offscreen_popup(offscreen) " {{{1
   " screen position of top-left corner of current window
   let [l:row, l:col] = win_screenpos(winnr())
   let l:height = winheight(0) " height of current window
-  let l:line = a:offscreen.lnum < line('.') ? l:row : l:row + l:height - 1
+  let l:adjust = matchup#quirks#status_adjust(a:offscreen)
+  let l:lnum = a:offscreen.lnum + l:adjust
+  let l:line = l:lnum < line('.') ? l:row : l:row + l:height - 1
 
   " if popup would overlap with cursor
   if l:line == winline() | return | endif
@@ -581,9 +583,12 @@ function! s:do_offscreen_popup(offscreen) " {{{1
   " set popup text
   let l:text = ''
   if &number || &relativenumber
-    let l:text = printf('%*S ', wincol()-virtcol('.')-1, a:offscreen.lnum)
+    let l:text = printf('%*S ', wincol()-virtcol('.')-1, l:lnum)
   endif
-  let l:text .= getline(a:offscreen.lnum) . ' '
+  let l:text .= getline(l:lnum) . ' '
+  if l:adjust
+    let l:text .= '… ' . a:offscreen.match . ' '
+  endif
   call setbufline(winbufnr(s:match_popup), 1, l:text)
   call popup_show(s:match_popup)
 endfunction
@@ -605,7 +610,7 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
           \ 'width': 42,
           \ 'height': &previewheight,
           \ 'style': 'minimal'
-          \ })
+          \})
 
     call nvim_buf_set_var(buf, 'cursorword', 0)
     call nvim_buf_set_option(buf, 'filetype',  l:original_filetype)
