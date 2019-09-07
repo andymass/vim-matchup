@@ -45,9 +45,11 @@ function! matchup#matchparen#enable() " {{{1
     endif
     autocmd BufReadPost * call s:matchparen.transmute_reset()
     autocmd WinLeave,BufLeave * call s:matchparen.clear()
-    autocmd InsertEnter,Insertchange * call s:matchparen.highlight(1, 1)
+    autocmd InsertEnter,InsertChange * call s:matchparen.highlight(1, 1)
     autocmd InsertLeave * call s:matchparen.highlight(1)
   augroup END
+
+  call s:init_match_popup()
 
   if has('vim_starting')
     " prevent this from autoloading during timer callback at startup
@@ -134,6 +136,10 @@ function! s:matchparen.clear() abort dict " {{{1
       silent! call matchdelete(l:id)
     endfor
     unlet! w:matchup_match_id_list
+  endif
+
+  if exists('s:match_popup')
+    call popup_hide(s:match_popup)
   endif
 
   if exists('w:matchup_oldstatus')
@@ -508,6 +514,12 @@ function! s:do_offscreen(current, method) " {{{1
     call s:do_offscreen_statusline(l:offscreen, 0)
   elseif a:method ==# 'status_manual'
     call s:do_offscreen_statusline(l:offscreen, 1)
+  elseif a:method ==# 'popup'
+    if has('nvim')
+      call s:do_offscreen_popup_nvim(l:offscreen)
+    else
+      call s:do_offscreen_popup(l:offscreen)
+    endif
   endif
 endfunction
 
@@ -533,6 +545,118 @@ function! s:do_offscreen_statusline(offscreen, manual) " {{{1
   if exists('#User#MatchupOffscreenEnter')
     doautocmd <nomodeline> User MatchupOffscreenEnter
   endif
+endfunction
+
+" }}}1
+function! s:init_match_popup() abort " {{{1
+  if !exists('*popup_create') || exists('s:match_popup')
+    return
+  endif
+
+  " create a popup and store its winid
+  let s:match_popup = popup_create('', {
+        \ 'hidden': v:true,
+        \})
+
+  " in case 'hidden' in popup_create-usage is unimplemented
+  call popup_hide(s:match_popup)
+endfunction
+
+" }}}1
+function! s:do_offscreen_popup(offscreen) " {{{1
+  " screen position of top-left corner of current window
+  let [l:row, l:col] = win_screenpos(winnr())
+  let l:height = winheight(0) " height of current window
+  let l:adjust = matchup#quirks#status_adjust(a:offscreen)
+  let l:lnum = a:offscreen.lnum + l:adjust
+  let l:line = l:lnum < line('.') ? l:row : l:row + l:height - 1
+
+  " if popup would overlap with cursor
+  if l:line == winline() | return | endif
+
+  call popup_move(s:match_popup, {
+        \ 'line': l:line,
+        \ 'col': l:col,
+        \ 'maxheight': 1,
+        \})
+
+  " set popup text
+  let l:text = ''
+  if &number || &relativenumber
+    let l:text = printf('%*S ', wincol()-virtcol('.')-1, l:lnum)
+  endif
+  let l:text .= getline(l:lnum) . ' '
+  if l:adjust
+    let l:text .= '… ' . a:offscreen.match . ' '
+  endif
+  call setbufline(winbufnr(s:match_popup), 1, l:text)
+  call popup_show(s:match_popup)
+endfunction
+
+" }}}1
+function! s:do_offscreen_popup_nvim(offscreen) " {{{1
+  let l:original_filetype = &filetype
+
+  if exists('*nvim_open_win')
+    " neovim floating window
+    call s:close_floating_win()
+
+    " Set default width and height for now.
+    let buf = nvim_create_buf(v:false, v:false)
+    let s:winid = nvim_open_win(buf, v:false, {
+          \ 'relative': 'cursor',
+          \ 'row': 1,
+          \ 'col': 0,
+          \ 'width': 42,
+          \ 'height': &previewheight,
+          \ 'style': 'minimal'
+          \})
+
+    call nvim_buf_set_var(buf, 'cursorword', 0)
+    call nvim_buf_set_option(buf, 'filetype',  l:original_filetype)
+    call nvim_buf_set_option(buf, 'buftype',   'nofile')
+    call nvim_buf_set_option(buf, 'bufhidden', 'delete')
+    call nvim_buf_set_option(buf, 'swapfile',  v:false)
+
+    " assumes cursor is in original window
+    autocmd matchup_matchparen CursorMoved <buffer> ++once
+          \ call s:close_floating_win()
+  endif
+
+  call s:populate_floating_win(a:offscreen)
+endfunction
+
+" }}}1
+function! s:populate_floating_win(offscreen) " {{{1
+  let l:adjust = matchup#quirks#status_adjust(a:offscreen)
+  let l:lnum = a:offscreen.lnum + l:adjust
+  let l:line = getline(l:lnum)
+
+  let l:body = split(l:line, '\n')
+  let body_length = len(l:body)
+  let height = min([body_length, &previewheight])
+
+  if exists('*nvim_open_win')
+    " neovim floating win
+    let width = max(map(copy(l:body), 'strdisplaywidth(v:val)'))
+    call nvim_win_set_width(s:float_id, width)
+    call nvim_win_set_height(s:float_id, height)
+
+    call nvim_buf_set_lines(winbufnr(s:float_id), 0, -1, v:false, [])
+    call nvim_buf_set_lines(winbufnr(s:float_id), 0, -1, v:false, l:body)
+    call nvim_win_set_cursor(s:float_id, [1,0])
+  endif
+endfunction
+
+" }}}1
+function! s:close_floating_win() " {{{1
+  if !exists('s:float_id')
+    return
+  endif
+  if win_id2win(s:float_id) > 0
+    execute win_id2win(s:float_id) . 'wincmd c'
+  endif
+  let s:float_id = 0
 endfunction
 
 " }}}1

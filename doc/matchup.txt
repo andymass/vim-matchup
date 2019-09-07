@@ -612,7 +612,7 @@ Module matchparen~
     Sets the method to use to show off-screen matches.
     Possible values are:
 
-    `'status' (default): Replace the |status-line| for off-screen matches.
+    `'status'` (default): Replace the |status-line| for off-screen matches.
 
     If a match is off of the screen, the line belonging to that match will be
     displayed syntax-highlighted in the status line along with the line number
@@ -622,6 +622,9 @@ Module matchparen~
 
     `'status_manual'`: Compute the status-line but do not display it (future
     extension).
+
+    `'popup'`: Use a popup window (requires at least vim 8.1.1406) or
+    a floating window (in neovim) to show the off-screen match.
 
   scrolloff~
     When enabled, off-screen matches will not be shown in the statusline while
