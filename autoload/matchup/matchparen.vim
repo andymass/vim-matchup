@@ -602,8 +602,8 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
     call s:close_floating_win()
 
     " Set default width and height for now.
-    let buf = nvim_create_buf(v:false, v:false)
-    let s:winid = nvim_open_win(buf, v:false, {
+    let l:buf = nvim_create_buf(v:false, v:false)
+    let s:float_id = nvim_open_win(l:buf, v:false, {
           \ 'relative': 'cursor',
           \ 'row': 1,
           \ 'col': 0,
@@ -612,18 +612,18 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
           \ 'style': 'minimal'
           \})
 
-    call nvim_buf_set_var(buf, 'cursorword', 0)
-    call nvim_buf_set_option(buf, 'filetype',  l:original_filetype)
-    call nvim_buf_set_option(buf, 'buftype',   'nofile')
-    call nvim_buf_set_option(buf, 'bufhidden', 'delete')
-    call nvim_buf_set_option(buf, 'swapfile',  v:false)
+    call nvim_buf_set_var(l:buf, 'cursorword', 0)
+    call nvim_buf_set_option(l:buf, 'filetype',  l:original_filetype)
+    call nvim_buf_set_option(l:buf, 'buftype',   'nofile')
+    call nvim_buf_set_option(l:buf, 'bufhidden', 'delete')
+    call nvim_buf_set_option(l:buf, 'swapfile',  v:false)
 
     " assumes cursor is in original window
     autocmd matchup_matchparen CursorMoved <buffer> ++once
           \ call s:close_floating_win()
-  endif
 
-  call s:populate_floating_win(a:offscreen)
+    call s:populate_floating_win(a:offscreen)
+  endif
 endfunction
 
 " }}}1
