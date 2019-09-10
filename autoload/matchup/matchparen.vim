@@ -140,6 +140,8 @@ function! s:matchparen.clear() abort dict " {{{1
 
   if exists('s:match_popup')
     call popup_hide(s:match_popup)
+  elseif has('nvim')
+    call s:close_floating_win()
   endif
 
   if exists('w:matchup_oldstatus')
@@ -595,32 +597,30 @@ endfunction
 
 " }}}1
 function! s:do_offscreen_popup_nvim(offscreen) " {{{1
-  let l:original_filetype = &filetype
-
   if exists('*nvim_open_win')
     " neovim floating window
     call s:close_floating_win()
 
+    let l:lnum = a:offscreen.lnum
+    let [l:row, l:anchor] = l:lnum < line('.')
+          \ ? [0, 'NW'] : [winheight(0), 'SW']
+    if l:row == winline() | return | endif
+
     " Set default width and height for now.
-    let l:buf = nvim_create_buf(v:false, v:false)
-    let s:float_id = nvim_open_win(l:buf, v:false, {
-          \ 'relative': 'cursor',
-          \ 'row': 1,
+    let s:float_id = nvim_open_win(bufnr('%'), v:false, {
+          \ 'relative': 'win',
+          \ 'anchor': l:anchor,
+          \ 'row': l:row,
           \ 'col': 0,
           \ 'width': 42,
           \ 'height': &previewheight,
-          \ 'style': 'minimal'
+          \ 'focusable': v:false,
           \})
 
-    call nvim_buf_set_var(l:buf, 'cursorword', 0)
-    call nvim_buf_set_option(l:buf, 'filetype',  l:original_filetype)
-    call nvim_buf_set_option(l:buf, 'buftype',   'nofile')
-    call nvim_buf_set_option(l:buf, 'bufhidden', 'delete')
-    call nvim_buf_set_option(l:buf, 'swapfile',  v:false)
-
-    " assumes cursor is in original window
-    autocmd matchup_matchparen CursorMoved <buffer> ++once
-          \ call s:close_floating_win()
+    if &relativenumber
+      call nvim_win_set_option(s:float_id, 'number', v:true)
+      call nvim_win_set_option(s:float_id, 'relativenumber', v:false)
+    endif
 
     call s:populate_floating_win(a:offscreen)
   endif
@@ -630,21 +630,18 @@ endfunction
 function! s:populate_floating_win(offscreen) " {{{1
   let l:adjust = matchup#quirks#status_adjust(a:offscreen)
   let l:lnum = a:offscreen.lnum + l:adjust
-  let l:line = getline(l:lnum)
-
-  let l:body = split(l:line, '\n')
-  let body_length = len(l:body)
-  let height = min([body_length, &previewheight])
+  let l:body = getline(l:lnum, a:offscreen.lnum)
+  let l:body_length = len(l:body)
+  let l:height = min([l:body_length, &previewheight])
 
   if exists('*nvim_open_win')
     " neovim floating win
     let width = max(map(copy(l:body), 'strdisplaywidth(v:val)'))
-    call nvim_win_set_width(s:float_id, width)
-    call nvim_win_set_height(s:float_id, height)
-
-    call nvim_buf_set_lines(winbufnr(s:float_id), 0, -1, v:false, [])
-    call nvim_buf_set_lines(winbufnr(s:float_id), 0, -1, v:false, l:body)
-    call nvim_win_set_cursor(s:float_id, [1,0])
+    let l:width += wincol()-virtcol('.')
+    call nvim_win_set_width(s:float_id, l:width + 1)
+    call nvim_win_set_height(s:float_id, l:height)
+    call nvim_win_set_cursor(s:float_id, [l:lnum, 0])
+    call nvim_win_set_option(s:float_id, 'wrap', v:false)
   endif
 endfunction
 
