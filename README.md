@@ -719,6 +719,7 @@ See for instance one of the following plugins for this;
 - [auto-pairs](https://github.com/jiangmiao/auto-pairs)
 - [delimitMate](https://github.com/Raimondi/delimitMate)
 - [splitjoin.vim](https://github.com/AndrewRadev/splitjoin.vim)
+- [Pear Tree](https://github.com/tmsvg/pear-tree)
 
 ### Matchit
 

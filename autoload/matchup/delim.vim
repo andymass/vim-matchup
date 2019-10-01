@@ -695,7 +695,9 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
 
   " improves perceptual performance in insert mode
   if mode() ==# 'i' || mode() ==# 'R'
-    sleep 1m
+    if !g:matchup_matchparen_deferred
+      sleep 1m
+    endif
   endif
 
   " use b:match_ignorecase
