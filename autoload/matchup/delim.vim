@@ -849,7 +849,7 @@ endfunction
 " {strike} pattern of disallowed mid words
 " {def} is the fallback skip expression
 function! matchup#delim#skip2(strike, def)
-  return getline('.')[col('.')-1:] =~# '^'.a:strike || eval(a:def)
+  return getline('.')[col('.')-1:] =~# '^' . a:strike || eval(a:def)
 endfunction
 
 let s:invert_skip = 0

@@ -442,8 +442,8 @@ function! s:init_delim_lists(...) abort " {{{1
     let l:elems = deepcopy(b:match_midmap)
     let l:lists.delim_tex.midmap = {
           \ 'elements': l:elems,
-          \ 'strike': join(map(range(len(l:elems)),
-          \   '"\\(".l:elems[v:val][1]."\\)"'), '\|')
+          \ 'strike': '\%(' . join(map(range(len(l:elems)),
+          \   '"\\(".l:elems[v:val][1]."\\)"'), '\|') . '\)'
           \}
   endif
 
