@@ -651,7 +651,7 @@ function! s:close_floating_win() " {{{1
     return
   endif
   if win_id2win(s:float_id) > 0
-    execute win_id2win(s:float_id) . 'wincmd c'
+    call nvim_win_close(s:float_id, 0)
   endif
   let s:float_id = 0
 endfunction
