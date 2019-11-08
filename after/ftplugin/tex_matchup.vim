@@ -1,8 +1,12 @@
-" vim match-up - matchit replacement and more
+" vim match-up - even better matching pairs
 "
 " Maintainer: Andy Massimino
 " Email:      a@normed.space
 "
+
+if !exists('g:loaded_matchup') || !exists('b:did_ftplugin')
+  finish
+endif
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -71,15 +75,20 @@ function! s:get_match_words()
 endfunction
 
 function! s:setup_match_words()
-    setlocal matchpairs=(:),{:},[:]
-    let b:matchup_delim_nomatchpairs = 1
-    let b:match_words = s:get_match_words()
+  setlocal matchpairs=(:),{:},[:]
+  let b:matchup_delim_nomatchpairs = 1
+  let b:match_words = s:get_match_words()
 
-    " the syntax method is too slow for latex
-    let b:match_skip = 'r:\\\@<!\%(\\\\\)*%'
+  " the syntax method is too slow for latex
+  let b:match_skip = 'r:\\\@<!\%(\\\\\)*%'
 
-    " the old regexp engine is a bit faster '\%#=1'
-    let b:matchup_regexpengine = 1
+  " the old regexp engine is a bit faster '\%#=1'
+  let b:matchup_regexpengine = 1
+
+  let b:undo_ftplugin =
+        \ (exists('b:undo_ftplugin') ? b:undo_ftplugin . '|' : '')
+        \ . 'unlet! b:matchup_delim_nomatchpairs b:match_words'
+        \ . ' b:match_skip b:matchup_regexpengine'
 endfunction
 
 if get(g:, 'vimtex_enabled',

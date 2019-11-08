@@ -1,8 +1,12 @@
-" vim match-up - matchit replacement and more
+" vim match-up - even better matching pairs
 "
 " Maintainer: Andy Massimino
 " Email:      a@normed.space
 "
+
+if !exists('g:loaded_matchup') || !exists('b:did_ftplugin')
+  finish
+endif
 
 let s:save_cpo = &cpo
 set cpo&vim

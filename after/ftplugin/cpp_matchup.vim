@@ -11,13 +11,13 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
-call matchup#util#patch_match_words('retry', 'retry\|return')
-
-let b:match_midmap = [
-      \ ['rubyRepeat', 'next'],
-      \ ['rubyDefine', 'return'],
-      \]
-let b:undo_ftplugin .= '| unlet! b:match_midmap'
+if matchup#util#matchpref('template', 0)
+  call matchup#util#append_match_words(
+        \ '\%(\s\@<!<\|<\s\@!\)=\@!:\%(\s\@<!>\|>\s\@!\)=\@!')
+  if stridx(&matchpairs, '<:>')
+    setlocal matchpairs-=<:>
+  endif
+endif
 
 let &cpo = s:save_cpo
 

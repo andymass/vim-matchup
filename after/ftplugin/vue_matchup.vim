@@ -1,4 +1,4 @@
-" vim match-up - matchit replacement and more
+" vim match-up - even better matching pairs
 "
 " Maintainer: Andy Massimino
 " Email:      a@normed.space
