@@ -49,7 +49,7 @@ function! matchup#matchparen#enable() " {{{1
     autocmd InsertLeave * call s:matchparen.highlight(1)
   augroup END
 
-  call s:init_match_popup()
+  call s:ensure_match_popup()
 
   if has('vim_starting')
     " prevent this from autoloading during timer callback at startup
@@ -138,8 +138,8 @@ function! s:matchparen.clear() abort dict " {{{1
     unlet! w:matchup_match_id_list
   endif
 
-  if exists('s:match_popup')
-    call popup_hide(s:match_popup)
+  if exists('t:match_popup')
+    call popup_hide(t:match_popup)
   elseif has('nvim')
     call s:close_floating_win()
   endif
@@ -519,7 +519,8 @@ function! s:do_offscreen(current, method) " {{{1
   elseif a:method ==# 'popup'
     if has('nvim')
       call s:do_offscreen_popup_nvim(l:offscreen)
-    else
+    elseif exists('*popup_create')
+      call s:ensure_match_popup()
       call s:do_offscreen_popup(l:offscreen)
     endif
   endif
@@ -550,18 +551,20 @@ function! s:do_offscreen_statusline(offscreen, manual) " {{{1
 endfunction
 
 " }}}1
-function! s:init_match_popup() abort " {{{1
-  if !exists('*popup_create') || exists('s:match_popup')
+function! s:ensure_match_popup() abort " {{{1
+  if !exists('*popup_create') || exists('t:match_popup')
     return
   endif
 
   " create a popup and store its winid
-  let s:match_popup = popup_create('', {
+  let t:match_popup = popup_create('', {
         \ 'hidden': v:true,
         \})
 
-  " in case 'hidden' in popup_create-usage is unimplemented
-  call popup_hide(s:match_popup)
+  if !has('patch-8.1.1406')
+    " in case 'hidden' in popup_create-usage is unimplemented
+    call popup_hide(t:match_popup)
+  endif
 endfunction
 
 " }}}1
@@ -576,7 +579,7 @@ function! s:do_offscreen_popup(offscreen) " {{{1
   " if popup would overlap with cursor
   if l:line == winline() | return | endif
 
-  call popup_move(s:match_popup, {
+  call popup_move(t:match_popup, {
         \ 'line': l:line,
         \ 'col': l:col,
         \ 'maxheight': 1,
@@ -591,8 +594,8 @@ function! s:do_offscreen_popup(offscreen) " {{{1
   if l:adjust
     let l:text .= '… ' . a:offscreen.match . ' '
   endif
-  call setbufline(winbufnr(s:match_popup), 1, l:text)
-  call popup_show(s:match_popup)
+  call setbufline(winbufnr(t:match_popup), 1, l:text)
+  call popup_show(t:match_popup)
 endfunction
 
 " }}}1
