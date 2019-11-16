@@ -472,6 +472,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   let l:method = get(g:matchup_matchparen_offscreen, 'method', '')
   if !empty(l:method) && l:method !=# 'none'
         \ && !l:current.skip && !l:scrolling
+        \ && winheight(0) > 0
     call s:do_offscreen(l:current, l:method)
   endif
 
@@ -516,7 +517,7 @@ function! s:do_offscreen(current, method) " {{{1
     call s:do_offscreen_statusline(l:offscreen, 0)
   elseif a:method ==# 'status_manual'
     call s:do_offscreen_statusline(l:offscreen, 1)
-  elseif a:method ==# 'popup'
+  elseif a:method ==# 'popup' && winheight(0) > 1
     if has('nvim')
       call s:do_offscreen_popup_nvim(l:offscreen)
     elseif exists('*popup_create')
