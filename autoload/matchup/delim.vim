@@ -302,7 +302,7 @@ function! s:get_delim(opts) " {{{1
   "     is_open  : side == 'open'
   "     class    : [ c1, c2 ] identifies the kind of match_words
   "     regexone : the regex item, like \1foo
-  "     regextwo : the regex_backref item, like \(group\)foo
+  "     regextwo : the regex_capture item, like \(group\)foo
   "     rematch  : regular expression to use in match highlight
   "   }
   "
@@ -489,7 +489,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
   let l:found = 0
 
   let l:sides = matchup#loader#sidedict()[a:opts.side]
-  let l:rebrs = b:matchup_delim_lists[a:opts.type].regex_backref
+  let l:rebrs = b:matchup_delim_lists[a:opts.type].regex_capture
 
   " use b:match_ignorecase
   let l:ic = get(b:, 'match_ignorecase', 0) ? '\c' : '\C'
@@ -562,14 +562,14 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
   " reset ignorecase (defunct)
 
   if !l:found
-      return {}
+    return {}
   endif
 
   let l:match = l:matches[0]
 
   let l:list = b:matchup_delim_lists[a:opts.type]
   let l:thisre   = l:list.regex[l:i / l:ns]
-  let l:thisrebr = l:list.regex_backref[l:i / l:ns]
+  let l:thisrebr = l:list.regex_capture[l:i / l:ns]
 
   let l:augment = {}
 
@@ -683,10 +683,10 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
     endif
     if len(l:idx)
       let l:valid = l:midmap[l:idx[0]]
-      let l:skip = printf("matchup#delim#skip1(%s, %s)",
+      let l:skip = printf('matchup#delim#skip1(%s, %s)',
             \ string(l:midmap[l:idx[0]]), string(l:skip))
     else
-      let l:skip = printf("matchup#delim#skip2(%s, %s)",
+      let l:skip = printf('matchup#delim#skip2(%s, %s)',
             \ string(self.midmap.strike), string(l:skip))
     endif
   endif
