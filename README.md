@@ -1,5 +1,7 @@
 # vim match-up
 
+[![Circle CI](https://img.shields.io/badge/vim%20scripts-5624-brightgreen)](https://www.vim.org/scripts/script.php?script_id=5624)
+
 match-up is a drop-in replacement for the vim plugin [matchit.vim].
 match-up aims to enhance all of matchit's features, fix a number of its
 deficiencies and bugs, and add a few totally new features.  It also
