@@ -1,6 +1,7 @@
 name: Test action
 
-on: [push]
+on:
+  status
 
 jobs:
   build:
