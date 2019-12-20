@@ -84,8 +84,13 @@ let s:match_word_cache = {}
 " }}}1
 
 function! s:init_delim_lists(...) abort " {{{1
-  let l:lists = { 'delim_tex': { 'regex': [], 'regex_backref': [],
-        \ 'midmap': {} } }
+  let l:lists = {
+        \ 'delim_tex': {
+        \   'regex': [],
+        \   'regex_capture': [],
+        \   'midmap': {},
+        \ },
+        \}
 
   " very tricky examples:
   " good: let b:match_words = '\(\(foo\)\(bar\)\):\3\2:end\1'
