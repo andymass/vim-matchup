@@ -1,22 +1,22 @@
 name: Test action
 
-on: [push]
+on: push
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: 'Wait for status checks'
         id: waitforstatuschecks
         uses: "WyriHaximus/github-action-wait-for-status@0.1.0"
         with:
-          ignoreActions: automerge
+          ignoreActions: build
           checkInterval: 13
-          env:
-            GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - uses: actions/checkout@v1
+        if: steps.waitforstatuschecks.outputs.status == 'success'
 
       - name: Run a basic test
         run: |
