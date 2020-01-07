@@ -89,11 +89,8 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     let l:matching.cnum = l:cnum
     let l:matching.match = l:match
     let l:matching.side = l:i == 0 ? 'open'
-        \ : l:i == len(l:matches)-1 ? 'close' : 'mid'
-    let l:matching.is_open = !a:delim.is_open
+          \ : l:i == len(l:matches)-1 ? 'close' : 'mid'
     let l:matching.class[1] = 'FIXME'
-    let l:matching.corr  = a:delim.match
-    let l:matching.rematch = a:delim.regextwo[l:matching.side]
     let l:matching.match_index = l:i
 
     call add(l:matching_list, l:matching)
@@ -109,15 +106,7 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     let l:c.links.close = l:matching_list[-1]
   endfor
 
-  if a:0
-    return l:matching_list
-  else
-    " old syntax: open->close, close->open
-    if len(l:matching_list) < 2 | return {} | endif
-    return a:delim.side ==# 'open' ? l:matching_list[-1]
-       \ : l:matching_list[0]
-  endif
-
+  return l:matching_list
 endfunction
 
 " }}}1
@@ -299,11 +288,9 @@ function! s:get_delim(opts) " {{{1
   "     augment  : how to match a corresponding open
   "     groups   : dict of captured groups
   "     side     : 'open' | 'close' | 'mid'
-  "     is_open  : side == 'open'
   "     class    : [ c1, c2 ] identifies the kind of match_words
   "     regexone : the regex item, like \1foo
   "     regextwo : the regex_capture item, like \(group\)foo
-  "     rematch  : regular expression to use in match highlight
   "   }
   "
   " }}}2
@@ -461,11 +448,9 @@ function! s:get_delim(opts) " {{{1
         \ 'augment'  : '',
         \ 'groups'   : '',
         \ 'side'     : '',
-        \ 'is_open'  : '',
         \ 'class'    : [],
         \ 'regexone' : '',
         \ 'regextwo' : '',
-        \ 'rematch'  : '',
         \ 'skip'     : l:skip_state,
         \}
 
@@ -612,13 +597,11 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
         \ 'augment'      : l:augment,
         \ 'groups'       : l:groups,
         \ 'side'         : l:side,
-        \ 'is_open'      : (l:side ==# 'open') ? 1 : 0,
         \ 'class'        : [(l:i / l:ns), l:id],
         \ 'get_matching' : s:basetypes['delim_tex'].get_matching,
         \ 'regexone'     : l:thisre,
         \ 'regextwo'     : l:thisrebr,
         \ 'midmap'       : get(l:list, 'midmap', {}),
-        \ 'rematch'      : l:re,
         \ 'highlighting' : get(a:opts, 'highlighting', 0),
         \}
 
