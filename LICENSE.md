@@ -1,6 +1,6 @@
 MIT license
 
-Copyright (c) 2019 Andy Massimino
+Copyright (c) 2020 Andy Massimino
 
 Copyright (c) 2016 Karl Yngve Lervåg
 

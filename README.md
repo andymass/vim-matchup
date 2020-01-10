@@ -1,18 +1,10 @@
 # vim match-up
 
-match-up is a drop-in replacement for the vim plugin [matchit.vim].
-match-up aims to enhance all of matchit's features, fix a number of its
-deficiencies and bugs, and add a few totally new features.  It also
-replaces the standard plugin [matchparen], allowing all of matchit's words
-to be highlighted along with the `matchpairs` (`(){}[]`).
-
-[matchit.vim]: http://ftp.vim.org/pub/vim/runtime/macros/matchit.txt
-[matchparen]: http://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt
+match-up is a plugin that lets you highlight, navigate, and operate on
+sets of matching text.  It extends vim's `%` key to language-specific
+words instead of just single characters.
 
 <img src='https://github.com/andymass/matchup.vim/wiki/images/teaser.jpg' width='300px' alt='and in this corner...'>
-
-A major goal of this project is to keep a modern and modular code base.
-Contributions are welcome!
 
 ## Screenshot
 
@@ -30,6 +22,15 @@ Contributions are welcome!
   * [Development](#development)
 
 ## Overview
+
+match-up can be used as a drop-in replacement for the classic plugin [matchit.vim].
+match-up aims to enhance all of matchit's features, fix a number of its
+deficiencies and bugs, and add a few totally new features.  It also
+replaces the standard plugin [matchparen], allowing all of matchit's words
+to be highlighted along with the `matchpairs` (`(){}[]`).
+
+[matchit.vim]: http://ftp.vim.org/pub/vim/runtime/macros/matchit.txt
+[matchparen]: http://ftp.vim.org/pub/vim/runtime/doc/pi_paren.txt
 
 See [detailed feature documentation](#detailed-feature-documentation) for
 more information.  This plugin:
@@ -79,7 +80,7 @@ together with other plugins.
 |         | feature                          | __match-up__   | matchit       | matchparen    |
 | ------- | -------------------------------- | -------------- | ------------- | ------------- |
 | ([a.1]) | jump between matching words      | :thumbsup:     | :thumbsup:    | :x:           |
-| ([a.2]) | jump to open & close words       | :thumbsup:     | :question:    | :x:           |
+| ([a.2]) | jump to open & close words       | :thumbsup:     | :thumbsup:    | :x:           |
 | ([a.3]) | jump inside                      | :thumbsup:     | :x:           | :x:           |
 | ([b.1]) | full set of text objects         | :thumbsup:     | :question:    | :x:           |
 | ([c.1]) | highlight `()`, `[]`, & `{}`     | :thumbsup:     | :x:           | :thumbsup:    |
@@ -773,4 +774,7 @@ Feature requests are also welcome.
 
 Please read the [contribution guidelines](CONTRIBUTING.md) before
 contributing.
+
+A major goal of this project is to keep a modern and modular code base.
+Contributions are welcome!
 
