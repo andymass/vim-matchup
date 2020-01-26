@@ -40,14 +40,9 @@ function! matchup#util#in_syntax(name, ...) " {{{1
   " usage: matchup#util#in_syntax(name, [line, col])
   let l:pos = a:0 > 0 ? [a:1, a:2] : [line('.'), col('.')]
 
-  " check syntax at position
-  let l:syn = map(synstack(l:pos[0], l:pos[1]),
-         \  "synIDattr(synIDtrans(v:val), 'name')")
-  return match(l:syn, '\c'.a:name) >= 0
-
-  " this is closer to the method used by most ftplugins
-  " let l:syn = synIDattr(synID(l:pos[0], l:pos[1], 1), 'name')
-  " return l:syn =~? a:name
+  " check syntax at position (same as matchit's s: method)
+  let l:syn = synIDattr(synID(l:pos[0], l:pos[1], 1), 'name')
+  return l:syn =~? a:name
 endfunction
 
 " }}}1
