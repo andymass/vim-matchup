@@ -41,7 +41,15 @@ endfunction
 " }}}1
 
 function! s:print_verbose() " {{{1
+  echohl Title | echon 'match-up:' | echohl None
+  echon ' loading...'
   let l:trail = matchup#where#get(500)
+  redraw!
+  if empty(l:trail)
+    echohl Title | echon 'match-up:' | echohl None
+    echon ' no context found'
+    return
+  endif
   let l:last = -1
   for l:t in l:trail
     let l:opts = {
@@ -62,7 +70,15 @@ endfunction
 
 " }}}1
 function! s:print_short() " {{{1
+  echohl Title | echon 'match-up:' | echohl None
+  echon ' loading...'
   let l:trail = matchup#where#get(200)
+  redraw!
+  if empty(l:trail)
+    echohl Title | echon 'match-up:' | echohl None
+    echon ' no context found'
+    return
+  endif
   " TODO len(trail) is not quite right here
   let l:width = (&columns - 3*(len(l:trail)-1)) / len(l:trail)
   let l:fullstr = ''
