@@ -52,7 +52,7 @@ function! s:get_match_words()
   let l:match_words .= ',{:}'
 
   " latex equation markers
-  let l:match_words .= ',\\(:\\),\\\[:\\]'
+  let l:match_words .= ',\\(:\\),'.s:not_bslash.'\\\[:\\]'
 
   " simple blocks
   let l:match_words .= ',\\if\%(\w\|@\)*\>:\\else\>:\\fi\>'
