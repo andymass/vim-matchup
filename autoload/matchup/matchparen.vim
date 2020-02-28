@@ -138,7 +138,8 @@ function! s:matchparen.clear() abort dict " {{{1
     unlet! w:matchup_match_id_list
   endif
 
-  if exists('t:match_popup')
+  if exists('t:match_popup') && (exists('*win_gettype')
+        \ ? win_gettype() !=# 'popup' : &buftype !=# 'terminal')
     call popup_hide(t:match_popup)
   elseif has('nvim')
     call s:close_floating_win()
