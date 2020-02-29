@@ -374,6 +374,11 @@ function! s:matchparen.highlight(...) abort dict " {{{1
     return
   endif
 
+  " prevent problems in visual block mode at the end of a line
+  if get(matchup#pos#get_cursor(), 4, 0) == 2147483647
+    return
+  endif
+
   " don't get matches when inside a closed fold
   if foldclosed(line('.')) > -1
     return
