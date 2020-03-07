@@ -49,8 +49,6 @@ function! matchup#matchparen#enable() " {{{1
     autocmd InsertLeave * call s:matchparen.highlight(1)
   augroup END
 
-  call s:ensure_match_popup()
-
   if has('vim_starting')
     " prevent this from autoloading during timer callback at startup
     if g:matchup_matchparen_deferred
