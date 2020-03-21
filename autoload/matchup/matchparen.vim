@@ -647,7 +647,14 @@ function! s:populate_floating_win(offscreen) " {{{1
     let width = max(map(copy(l:body), 'strdisplaywidth(v:val)'))
     let l:width += wincol()-virtcol('.')
     call nvim_win_set_width(s:float_id, l:width + 1)
-    call nvim_win_set_height(s:float_id, l:height)
+    if &winminheight != 1
+      let l:save_wmh = &winminheight
+      let &winminheight = 1
+      call nvim_win_set_height(s:float_id, l:height)
+      let &winminheight = l:save_wmh
+    else
+      call nvim_win_set_height(s:float_id, l:height)
+    endif
     call nvim_win_set_cursor(s:float_id, [l:lnum, 0])
     call nvim_win_set_option(s:float_id, 'wrap', v:false)
   endif
