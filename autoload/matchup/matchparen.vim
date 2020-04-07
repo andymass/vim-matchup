@@ -562,9 +562,11 @@ function! s:ensure_match_popup() abort " {{{1
   endif
 
   " create a popup and store its winid
-  let t:match_popup = popup_create('', {
-        \ 'hidden': v:true,
-        \})
+  let l:opts = {'hidden': v:true}
+  if has_key(g:matchup_matchparen_offscreen, 'highlight')
+    let l:opts.highlight = g:matchup_matchparen_offscreen.highlight
+  endif
+  let t:match_popup = popup_create('', l:opts)
 
   if !has('patch-8.1.1406')
     " in case 'hidden' in popup_create-usage is unimplemented

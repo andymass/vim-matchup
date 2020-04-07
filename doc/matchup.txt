@@ -633,6 +633,14 @@ Module matchparen~
 
     Default: 0
 
+  highlight~
+    For popup method on vim only: set to a highlight group to override the
+    colors in the popup window.  The default is to use *hl-Pmenu*.  Example:
+>
+      highlight! OffscreenPopup guibg=red guifg=blue
+      let g:matchup_matchparen_offscreen
+          \ = {'method': 'popup', 'highlight': 'OffscreenPopup'}
+<
   Default: `{'method': 'status'}`
 
 *g:matchup_matchparen_stopline*
