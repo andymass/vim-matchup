@@ -627,6 +627,11 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
           \ 'focusable': v:false,
           \})
 
+    if has_key(g:matchup_matchparen_offscreen, 'highlight')
+      call nvim_win_set_option(s:float_id, 'winhighlight',
+            \ 'Normal:' . g:matchup_matchparen_offscreen.highlight)
+    endif
+
     if &relativenumber
       call nvim_win_set_option(s:float_id, 'number', v:true)
       call nvim_win_set_option(s:float_id, 'relativenumber', v:false)
