@@ -597,7 +597,14 @@ function! s:do_offscreen_popup(offscreen) " {{{1
   if &number || &relativenumber
     let l:text = printf('%*S ', wincol()-virtcol('.')-1, l:lnum)
   endif
-  let l:text .= getline(l:lnum) . ' '
+
+  " replace tab indent with spaces
+  " (popup window doesn't follow tabstop option of current buffer)
+  let l:linestr = getline(l:lnum)
+  let l:indent = repeat(' ', strdisplaywidth(matchstr(l:linestr, '^\s\+')))
+  let l:linestr = substitute(l:linestr, '^\s\+', l:indent, '')
+
+  let l:text .= l:linestr . ' '
   if l:adjust
     let l:text .= '… ' . a:offscreen.match . ' '
   endif
