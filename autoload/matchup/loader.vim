@@ -35,6 +35,14 @@ function! matchup#loader#init_buffer() abort " {{{1
   " enable/disable for this buffer
   let b:matchup_delim_enabled = !empty(b:matchup_delim_lists.all.regex)
 
+  let b:matchup_active_engines = {}
+  if b:matchup_delim_enabled
+    for l:t in ['all', 'delim_all', 'delim_tex']
+      let b:matchup_active_engines[l:t]
+            \ = get(b:matchup_active_engines, l:t, []) + ['classic']
+    endfor
+  endif
+
   call matchup#perf#toc('loader_init_buffer', 'done')
 endfunction
 

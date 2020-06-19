@@ -19,7 +19,7 @@ endfunction
 
 function! s:init_options()
   call s:init_option('matchup_matchparen_enabled',
-    \ !(&t_Co < 8 && !has('gui_running')))
+        \ !(&t_Co < 8 && !has('gui_running')))
   let l:offs = {'method': 'status'}
   if !get(g:, 'matchup_matchparen_status_offscreen', 1)
     let l:offs = {}
@@ -43,9 +43,9 @@ function! s:init_options()
   call s:init_option('matchup_matchparen_hi_background', 0)
 
   call s:init_option('matchup_matchparen_timeout',
-    \ get(g:, 'matchparen_timeout', 300))
+        \ get(g:, 'matchparen_timeout', 300))
   call s:init_option('matchup_matchparen_insert_timeout',
-    \ get(g:, 'matchparen_insert_timeout', 60))
+        \ get(g:, 'matchparen_insert_timeout', 60))
 
   call s:init_option('matchup_delim_count_fail', 0)
   call s:init_option('matchup_delim_count_max', 8)

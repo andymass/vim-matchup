@@ -7,8 +7,8 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! matchup#delim#get_next(type, side, ...) " {{{1
-  return s:get_delim(extend({
+function! matchup#delim#get_next(type, side, ...) abort " {{{1
+  return s:get_delim_multi(extend({
         \ 'direction' : 'next',
         \ 'type' : a:type,
         \ 'side' : a:side,
@@ -16,8 +16,8 @@ function! matchup#delim#get_next(type, side, ...) " {{{1
 endfunction
 
 " }}}1
-function! matchup#delim#get_prev(type, side, ...) " {{{1
-  return s:get_delim(extend({
+function! matchup#delim#get_prev(type, side, ...) abort " {{{1
+  return s:get_delim_multi(extend({
         \ 'direction' : 'prev',
         \ 'type' : a:type,
         \ 'side' : a:side,
@@ -25,12 +25,29 @@ function! matchup#delim#get_prev(type, side, ...) " {{{1
 endfunction
 
 " }}}1
-function! matchup#delim#get_current(type, side, ...) " {{{1
-  return s:get_delim(extend({
+function! matchup#delim#get_current(type, side, ...) abort " {{{1
+  return s:get_delim_multi(extend({
         \ 'direction' : 'current',
         \ 'type' : a:type,
         \ 'side' : a:side,
         \}, get(a:, '1', {})))
+endfunction
+
+" }}}1
+function! matchup#delim#get_surrounding(type, count, opts) " {{{1
+  return matchup#delim#get_surrounding_impl(a:type, a:count, a:opts)
+endfunction
+
+" }}}1
+
+function! s:get_delim_multi(opts) " {{{1
+  for l:e in get(get(b:, 'matchup_active_engines', {}), a:opts.type, [])
+    let l:res = call(s:engines[l:e].get_delim, [a:opts])
+    if !empty(l:res)
+      return l:res
+    endif
+  endfor
+  return {}
 endfunction
 
 " }}}1
@@ -56,7 +73,8 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     endif
 
     let l:res = a:delim.get_matching(l:down, l:stopline)
-    if l:res[0][1] > 0
+    if empty(l:res)
+    elseif l:res[0][1] > 0
       call extend(l:matches, l:res)
     elseif l:down
       let l:matches = []
@@ -106,12 +124,22 @@ function! matchup#delim#get_matching(delim, ...) " {{{1
     let l:c.links.close = l:matching_list[-1]
   endfor
 
+  " allow empty marker ending
+  " TODO: use a sentinel value instead of empty
+  if len(l:matching_list) >= 2 && empty(l:matching_list[-1].match)
+    if get(l:opts, 'highlighting', 0) && len(l:matching_list) <= 2
+      return []
+    endif
+    let l:matching_list[0].links.prev = l:matching_list[-2]
+    let l:matching_list[-2].links.next = l:matching_list[0]
+  endif
+
   return l:matching_list
 endfunction
 
 " }}}1
 
-function! matchup#delim#get_surrounding(type, ...) " {{{1
+function! matchup#delim#get_surrounding_impl(type, ...) " {{{1
   call matchup#perf#tic('delim#get_surrounding')
 
   let l:save_pos = matchup#pos#get_cursor()
@@ -280,7 +308,7 @@ function! s:get_delim(opts) " {{{1
   "
   "  }}}2
   " returns: {{{2
-  "   delim = {
+  "   delim = { (TODO update)
   "     type     : 'delim'
   "     lnum     : line number
   "     cnum     : column number
@@ -454,8 +482,8 @@ function! s:get_delim(opts) " {{{1
         \ 'skip'     : l:skip_state,
         \}
 
-  for l:type in s:types[a:opts.type]
-    let l:parser_result = l:type.parser(l:lnum, l:cnum, a:opts)
+  for l:P in s:engines.classic.parsers[a:opts.type]
+    let l:parser_result = l:P(l:lnum, l:cnum, a:opts)
     if !empty(l:parser_result)
       let l:result = extend(l:parser_result, l:result, 'keep')
       break
@@ -598,7 +626,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
         \ 'groups'       : l:groups,
         \ 'side'         : l:side,
         \ 'class'        : [(l:i / l:ns), l:id],
-        \ 'get_matching' : s:basetypes['delim_tex'].get_matching,
+        \ 'get_matching' : s:engines.classic.get_matching,
         \ 'regexone'     : l:thisre,
         \ 'regextwo'     : l:thisrebr,
         \ 'midmap'       : get(l:list, 'midmap', {}),
@@ -723,6 +751,7 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   else
     for l:to in range(1,9)
       if !has_key(self.groups, l:to) && !empty(l:matches[l:to])
+        " TODO mark context
         let self.groups[l:to] = l:matches[l:to]
       endif
     endfor
@@ -899,17 +928,16 @@ endfunction
 " initialize script variables
 let s:stopline = get(g:, 'matchup_delim_stopline', 1500)
 
-let s:basetypes = {
-      \ 'delim_tex': {
-      \   'parser'       : function('s:parser_delim_new'),
-      \   'get_matching' : function('s:get_matching_delims'),
+let s:engines = {
+      \ 'classic': {
+      \   'get_delim'     : function('s:get_delim'),
+      \   'get_matching'  : function('s:get_matching_delims'),
+      \   'parsers': {
+      \     'all'       : [ function('s:parser_delim_new'), ],
+      \     'delim_all' : [ function('s:parser_delim_new'), ],
+      \     'delim_tex' : [ function('s:parser_delim_new'), ],
+      \   },
       \ },
-      \}
-
-let s:types = {
-      \ 'all'       : [ s:basetypes.delim_tex ],
-      \ 'delim_all' : [ s:basetypes.delim_tex ],
-      \ 'delim_tex' : [ s:basetypes.delim_tex ],
       \}
 
 let &cpo = s:save_cpo
