@@ -1,0 +1,38 @@
+name: Vim
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        vim_type: ['Vim']
+        vim_version:
+          - 'head'
+          - 'v8.0.1575'
+          - 'v7.4.2273'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 'actions/checkout@v2'
+
+      - name: Install vader.vim
+        run: git clone --depth=1 https://github.com/junegunn/vader.vim.git test/vader/vader.vim
+
+      - name: 'setup Vim'
+        uses: 'thinca/action-setup-vim@v1'
+        with:
+          vim_version: '${{ matrix.vim_version }}'
+          vim_type: '${{ matrix.vim_type }}'
+
+      - name: 'Show version'
+        run: vim --version
+
+      - name: 'Run test'
+        run: |
+          bash ./test/vader/run

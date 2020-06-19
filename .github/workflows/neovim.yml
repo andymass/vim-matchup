@@ -1,0 +1,37 @@
+name: Neovim
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        vim_type: ['Neovim']
+        neovim_version:
+          - 'head'
+          - 'stable'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 'actions/checkout@v2'
+
+      - name: Install vader.vim
+        run: git clone --depth=1 https://github.com/junegunn/vader.vim.git test/vader/vader.vim
+
+      - name: 'setup Neovim'
+        uses: 'thinca/action-setup-vim@v1'
+        with:
+          vim_version: '${{ matrix.neovim_version }}'
+          vim_type: '${{ matrix.vim_type }}'
+
+      - name: 'Show version'
+        run: nvim --version
+
+      - name: 'Run test'
+        run: |
+          bash -c 'VIMCMD=nvim test/vader/run'
