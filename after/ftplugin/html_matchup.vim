@@ -36,6 +36,15 @@ if matchup#util#matchpref('tagnameonly', 0)
   call matchup#util#patch_match_words(
         \ 'dl\>',
         \ 'dl\>\g{hlend}')
+  call matchup#util#patch_match_words(
+        \ '1>',
+        \ '1\g{hlend}>')
+  call matchup#util#patch_match_words(
+        \ ']l>',
+        \ ']l\g{hlend}>')
+  call matchup#util#patch_match_words(
+        \ 'dl>',
+        \ 'dl\g{hlend}>')
 endif
 
 let &cpo = s:save_cpo
