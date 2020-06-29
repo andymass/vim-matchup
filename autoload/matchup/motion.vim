@@ -75,7 +75,9 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
 
   let l:start_pos = matchup#pos#get_cursor()
 
-  normal! m`
+  if !g:matchup_motion_keepjumps
+    normal! m`
+  endif
 
   " column position of last character in match
   let l:eom = l:delim.cnum + matchup#delim#end_offset(l:delim)
@@ -217,7 +219,7 @@ function! matchup#motion#find_unmatched(visual, down, ...) " {{{1
 
   if get(l:opts, '__where_impl__', 0)
     let l:opts.delim = l:delim
-  else
+  elseif !g:matchup_motion_keepjumps
     normal! m`
   endif
   call matchup#pos#set_cursor(l:new_pos)
@@ -282,7 +284,9 @@ function! matchup#motion#jump_inside(visual) " {{{1
     let l:new_pos = matchup#pos#next_eol(l:new_pos)
   endif
 
-  normal! m`
+  if !g:matchup_motion_keepjumps
+    normal! m`
+  endif
   call matchup#pos#set_cursor(l:new_pos)
 endfunction
 
