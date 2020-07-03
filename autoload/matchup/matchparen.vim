@@ -70,7 +70,8 @@ function! s:pi_paren_sid() " {{{1
 
   let s:pi_paren_sid = 0
   if get(g:, 'loaded_matchparen')
-    let l:pat = '\%#=1\V'.expand('$VIM').'\m.\+matchparen\.vim$'
+    let l:pat = '\%#=1\V' . fnamemodify(expand('$VIM'), ':~')
+          \ . '\m.\+matchparen\.vim$'
     if v:version >= 800
       " execute() was added in 7.4.2008
       " :filter was introduced in 7.4.2244 but I have not tested it there
