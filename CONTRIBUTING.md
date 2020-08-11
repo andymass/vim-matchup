@@ -1,6 +1,7 @@
 # Issue descriptions
 
-Please see the [issue template](ISSUE_TEMPLATE.md) for how to write a good
+Please see the [issue template](.github/ISSUE_TEMPLATE/bug_report.md)
+for how to write a good
 issue description. In short, it should contain the following:
 
 1. Describe the issue in detail, include steps to reproduce the issue

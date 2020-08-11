@@ -763,9 +763,9 @@ heavily influenced by vimtex. :beers:
 
 ### Reporting problems
 
-This is a new plugin and there are likely to be some bugs.
 Thorough issue reports are encouraged.  Please read the [issue
-template](ISSUE_TEMPLATE.md) first.  Be as precise and detailed as
+template](.github/ISSUE_TEMPLATE/bug_report.md) first.  Be as precise and
+detailed as
 possible when submitting issues.
 
 Feature requests are also welcome.
@@ -775,6 +775,5 @@ Feature requests are also welcome.
 Please read the [contribution guidelines](CONTRIBUTING.md) before
 contributing.
 
-A major goal of this project is to keep a modern and modular code base.
 Contributions are welcome!
 

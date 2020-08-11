@@ -1,3 +1,9 @@
+---
+name: Bug report
+about: Create a report to help us improve
+labels: bug
+---
+
 ### Explain the issue
 
 Most issues are related to bugs or problems. In these cases, you should
@@ -11,6 +17,7 @@ well as:
 
 If your issue is instead a feature request or anything else, please
 consider if minimal examples and vimrc files might still be relevant.
+
 
 ### Minimal working example
 
@@ -46,4 +53,3 @@ syntax enable
 
 " match-up options go here
 ```
-
