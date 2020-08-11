@@ -142,7 +142,7 @@ function! s:make_oldstyle_omaps(lhs, rhs)
   return 1
 endfunction
 
-let s:old_style_ops = !has('patch-8.1.0648')
+let s:old_style_ops = !(has('patch-8.1.0648') || has('nvim-0.5.0'))
 
 let g:v_motion_force = ''
 function! s:force(wise)
