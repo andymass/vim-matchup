@@ -680,7 +680,8 @@ _Options planned_.
 - How can I contribute?
 
   Read the [contribution guidelines](CONTRIBUTING.md) and [issue
-  template](ISSUE_TEMPLATE.md).  Be as precise and detailed as possible
+  template](.github/ISSUE_TEMPLATE/bug_report.md).  Be as precise and
+  detailed as possible
   when submitting issues and pull requests.
 
 ## Interoperability
