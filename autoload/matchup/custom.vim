@@ -31,7 +31,7 @@ function! matchup#custom#example_motion(info, opts) abort
   endif
 
   let [l:open_, l:close_] = matchup#delim#get_surrounding(
-        \ 'delim_all', v:count1)
+        \ 'delim_all', v:count1, {})
   if empty(l:open_) || empty(l:close_)
     return []
   endif
