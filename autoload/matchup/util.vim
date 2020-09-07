@@ -32,7 +32,7 @@ endfunction
 " }}}1
 function! matchup#util#in_comment_or_string(...) " {{{1
   return call('matchup#util#in_syntax',
-        \ ['^\%(String\|Comment\)$'] + a:000)
+        \ ['\%(String\|Comment\)'] + a:000)
 endfunction
 
 " }}}1
