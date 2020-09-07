@@ -9,9 +9,12 @@ Given scheme (Syntax):
 
 Before ():
   2normal! f)
+  Log getcurpos()
+  Log synIDattr(synID(line('.'), col('.'), 1), 'name')
 
 Do (%):
   %
 Then (Verify line):
-  Assert line('.') == 2
+  Log getcurpos()
+  AssertEqual 1, line('.')
 
