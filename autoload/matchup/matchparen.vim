@@ -374,7 +374,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   endif
 
   " prevent problems in visual block mode at the end of a line
-  if get(matchup#pos#get_cursor(), 4, 0) == 2147483647
+  if get(matchup#pos#get_cursor(), 4, 0) == 2147483647 && mode() ==? 'v'
     return
   endif
 
