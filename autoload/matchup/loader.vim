@@ -33,7 +33,9 @@ function! matchup#loader#init_buffer() abort " {{{1
   let b:matchup_delim_skip = s:init_delim_skip()
 
   " enable/disable for this buffer
-  let b:matchup_delim_enabled = !empty(b:matchup_delim_lists.all.regex)
+  if ! exists("b:matchup_delim_enabled")
+    let b:matchup_delim_enabled = !empty(b:matchup_delim_lists.all.regex)
+  endif
 
   let b:matchup_active_engines = {}
   if b:matchup_delim_enabled
