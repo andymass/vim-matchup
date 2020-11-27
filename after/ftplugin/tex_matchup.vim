@@ -71,6 +71,9 @@ function! s:get_match_words()
   " generic environment
   let l:match_words .= ',\\begin\s*{\([^}]*\)}:\\end\s*{\1}'
 
+  " dollar sign math
+  let l:match_words .= ',\$:\$\g{syn;!texMathZoneX}'
+
   return l:match_words
 endfunction
 

@@ -81,13 +81,13 @@ together with other plugins.
 | ------- | -------------------------------- | -------------- | ------------- | ------------- |
 | ([a.1]) | jump between matching words      | :thumbsup:     | :thumbsup:    | :x:           |
 | ([a.2]) | jump to open & close words       | :thumbsup:     | :thumbsup:    | :x:           |
-| ([a.3]) | jump inside                      | :thumbsup:     | :x:           | :x:           |
+| ([a.3]) | jump inside (`z%`)               | :thumbsup:     | :x:           | :x:           |
 | ([b.1]) | full set of text objects         | :thumbsup:     | :question:    | :x:           |
 | ([c.1]) | highlight `()`, `[]`, & `{}`     | :thumbsup:     | :x:           | :thumbsup:    |
 | ([c.2]) | highlight _all_ matches          | :thumbsup:     | :x:           | :x:           |
 | ([c.3]) | display matches off-screen       | :thumbsup:     | :x:           | :x:           |
+| ([c.4]) | show where you are (breadcrumbs) | :thumbsup:     | :x:           | :x:           |
 | ([d.1]) | modern, modular coding style     | :thumbsup:     | :x:           | :x:           |
-| ([d.2]) | actively developed               | :thumbsup:     | :x:           | :x:           |
 
 [a.1]: #a1-jump-between-matching-words
 [a.2]: #a2-jump-to-open-and-close-words
@@ -96,8 +96,8 @@ together with other plugins.
 [c.1]: #c1-highlight---and-
 [c.2]: #c2-highlight-all-matches
 [c.3]: #c3-display-matches-off-screen
+[c.4]: #c4-where-am-i
 [d.1]: #development
-[d.2]: #development
 [inclusive]: #inclusive-and-exclusive-motions
 [exclusive]: #inclusive-and-exclusive-motions
 
@@ -231,9 +231,42 @@ since these commands make sure not to leave stale matches around.
 
 If a open or close which would have been highlighted is on a line
 positioned outside the current window, the match is shown in the
-status line.  If both the open and close match are off-screen, the
+status line or popup window.
+If both the open and close match are off-screen, the
 close match is preferred.
-(See the option `g:matchup_matchparen_offscreen`).
+See the option `g:matchup_matchparen_offscreen` for more details.
+
+For popup style (supported in recent vim and neovim versions):
+
+```vim
+let g:matchup_matchparen_offscreen = {'method': 'popup'}
+```
+
+For status line style (default):
+
+```vim
+let g:matchup_matchparen_offscreen = {'method': 'status'}
+```
+
+#### (c.4) where am I?
+
+If you are lost, you can ask match-up where you are using
+
+    :MatchupWhereAmI?
+
+This echos your position in the code in a breadcrumb-style by finding
+successive matching words, like doing `[%` repeatedly.
+
+It's useful to bind this to a key (not bound by default)
+
+```vim
+nnoremap <c-k> :<c-u>MatchupWhereAmI?<cr>
+```
+
+If you are really lost, you can ask a bit harder to get a more detailed
+print out.
+
+    :MatchupWhereAmI??
 
 ### Inclusive and exclusive motions
 

@@ -46,6 +46,15 @@ function! matchup#util#in_syntax(name, ...) " {{{1
 endfunction
 
 " }}}1
+function! matchup#util#in_synstack(name, ...) abort " {{{1
+  let l:pos = a:0 > 0 ? [a:1, a:2] : [line('.'), col('.')]
+  let l:syn = map(synstack(l:pos[0], l:pos[1]),
+        \ "synIDattr(v:val, 'name')")
+  return match(l:syn, '^' . a:name) >= 0
+endfunction
+
+" }}}1
+
 function! matchup#util#in_whitespace(...) " {{{1
   let l:pos = a:0 > 0 ? [a:1, a:2] : [line('.'), col('.')]
   return matchstr(getline(l:pos[0]), '\%'.l:pos[1].'c.') =~# '\s'

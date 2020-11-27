@@ -563,6 +563,21 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
         continue
       endif
 
+      " handle syntax check- currently used for 'same' matches
+      if has_key(l:extra_entry, 'syn')
+        let l:pat = l:extra_entry.syn
+        if l:pat[0] == '!'
+          let l:pat = l:pat[1:]
+          if matchup#util#in_synstack(l:pat, a:lnum, a:cnum)
+            continue
+          endif
+        else
+          if !matchup#util#in_synstack(l:pat, a:lnum, a:cnum)
+            continue
+          endif
+        endif
+      endif
+
       let l:found = 1
       break
     endfor
@@ -571,8 +586,6 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
 
     break
   endfor
-
-  " reset ignorecase (defunct)
 
   if !l:found
     return {}
@@ -716,15 +729,19 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   let l:open = l:ic . l:open
   let l:close = l:ic . l:close
 
-  let [l:lnum_corr, l:cnum_corr] = searchpairpos(l:open, '', l:close,
-        \ 'n'.l:flags, l:skip, l:stopline, matchup#perf#timeout())
+  " handle 'same' matches (TODO refactor to separate parser)
+  if l:open == l:close
+    let [l:lnum_corr, l:cnum_corr] = searchpos(l:open,
+          \ 'n'.l:flags, l:stopline, matchup#perf#timeout(), l:skip)
+  else
+    let [l:lnum_corr, l:cnum_corr] = searchpairpos(l:open, '', l:close,
+          \ 'n'.l:flags, l:skip, l:stopline, matchup#perf#timeout())
+  endif
 
   call matchup#perf#toc('get_matching_delims', 'initial_pair')
 
   " if nothing found, bail immediately
   if l:lnum_corr == 0
-    " reset ignorecase (defunct)
-
     return [['', 0, 0]]
   endif
 
@@ -739,8 +756,6 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   let l:re_anchored = l:ic . s:anchor_regex(l:re, l:cnum_corr, l:has_zs)
   let l:matches = matchlist(getline(l:lnum_corr), l:re_anchored)
   let l:match_corr = l:matches[0]
-
-  " reset ignorecase (defunct)
 
   " store these in these groups
   if a:down
@@ -805,8 +820,6 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
 
     call add(l:list, [l:match, l:lnum, l:cnum])
   endwhile
-
-  " reset ignorecase (defunct)
 
   call add(l:list, [l:match_corr, l:lnum_corr, l:cnum_corr])
 
