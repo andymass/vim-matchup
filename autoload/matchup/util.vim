@@ -50,7 +50,7 @@ function! matchup#util#in_synstack(name, ...) abort " {{{1
   let l:pos = a:0 > 0 ? [a:1, a:2] : [line('.'), col('.')]
   let l:syn = map(synstack(l:pos[0], l:pos[1]),
         \ "synIDattr(v:val, 'name')")
-  return match(l:syn, '^' . a:name) >= 0
+  return match(l:syn, '^' . a:name . '$') >= 0
 endfunction
 
 " }}}1
@@ -140,7 +140,9 @@ endfunction
 
 " }}}1
 function! matchup#util#append_match_words(str) abort " {{{1
-  if !exists('b:match_words') | return | endif
+  if !exists('b:match_words')
+    let b:match_words = ''
+  endif
 
   if len(b:match_words) && b:match_words[-1] !=# ',' && a:str[0] !=# ','
     let b:match_words .= ','
