@@ -732,7 +732,7 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   " handle 'same' matches (TODO refactor to separate parser)
   if l:open == l:close
     let [l:lnum_corr, l:cnum_corr] = searchpos(l:open,
-          \ 'n'.l:flags, l:stopline, matchup#perf#timeout(), l:skip)
+          \ 'n'.l:flags, l:stopline, matchup#perf#timeout()) " , l:skip)
   else
     let [l:lnum_corr, l:cnum_corr] = searchpairpos(l:open, '', l:close,
           \ 'n'.l:flags, l:skip, l:stopline, matchup#perf#timeout())
