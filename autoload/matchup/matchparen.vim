@@ -37,6 +37,10 @@ function! matchup#matchparen#enable() " {{{1
     autocmd!
     autocmd CursorMoved,CursorMovedI *
           \ call s:matchparen.highlight_deferred()
+    if exists('##WinScrolled')
+      autocmd WinScrolled *
+            \ call s:matchparen.highlight(1)
+    endif
     autocmd WinEnter * call s:matchparen.highlight(1)
     autocmd TextChanged,TextChangedI *
           \ call s:matchparen.highlight_deferred()
