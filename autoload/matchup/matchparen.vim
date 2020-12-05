@@ -637,7 +637,14 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
 
     if has_key(g:matchup_matchparen_offscreen, 'highlight')
       call nvim_win_set_option(s:float_id, 'winhighlight',
-            \ 'Normal:' . g:matchup_matchparen_offscreen.highlight)
+            \ 'Normal:' . g:matchup_matchparen_offscreen.highlight .
+            \ ',LineNr:CursorLineNr')
+    else
+      call nvim_win_set_option(s:float_id, 'winhighlight', 'LineNr:CursorLineNr')
+    endif
+
+    if &cursorline
+      call nvim_win_set_option(s:float_id, 'cursorline', v:false)
     endif
 
     if &relativenumber
