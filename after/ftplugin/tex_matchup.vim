@@ -72,7 +72,12 @@ function! s:get_match_words()
   let l:match_words .= ',\\begin\s*{\([^}]*\)}:\\end\s*{\1}'
 
   " dollar sign math
-  let l:match_words .= ',\$:\$\g{syn;!texMathZoneX}'
+  if s:has_plugin('vimtex') && exists('*execute')
+        \ && execute(':scriptnames') =~# 'vimtex.*ftdetect.*tex\.vim'
+    let l:match_words .= ',\$:\$\g{syn;!texMathRegionX}'
+  else
+    let l:match_words .= ',\$:\$\g{syn;!texMathZoneX}'
+  endif
 
   return l:match_words
 endfunction
