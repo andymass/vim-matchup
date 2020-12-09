@@ -12,10 +12,9 @@ jobs:
   build:
     strategy:
       matrix:
-        vim_type: ['Neovim']
         neovim_version:
-          - 'head'
-          - 'stable'
+          - 'nightly'
+          - 'v0.4.3'
     runs-on: ubuntu-latest
     steps:
       - uses: 'actions/checkout@v2'
@@ -26,8 +25,8 @@ jobs:
       - name: 'setup Neovim'
         uses: 'thinca/action-setup-vim@v1'
         with:
-          vim_version: '${{ matrix.neovim_version }}'
-          vim_type: '${{ matrix.vim_type }}'
+          neovim: true
+          verion: '${{ matrix.neovim_version }}'
 
       - name: 'Show version'
         run: nvim --version
