@@ -596,7 +596,12 @@ function! s:do_offscreen_popup(offscreen) " {{{1
   " set popup text
   let l:text = ''
   if &number || &relativenumber
-    let l:text = printf('%*S ', wincol()-virtcol('.')-1, l:lnum)
+    if &relativenumber
+      let l:displaynumber = abs(l:lnum - line('.'))
+    else
+      let l:displaynumber = l:lnum
+    endif
+    let l:text = printf('%*S ', wincol()-virtcol('.')-1, l:displaynumber)
   endif
 
   " replace tab indent with spaces
