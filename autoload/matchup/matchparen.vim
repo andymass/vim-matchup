@@ -409,7 +409,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
           \ g:matchup_matchparen_deferred)
           \ && get(b:, 'matchup_matchparen_hi_surround_always',
           \        g:matchup_matchparen_hi_surround_always)
-       call s:highlight_surrounding(l:insertmode)
+       call s:highlight_surrounding(l:insertmode, 10)
     endif
     return
   endif
@@ -716,6 +716,10 @@ endfunction
 
 function! s:highlight_surrounding(...) " {{{1
   let l:opts = { 'local': 0, 'matches': [] }
+  if a:0 >= 2
+    let l:opts['stopline'] = a:2
+    echo a:2
+  endif
   let l:delims = matchup#delim#get_surrounding('delim_all', 1, l:opts)
   let l:open = l:delims[0]
   if empty(l:open) | return | endif

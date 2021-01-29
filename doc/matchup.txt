@@ -6,7 +6,7 @@ Web: https://github.com/andymass/vim-matchup
 Script ID: 5624
 License: MIT license {{{
 
-  Copyright (c) 2020 Andy Massimino
+  Copyright (c) 2021 Andy Massimino
 
   Copyright (c) 2016 Karl Yngve Lervåg
 
@@ -506,6 +506,15 @@ Options~
   let g:matchup_delim_noskips = 2
 <
   Default: 0 (matching enabled within strings and comments)
+
+*g:matchup_delim_nomids*
+
+  If set to 1, middle words (like `return`) are not matched to start and
+  end words for higlighting and motions.
+
+  let g:matchup_delim_noskips = 0
+<
+  Default: 0
 
 *g:matchup_delim_start_plaintext*
 

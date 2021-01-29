@@ -779,7 +779,7 @@ function! s:get_matching_delims(down, stopline) dict " {{{1
   let l:mids = matchup#delim#fill_backrefs(l:mids, self.groups, 1)
 
   " if there are no mids, we're done
-  if empty(l:mids)
+  if empty(l:mids) || g:matchup_delim_nomids
     return [[l:match_corr, l:lnum_corr, l:cnum_corr]]
   endif
 

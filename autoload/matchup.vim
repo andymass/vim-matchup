@@ -51,6 +51,7 @@ function! s:init_options()
   call s:init_option('matchup_delim_count_max', 8)
   call s:init_option('matchup_delim_start_plaintext', 1)
   call s:init_option('matchup_delim_noskips', 0)
+  call s:init_option('matchup_delim_nomids', 0)
 
   call s:init_option('matchup_motion_enabled', 1)
   call s:init_option('matchup_motion_cursor_end', 1)
