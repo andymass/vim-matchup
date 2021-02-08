@@ -594,8 +594,8 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
   let l:match = l:matches[0]
 
   let l:list = b:matchup_delim_lists[a:opts.type]
-  let l:thisre   = l:list.regex[l:i / l:ns]
-  let l:thisrebr = l:list.regex_capture[l:i / l:ns]
+  let l:thisrenr  = l:list.regex[l:i / l:ns]
+  let l:thisrecap = l:list.regex_capture[l:i / l:ns]
 
   let l:augment = {}
 
@@ -605,18 +605,18 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
 
   if l:side ==# 'open'
     " XXX we might as well store all the groups...
-    "for l:br in keys(l:thisrebr.need_grp)
+    "for l:br in keys(l:thisrecap.need_grp)
     for l:br in range(1,9)
       if empty(l:matches[l:br]) | continue | endif
       let l:groups[l:br] = l:matches[l:br]
     endfor
   else
     let l:id = (l:side ==# 'close')
-          \ ? len(l:thisrebr.mid_list)+1
+          \ ? len(l:thisrecap.mid_list)+1
           \ : l:mid_id
 
-    if has_key(l:thisrebr.grp_renu, l:id)
-      for [l:br, l:to] in items(l:thisrebr.grp_renu[l:id])
+    if has_key(l:thisrecap.grp_renu, l:id)
+      for [l:br, l:to] in items(l:thisrecap.grp_renu[l:id])
         let l:groups[l:to] = l:matches[l:br]
       endfor
     endif
@@ -624,8 +624,8 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
     " fill in augment pattern
     " TODO all the augment patterns should match,
     " but checking might be too slow
-    if has_key(l:thisrebr.aug_comp, l:id)
-      let l:aug = l:thisrebr.aug_comp[l:id][0]
+    if has_key(l:thisrecap.aug_comp, l:id)
+      let l:aug = l:thisrecap.aug_comp[l:id][0]
       let l:augment.str = matchup#delim#fill_backrefs(
             \ l:aug.str, l:groups, 0)
       let l:augment.unresolved = deepcopy(l:aug.outputmap)
@@ -640,8 +640,8 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
         \ 'side'         : l:side,
         \ 'class'        : [(l:i / l:ns), l:id],
         \ 'get_matching' : s:engines.classic.get_matching,
-        \ 'regexone'     : l:thisre,
-        \ 'regextwo'     : l:thisrebr,
+        \ 'regexone'     : l:thisrenr,
+        \ 'regextwo'     : l:thisrecap,
         \ 'midmap'       : get(l:list, 'midmap', {}),
         \ 'highlighting' : get(a:opts, 'highlighting', 0),
         \}

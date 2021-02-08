@@ -304,9 +304,9 @@ function! s:init_delim_lists(...) abort " {{{1
 
       " mostly a sanity check
       if matchup#util#has_duplicate_str(values(l:group_renumber[l:i]))
-          echohl ErrorMsg
-          echom 'match-up: duplicate bref in set ' l:s ':' l:i
-          echohl None
+        echohl ErrorMsg
+        echom 'match-up: duplicate bref in set ' l:s ':' l:i
+        echohl None
       endif
 
       " compile the augment list for this set of backrefs, going
@@ -419,6 +419,7 @@ function! s:init_delim_lists(...) abort " {{{1
     let l:extra_info.has_zs
           \ = match(l:words_backref, g:matchup#re#zs) >= 0
 
+    " check if hlend is used in any mid
     if !empty(filter(copy(l:extra_list[1:-2]),
           \ 'get(v:val, "hlend")'))
       let l:extra_info.mid_hlend = 1
