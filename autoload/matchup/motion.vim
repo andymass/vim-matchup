@@ -17,7 +17,7 @@ function! matchup#motion#op(motion) abort
   unlet s:v_operator
 endfunction
 
-function matchup#motion#getoper()
+function! matchup#motion#getoper() abort
   return get(s:, 'v_operator', '')
 endfunction
 
@@ -39,8 +39,16 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
     return
   endif
 
-  " disable the timeout
-  call matchup#perf#timeout_start(0)
+  if s:in_indentexpr()
+    call matchup#perf#timeout_start(300)
+    " fix bug where column is incorrect in indent expression
+    if !&startofline && col('.') >= col('$')
+      normal! ^
+    endif
+  else
+    " set the timeout fairly high for interactive use
+    call matchup#perf#timeout_start(1000)
+  endif
 
   " get a delim where the cursor is
   let l:delim = matchup#delim#get_current('all', 'both_all')
@@ -132,9 +140,21 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
   endif
 
   call matchup#pos#set_cursor(l:lnum, l:column)
+
   if stridx(&foldopen, 'percent') >= 0
     normal! zv
   endif
+endfunction
+
+function! s:in_indentexpr()
+  try
+    throw '_'
+  catch /_/
+    if v:throwpoint =~# 'GetVimIndent'
+      return 1
+    endif
+  endtry
+  return 0
 endfunction
 
 " }}}1
