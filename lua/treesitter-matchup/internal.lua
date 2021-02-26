@@ -1,3 +1,7 @@
+if not pcall(require, 'nvim-treesitter') then
+  return {is_enabled = function(bufnr) return 0 end}
+end
+
 local vim = vim
 local api = vim.api
 local configs = require'nvim-treesitter.configs'
