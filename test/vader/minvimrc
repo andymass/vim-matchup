@@ -3,7 +3,7 @@ set nocompatible
 " load match-up
 let s:path = simplify(expand('<sfile>:h').'/../..')
 let &rtp  = s:path.',' . &rtp
-let &rtp .= ',vader.vim'
+let &rtp .= ','.s:path.'/test/vader/vader.vim'
 let &rtp .= ','.s:path.'/after'
 
 " rtp for testing files
@@ -23,4 +23,3 @@ syntax enable
 set notimeout
 
 " match-up options go here
-
