@@ -279,7 +279,7 @@ function M.attach(bufnr, lang)
 end
 
 function M.detach(bufnr)
-  api.nvim_call_function('matchup#ts_engine#detach', {bufnr, lang})
+  api.nvim_call_function('matchup#ts_engine#detach', {bufnr})
 end
 
 return M

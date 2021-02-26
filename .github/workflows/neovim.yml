@@ -28,6 +28,12 @@ jobs:
           vim_version: '${{ matrix.neovim_version }}'
           vim_type: 'Neovim'
 
+      - name: Install nvim-treesitter
+        run: git clone --depth=1 https://github.com/nvim-treesitter/nvim-treesitter.git test/vader/plugged/nvim-treesitter
+
+      - name: Install python treesitter module
+        run: nvim --headless -Nu test/vader/minvimrc -c 'TSInstallSync python' -c 'q'
+
       - name: 'Show version'
         run: nvim --version
 

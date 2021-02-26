@@ -1,0 +1,46 @@
+Execute (Helper):
+  function! TSActive()
+    return exists(':TSInstall')
+  endfunction
+
+  if TSActive()
+    Log 'nvim-treesitter active'
+  else
+    Log 'nvim-treesitter not active'
+  endif
+
+Given python (A python script):
+  def F(x):
+    if x == 1:
+      return 1
+    elif x == 2:
+      pass
+    else:
+      return 3
+    return 2
+
+Execute (Logs):
+  Log b:matchup_active_engines
+
+Before (Cursor):
+  normal! 2gg^
+
+Do (Move %):
+  %
+Then (Verify line):
+  Assert line('.') == (TSActive() ? 4 : 2)
+
+Do (Move % twice):
+  %%
+Then (Verify line):
+  Assert line('.') == (TSActive() ? 6 : 2)
+
+Do (Move % 3 times):
+  %%%
+Then (Verify line):
+  Assert line('.') == (TSActive() ? 2 : 2)
+
+Do (Move % 4 times):
+  %%%%
+Then (Verify line):
+  Assert line('.') == (TSActive() ? 4 : 2)
