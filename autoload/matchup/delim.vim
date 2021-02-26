@@ -41,13 +41,23 @@ endfunction
 " }}}1
 
 function! s:get_delim_multi(opts) " {{{1
+  let l:best = {}
   for l:e in get(get(b:, 'matchup_active_engines', {}), a:opts.type, [])
     let l:res = call(s:engines[l:e].get_delim, [a:opts])
-    if !empty(l:res)
+    if empty(l:res)
+      continue
+    endif
+    if a:opts.direction ==# 'current'
       return l:res
+    elseif a:opts.direction ==# 'next'
+          \ && (empty(l:best) || matchup#pos#smaller(l:res, l:best))
+      let l:best = l:res
+    elseif a:opts.direction ==# 'prev'
+          \ && (empty(l:best) || matchup#pos#larger(l:res, l:best))
+      let l:best = l:res
     endif
   endfor
-  return {}
+  return l:best
 endfunction
 
 " }}}1
