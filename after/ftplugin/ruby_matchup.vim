@@ -17,9 +17,10 @@ let b:match_midmap = [
       \ ['rubyRepeat', 'next'],
       \ ['rubyDefine', 'return'],
       \]
-let b:undo_ftplugin .= '| unlet! b:match_midmap'
+if exists('b:undo_ftplugin')
+  let b:undo_ftplugin .= '|unlet! b:match_midmap'
+endif
 
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
-

@@ -134,7 +134,7 @@ function! matchup#transmute#dochange(list, pri, cur) " {{{1
   return l:num_changes
 endfunction
 
-function s:qescape(str)
+function! s:qescape(str)
   return escape(substitute(a:str, "'", "''", 'g'), '\')
 endfunction
 

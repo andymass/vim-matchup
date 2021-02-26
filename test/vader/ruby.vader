@@ -11,6 +11,8 @@ Do (Motion %):
   %
 
 Then (Verify):
+  Log b:match_words
+  Log b:match_midmap
   AssertEqual 'next', expand('<cword>')
 
 Given ruby (Ruby do end):
