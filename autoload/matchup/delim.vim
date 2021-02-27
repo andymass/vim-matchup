@@ -174,6 +174,7 @@ function! matchup#delim#get_surrounding_impl(type, ...) " {{{1
   if get(l:opts, 'check_skip', 0)
     let l:delimopts.check_skip = 1
   endif
+  let l:delimopts.stopline = get(l:opts, 'stopline', s:stopline)
 
   " keep track of the outermost pair found so far
   " returned when g:matchup_delim_count_fail = 1

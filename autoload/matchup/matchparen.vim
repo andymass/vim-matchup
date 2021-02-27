@@ -715,7 +715,7 @@ endfunction
 " }}}1
 
 function! s:highlight_surrounding(...) " {{{1
-  let l:opts = { 'local': 0, 'matches': [] }
+  let l:opts = {'local': 0, 'matches': [], 'stopline': 2*winheight(0)}
   let l:delims = matchup#delim#get_surrounding('delim_all', 1, l:opts)
   let l:open = l:delims[0]
   if empty(l:open) | return | endif
