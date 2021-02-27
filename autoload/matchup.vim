@@ -96,6 +96,7 @@ function! s:init_modules()
   call s:misc_init_module()
   call s:surround_init_module()
   call s:where_init_module()
+  call s:treesitter_init_module()
 endfunction
 
 function! s:init_oldstyle_ops() " {{{1
@@ -357,6 +358,15 @@ function! s:where_init_module() " {{{1
 endfunction
 
 " }}}1
+function! s:treesitter_init_module() " {{{1
+  if !has('nvim-0.5.0')
+    return
+  endif
+
+  lua require'treesitter-matchup'.init()
+endfunction
+
+"}}}1
 
 let &cpo = s:save_cpo
 

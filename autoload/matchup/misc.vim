@@ -15,6 +15,11 @@ if get(s:, 'reload_guard', 1)
 
     call matchup#init()
 
+    if has('nvim-0.5.0')
+      silent! lua require('treesitter-matchup.reload')
+            \ .reload_module('treesitter-matchup')
+    endif
+
     unlet s:reload_guard
   endfunction
 endif

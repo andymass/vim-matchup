@@ -961,6 +961,10 @@ let s:engines = {
       \     'delim_tex' : [ function('s:parser_delim_new'), ],
       \   },
       \ },
+      \ 'tree_sitter': {
+      \   'get_delim'     : function('matchup#ts_engine#get_delim'),
+      \   'get_matching'  : function('matchup#ts_engine#get_matching'),
+      \ },
       \}
 
 let &cpo = s:save_cpo

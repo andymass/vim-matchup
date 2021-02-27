@@ -35,7 +35,16 @@ function! matchup#loader#init_buffer() abort " {{{1
   " enable/disable for this buffer
   let b:matchup_delim_enabled = !empty(b:matchup_delim_lists.all.regex)
 
+  " enable matching engines
   let b:matchup_active_engines = {}
+
+  if has('nvim-0.5.0') && matchup#ts_engine#is_enabled(bufnr('%'))
+    for l:t in ['all', 'delim_all', 'delim_py']
+      let b:matchup_active_engines[l:t]
+            \ = get(b:matchup_active_engines, l:t, []) + ['tree_sitter']
+    endfor
+  endif
+
   if b:matchup_delim_enabled
     for l:t in ['all', 'delim_all', 'delim_tex']
       let b:matchup_active_engines[l:t]
