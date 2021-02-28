@@ -136,6 +136,9 @@ function! s:matchparen.clear() abort dict " {{{1
     endfor
     unlet! w:matchup_match_id_list
   endif
+  if exists('s:ns_id')
+    call nvim_buf_clear_namespace(0, s:ns_id, 0, -1)
+  endif
 
   if exists('t:match_popup') && (exists('*win_gettype')
         \ ? win_gettype() !=# 'popup' : &buftype !=# 'terminal')
@@ -630,7 +633,7 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
     if l:row == winline() | return | endif
 
     " Set default width and height for now.
-    let s:float_id = nvim_open_win(bufnr('%'), v:false, {
+    let l:win_cfg = {
           \ 'relative': 'win',
           \ 'anchor': l:anchor,
           \ 'row': l:row,
@@ -638,7 +641,8 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
           \ 'width': 42,
           \ 'height': &previewheight,
           \ 'focusable': v:false,
-          \})
+          \}
+    let s:float_id = nvim_open_win(bufnr('%'), v:false, l:win_cfg)
 
     if has_key(g:matchup_matchparen_offscreen, 'highlight')
       call nvim_win_set_option(s:float_id, 'winhighlight',
@@ -924,7 +928,10 @@ function! s:add_matches(corrlist, ...) " {{{1
       let l:group = l:wordish ? 'MatchWord' : 'MatchParen'
     endif
 
-    if exists('*matchaddpos')
+    if exists('s:ns_id')
+      call nvim_buf_add_highlight(0, s:ns_id, l:group, l:corr.lnum - 1,
+            \ l:corr.cnum - 1, l:corr.cnum - 1 + strlen(l:corr.match))
+    elseif exists('*matchaddpos')
       call add(w:matchup_match_id_list, matchaddpos(l:group,
             \ [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]], 0))
     else
@@ -934,6 +941,10 @@ function! s:add_matches(corrlist, ...) " {{{1
     endif
   endfor
 endfunction
+
+if has('nvim-0.5.0')
+  let s:ns_id = nvim_create_namespace('vim-matchup')
+endif
 
 " }}}1
 function! s:add_background_matches_1(line1, col1, line2, col2) " {{{1
