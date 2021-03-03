@@ -663,13 +663,15 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
 
     call s:populate_floating_win(a:offscreen)
 
-    augroup matchup_matchparen_scroll
-      au!
-      execute 'autocmd WinScrolled * if s:ensure_scroll_timer()'
-            \ . '|call matchup#matchparen#scroll_update('
-            \ . a:offscreen.lnum . ')|endif'
-            \ . '|if s:float_id == 0|au! matchup_matchparen_scroll|endif'
-    augroup END
+    if exists('##WinScrolled')
+      augroup matchup_matchparen_scroll
+        au!
+        execute 'autocmd WinScrolled * if s:ensure_scroll_timer()'
+              \ . '|call matchup#matchparen#scroll_update('
+              \ . a:offscreen.lnum . ')|endif'
+              \ . '|if s:float_id == 0|au! matchup_matchparen_scroll|endif'
+      augroup END
+    endif
   endif
 endfunction
 
