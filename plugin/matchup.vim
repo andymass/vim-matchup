@@ -25,7 +25,7 @@ endif
 let g:loaded_matchup = 1
 
 if exists('g:loaded_matchit') && exists(':MatchDebug')
-  runtime! autoload/matchup/unmatchit.vim
+  call matchup#unmatchit#()
 endif
 let g:loaded_matchit = 1
 
