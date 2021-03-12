@@ -17,7 +17,7 @@ function! matchup#perf#tic(context)
 endfunction
 
 function! matchup#perf#toc(context, state)
-  let l:elapsed = s:reltimefloat(reltime(s:time_start[a:context]))
+  let l:elapsed = s:Reltimefloat(reltime(s:time_start[a:context]))
 
   let l:key = a:context.'#'.a:state
   if has_key(g:matchup#perf#times, l:key)
@@ -90,7 +90,7 @@ endfunction
 " }}}1
 function! matchup#perf#timeout_check() " {{{1
   if !s:timeout_enabled | return 0 | endif
-  let l:elapsed = 1000.0 * s:reltimefloat(reltime(s:timeout_pulse_time))
+  let l:elapsed = 1000.0 * s:Reltimefloat(reltime(s:timeout_pulse_time))
   let s:timeout -= l:elapsed
   let s:timeout_pulse_time = reltime()
   return s:timeout <= 0.0
@@ -100,11 +100,9 @@ endfunction
 
 " function! s:reltimefloat(time) {{{1
 if exists('*reltimefloat')
-  function! s:reltimefloat(time)
-    return reltimefloat(a:time)
-  endfunction
+  let s:Reltimefloat = function('reltimefloat')
 else
-  function! s:reltimefloat(time)
+  function! s:Reltimefloat(time)
     return str2float(reltimestr(a:time))
   endfunction
 endif
