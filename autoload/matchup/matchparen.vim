@@ -696,8 +696,10 @@ function! s:populate_floating_win(offscreen) " {{{1
     else
       call nvim_win_set_height(s:float_id, l:height)
     endif
-    call nvim_win_set_cursor(s:float_id, [l:lnum, 0])
     call nvim_win_set_option(s:float_id, 'wrap', v:false)
+    call nvim_win_set_option(s:float_id, 'scrolloff', 0)
+    call nvim_win_set_cursor(s:float_id, [l:lnum, 0])
+    call nvim_win_set_cursor(s:float_id, [a:offscreen.lnum, 0])
   endif
 endfunction
 
