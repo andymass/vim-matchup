@@ -576,6 +576,17 @@ function! s:ensure_match_popup() abort " {{{1
     " in case 'hidden' in popup_create-usage is unimplemented
     call popup_hide(t:match_popup)
   endif
+
+  if exists('*prop_type_add')
+    call prop_type_add('matchup__MatchParen', {
+          \ 'bufnr': winbufnr(t:match_popup),
+          \ 'highlight': 'MatchParen',
+          \})
+    call prop_type_add('matchup__MatchWord', {
+          \ 'bufnr': winbufnr(t:match_popup),
+          \ 'highlight': 'MatchWord',
+          \})
+  endif
 endfunction
 
 " }}}1
@@ -613,11 +624,25 @@ function! s:do_offscreen_popup(offscreen) " {{{1
   let l:indent = repeat(' ', strdisplaywidth(matchstr(l:linestr, '^\s\+')))
   let l:linestr = substitute(l:linestr, '^\s\+', l:indent, '')
 
+  let l:prop_place = len(l:text) + len(l:indent) + 1
   let l:text .= l:linestr . ' '
   if l:adjust
+    let l:prop_place = strlen(l:text) + 5
     let l:text .= '… ' . a:offscreen.match . ' '
   endif
-  call setbufline(winbufnr(t:match_popup), 1, l:text)
+
+  if exists('*prop_type_add')
+    let l:curhi = s:wordish(a:offscreen) ? 'MatchWord' : 'MatchParen'
+    let l:prop = {
+          \ 'length': len(a:offscreen.match),
+          \ 'col': l:prop_place,
+          \ 'type': 'matchup__' . l:curhi,
+          \}
+    call popup_settext(t:match_popup, [{'text': l:text, 'props': [l:prop]}])
+  else
+    call setbufline(winbufnr(t:match_popup), 1, l:text)
+  endif
+
   call popup_show(t:match_popup)
 endfunction
 
@@ -848,9 +873,8 @@ function! matchup#matchparen#status_str(offscreen, ...) abort " {{{1
   for l:c in range(min([l:room, strlen(l:line)]))
     if !l:adjust && a:offscreen.cnum <= l:c+1 && l:c+1 <= a:offscreen.cnum
           \ - 1 + strlen(a:offscreen.match)
-      let l:wordish = a:offscreen.match !~? '^[[:punct:]]\{1,3\}$'
       " TODO: we can't overlap groups, this might not be totally correct
-      let l:curhi = l:wordish ? 'MatchWord' : 'MatchParen'
+      let l:curhi = s:wordish(a:offscreen) ? 'MatchWord' : 'MatchParen'
     elseif char2nr(l:line[l:c]) < 32
       let l:curhi = 'SpecialKey'
     else
@@ -932,12 +956,10 @@ function! s:add_matches(corrlist, ...) " {{{1
   endif
 
   for l:corr in a:corrlist
-    let l:wordish = l:corr.match !~? '^[[:punct:]]\{1,3\}$'
-
     if a:0 && l:corr.match_index == a:1.match_index
-      let l:group = l:wordish ? l:mwc : 'MatchParenCur'
+      let l:group = s:wordish(l:corr) ? l:mwc : 'MatchParenCur'
     else
-      let l:group = l:wordish ? 'MatchWord' : 'MatchParen'
+      let l:group = s:wordish(l:corr) ? 'MatchWord' : 'MatchParen'
     endif
 
     if exists('s:ns_id')
@@ -957,6 +979,10 @@ endfunction
 if has('nvim-0.5.0')
   let s:ns_id = nvim_create_namespace('vim-matchup')
 endif
+
+function! s:wordish(delim)
+  return a:delim.match !~? '^[[:punct:]]\{1,3\}$'
+endfunction
 
 " }}}1
 function! s:add_background_matches_1(line1, col1, line2, col2) " {{{1
@@ -1011,4 +1037,3 @@ endfunction
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
-
