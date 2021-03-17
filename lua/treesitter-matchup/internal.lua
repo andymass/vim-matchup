@@ -248,13 +248,14 @@ function M.get_matching(delim, down, bufnr)
           and (row >= info.search_range[1]
             and row <= info.search_range[3]) then
 
-        local scope = M.containing_scope(node, bufnr, info.key)
+        local target_scope = M.containing_scope(node, bufnr, info.key)
+        if info.scope == target_scope then
+          local text = ts_utils.get_node_text(node, bufnr)[1]
+          table.insert(matches, {text, row + 1, col + 1})
 
-        local text = ts_utils.get_node_text(node, bufnr)[1]
-        table.insert(matches, {text, row + 1, col + 1})
-
-        if side == 'close' then
-          got_close = true
+          if side == 'close' then
+            got_close = true
+          end
         end
       end
     end
