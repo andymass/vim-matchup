@@ -2,6 +2,7 @@
 
 (function_item
   "fn" @open.function) @scope.function
+(closure_expression parameters: (closure_parameters . "|" @open.function "|" .) body: (block)) @scope.function
 (return_expression
   "return" @mid.function.1)
 
