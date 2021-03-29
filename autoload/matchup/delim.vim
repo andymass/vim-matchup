@@ -180,9 +180,22 @@ function! matchup#delim#get_surrounding_impl(type, ...) " {{{1
   " returned when g:matchup_delim_count_fail = 1
   let l:best = []
 
+  " if the buffer changed, clear the cache
+  if !has_key(s:cache, bufnr()) || s:cache_valid[bufnr()] != b:changedtick
+    let s:cache[bufnr()] = {}
+    let s:cache_valid[bufnr()] = b:changedtick
+  endif
+
   while l:pos_val_open < l:pos_val_last
-    let l:open = matchup#delim#get_prev(a:type,
-          \ l:local ? 'open_mid' : 'open', l:delimopts)
+    " store found delims in a cache by cursor position
+    let l:key = string(getcurpos())
+    if has_key(s:cache[bufnr()], l:key)
+      let l:open = s:cache[bufnr()][l:key]
+    else
+      let l:open = matchup#delim#get_prev(a:type,
+            \ l:local ? 'open_mid' : 'open', l:delimopts)
+      let s:cache[bufnr()][l:key] = l:open
+    endif
     if empty(l:open) | break | endif
 
     " if configured, we may still accept this match
@@ -238,6 +251,9 @@ function! matchup#delim#get_surrounding_impl(type, ...) " {{{1
   call matchup#perf#toc('delim#get_surrounding', 'fail')
   return [{}, {}]
 endfunction
+
+let s:cache = {}
+let s:cache_valid = {}
 
 " }}}1
 function! matchup#delim#get_surround_nearest(open, ...) " {{{1
@@ -305,7 +321,7 @@ endfunction
 
 " }}}1
 
-function! s:get_delim(opts) " {{{1
+function! s:get_delim(opts) abort " {{{1
   " arguments: {{{2
   "   opts = {
   "     'direction'   : 'next' | 'prev' | 'current'
@@ -661,7 +677,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
 endfunction
 " }}}1
 
-function! s:get_matching_delims(down, stopline) dict " {{{1
+function! s:get_matching_delims(down, stopline) dict abort " {{{1
   " called as:   a:delim.get_matching(...)
   " called from: matchup#delim#get_matching <- matchparen, motion
   "   from: matchup#delim#get_surrounding <- matchparen, motion, text_obj
