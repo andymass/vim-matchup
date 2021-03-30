@@ -181,20 +181,21 @@ function! matchup#delim#get_surrounding_impl(type, ...) " {{{1
   let l:best = []
 
   " if the buffer changed, clear the cache
-  if !has_key(s:cache, bufnr()) || s:cache_valid[bufnr()] != b:changedtick
-    let s:cache[bufnr()] = {}
-    let s:cache_valid[bufnr()] = b:changedtick
+  let l:bufnr = bufnr('%')
+  if !has_key(s:cache, l:bufnr) || s:cache_valid[l:bufnr] != b:changedtick
+    let s:cache[l:bufnr] = {}
+    let s:cache_valid[l:bufnr] = b:changedtick
   endif
 
   while l:pos_val_open < l:pos_val_last
     " store found delims in a cache by cursor position
     let l:key = string(getcurpos())
-    if has_key(s:cache[bufnr()], l:key)
-      let l:open = s:cache[bufnr()][l:key]
+    if has_key(s:cache[l:bufnr], l:key)
+      let l:open = s:cache[l:bufnr][l:key]
     else
       let l:open = matchup#delim#get_prev(a:type,
             \ l:local ? 'open_mid' : 'open', l:delimopts)
-      let s:cache[bufnr()][l:key] = l:open
+      let s:cache[l:bufnr][l:key] = l:open
     endif
     if empty(l:open) | break | endif
 
