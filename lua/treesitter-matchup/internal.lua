@@ -161,6 +161,7 @@ function M.do_node_result(initial_node, bufnr, opts)
     bufnr = bufnr,
     initial_node = initial_node,
     row = row,
+    col = col,
     key = key,
     scope = scope,
     search_range = {scope:range()},
@@ -243,8 +244,8 @@ function M.get_matching(delim, down, bufnr)
     for _, node in ipairs(active_nodes[side]) do
       local row, col, _ = node:start()
       if info.initial_node ~= node and symbols[node:id()] == info.key
-          and (down and row >= info.row
-            or not down and row <= info.row)
+          and (down and (row > info.row or row == info.row and col > info.col)
+            or not down and (row < info.row or row == info.row and col < info.col))
           and (row >= info.search_range[1]
             and row <= info.search_range[3]) then
 
