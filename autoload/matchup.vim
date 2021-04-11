@@ -75,9 +75,8 @@ function! s:init_options()
 endfunction
 
 function! s:init_option(option, default)
-  let l:option = 'g:' . a:option
-  if !exists(l:option)
-    let {l:option} = a:default
+  if !has_key(g:, a:option)
+    let g:[a:option] = a:default
   endif
 endfunction
 
