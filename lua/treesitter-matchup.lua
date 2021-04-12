@@ -12,7 +12,7 @@ function M.init()
     matchup = {
       module_path = 'treesitter-matchup.internal',
       is_supported = function(lang)
-        return queries.get_query(lang, 'matchup') ~= nil
+        return queries.has_query_files(lang, 'matchup')
       end
     }
   }
