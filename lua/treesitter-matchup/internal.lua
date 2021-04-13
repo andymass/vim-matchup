@@ -14,7 +14,7 @@ local util = require'treesitter-matchup.util'
 
 local M = {}
 
-local cache = lru.new(20)
+local cache = lru.new(100)
 
 function M.is_enabled(bufnr)
   local buf = bufnr or api.nvim_get_current_buf()
