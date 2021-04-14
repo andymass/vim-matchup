@@ -407,13 +407,16 @@ function! s:matchparen.highlight(...) abort dict " {{{1
         \   'stopline': g:matchup_matchparen_stopline,
         \   'highlighting': 1, })
   call matchup#perf#toc('matchparen.highlight', 'get_current')
-  if empty(l:current)
-    if get(b:, 'matchup_matchparen_deferred',
-          \ g:matchup_matchparen_deferred)
-          \ && get(b:, 'matchup_matchparen_hi_surround_always',
-          \        g:matchup_matchparen_hi_surround_always)
-       call s:highlight_surrounding(l:insertmode)
+
+  if get(b:, 'matchup_matchparen_deferred', g:matchup_matchparen_deferred)
+    let l:hsa = get(b:, 'matchup_matchparen_hi_surround_always',
+          \ g:matchup_matchparen_hi_surround_always)
+    if l:hsa > 0 && empty(l:current) || l:hsa > 1
+      call s:highlight_surrounding(l:insertmode, !empty(l:current))
     endif
+  endif
+
+  if empty(l:current)
     return
   endif
 
@@ -750,14 +753,15 @@ endfunction
 
 function! matchup#matchparen#highlight_surrounding() abort " {{{1
   call matchup#perf#timeout_start(500)
-  call s:highlight_surrounding()
+  call s:highlight_surrounding(0, 0)
 endfunction
 
 " }}}1
 
-function! s:highlight_surrounding(...) " {{{1
+function! s:highlight_surrounding(_, current) " {{{1
   let l:opts = {'local': 0, 'matches': [], 'stopline': 2*winheight(0)}
-  let l:delims = matchup#delim#get_surrounding('delim_all', 1, l:opts)
+  let l:delims = matchup#delim#get_surrounding('delim_all',
+        \ 1 + a:current, l:opts)
   let l:open = l:delims[0]
   if empty(l:open) | return | endif
 
