@@ -967,8 +967,16 @@ function! s:add_matches(corrlist, ...) " {{{1
     endif
 
     if exists('s:ns_id')
-      call nvim_buf_add_highlight(0, s:ns_id, l:group, l:corr.lnum - 1,
-            \ l:corr.cnum - 1, l:corr.cnum - 1 + strlen(l:corr.match))
+      if strlen(l:corr.match) == 0
+        call nvim_buf_set_extmark(0, s:ns_id,
+              \ l:corr.lnum - 1, l:corr.cnum - 1, {
+              \   'virt_text': [['◀', l:group]],
+              \})
+      else
+        call nvim_buf_add_highlight(0, s:ns_id, l:group,
+              \ l:corr.lnum - 1, l:corr.cnum - 1,
+              \ l:corr.cnum - 1 + strlen(l:corr.match))
+      end
     elseif exists('*matchaddpos')
       call add(w:matchup_match_id_list, matchaddpos(l:group,
             \ [[l:corr.lnum, l:corr.cnum, strlen(l:corr.match)]], 0))
