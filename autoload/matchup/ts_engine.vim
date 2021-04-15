@@ -34,7 +34,7 @@ endfunction
 function! matchup#ts_engine#get_delim(opts) abort
   call matchup#perf#tic('ts_engine.get_delim')
 
-  let l:res = s:forward('get_delim', bufnr(), a:opts)
+  let l:res = s:forward('get_delim', bufnr('%'), a:opts)
   if empty(l:res)
     call matchup#perf#toc('ts_engine.get_delim', 'fail')
     return {}
@@ -48,7 +48,7 @@ function! matchup#ts_engine#get_delim(opts) abort
 endfunction
 
 function! matchup#ts_engine#get_matching(down, _) dict abort
-  let l:list = s:forward('get_matching', self, a:down, bufnr())
+  let l:list = s:forward('get_matching', self, a:down, bufnr('%'))
   return l:list
 endfunction
 

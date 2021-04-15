@@ -623,7 +623,7 @@ default: 1
 Modify the set of operators which may operate
 [line-wise](#line-wise-operatortext-object-combinations)
 ```vim
-let g:matchup_text_obj_linewise_operators' = ['d', 'y']
+let g:matchup_text_obj_linewise_operators = ['d', 'y']
 ```
 default: `['d', 'y']`
 

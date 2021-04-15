@@ -1018,33 +1018,6 @@ function! s:add_background_matches_1(line1, col1, line2, col2) " {{{1
 endfunction
 
 " }}}1
-function! s:add_background_matches_2(line1, col1, line2, col2) " {{{1
-  if a:line1 == a:line2 && a:col1 > a:col2
-    return
-  endif
-
-  let l:priority = -1
-
-  let l:curline = a:line1
-  while l:curline <= a:line2
-    let l:endline = min([l:curline+7, a:line2])
-    let l:list = range(l:curline, l:endline)
-    if l:curline == a:line1
-      let l:list[0] = [a:line1, a:col1,
-            \ l:curline == a:line2 ? (a:col2-a:col1+1)
-            \ : strlen(getline(a:line1))]
-    endif
-    if l:endline == a:line2 && l:curline != a:line2
-      let l:list[-1] = [a:line2, 1, a:col2]
-    endif
-
-    call add(w:matchup_match_id_list,
-          \ matchaddpos('MatchBackground', l:list, l:priority))
-    let l:curline = l:endline+1
-  endwhile
-endfunction
-
-" }}}1
 
 let &cpo = s:save_cpo
 
