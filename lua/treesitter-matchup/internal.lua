@@ -26,6 +26,7 @@ function M.get_matches(bufnr)
   return queries.get_matches(bufnr, 'matchup')
 end
 
+--- Get all nodes belonging to defined scopes (organized by key)
 function M.get_scopes(bufnr)
   local matches = M.get_matches(bufnr)
 
@@ -103,6 +104,7 @@ function M.containing_scope(node, bufnr, key)
   return nil
 end
 
+--- Walks up the tree from node until an active node is detected
 function M.active_node(node, bufnr)
   local bufnr = bufnr or api.nvim_get_current_buf()
 
@@ -123,6 +125,7 @@ function M.active_node(node, bufnr)
   return nil
 end
 
+--- Get any node at cursor, even anonymous ones
 function M.get_node_at_cursor(winnr)
   if not parsers.has_parser() then return end
   local cursor = api.nvim_win_get_cursor(winnr or 0)
@@ -131,6 +134,7 @@ function M.get_node_at_cursor(winnr)
     cursor[1]-1, cursor[2])
 end
 
+--- Fill in a match result based on a seed node
 function M.do_node_result(initial_node, bufnr, opts)
   local node, side, key = M.active_node(initial_node, bufnr)
   if not side then
@@ -141,7 +145,6 @@ function M.do_node_result(initial_node, bufnr, opts)
   if not scope then
     return nil
   end
-
 
   row, col, _ = initial_node:start()
 
@@ -193,16 +196,19 @@ function M.get_delim(bufnr, opts)
   end
 
   -- direction is next or prev
+  -- look forwards or backwards for an active node
+  local max_col = 1e5
+
   local active_nodes = M.get_active_nodes(bufnr)
 
   local cursor = api.nvim_win_get_cursor(0)
-  local cur_pos = 1e5 * (cursor[1]-1) + cursor[2]
+  local cur_pos = max_col * (cursor[1]-1) + cursor[2]
   local closest_node, closest_dist = nil, 1e31
 
   for _, side in ipairs(side_table[opts.side]) do
     for _, node in ipairs(active_nodes[side]) do
       local row, col, _ = node:start()
-      local pos = 1e5 * row + col
+      local pos = max_col * row + col
 
       if opts.direction == 'next' and pos >= cur_pos
         or opts.direction == 'prev' and pos <= cur_pos then
@@ -213,7 +219,6 @@ function M.get_delim(bufnr, opts)
           closest_node = node
         end
       end
-
     end
   end
 
