@@ -47,6 +47,18 @@ function M.get_scopes(bufnr)
   return scopes
 end
 
+--- Returns a (mostly) unique id for this node
+-- Also supports nvim-treesitter's range object
+local function _node_id(node)
+  if not node then
+    return nil
+  end
+  if node:type() == 'nvim-treesitter-range' then
+    return string.format('range_%d_%d_%d_%d', node:range())
+  end
+  return node:id()
+end
+
 function M.get_active_nodes(bufnr)
   local matches = M.get_matches(bufnr)
 
@@ -73,9 +85,10 @@ function M.get_active_nodes(bufnr)
     if match.mid then
       for key, mid_group in pairs(match.mid) do
         for _, mid in pairs(mid_group) do
-          if mid.node and symbols[mid.node:id()] == nil then
+          local id = _node_id(mid.node)
+          if mid.node and symbols[id] == nil then
             table.insert(nodes.mid, mid.node)
-            symbols[mid.node:id()] = key
+            symbols[id] = key
           end
         end
       end
@@ -115,7 +128,7 @@ function M.active_node(node, bufnr)
   while iter_node ~= nil do
     for side, _ in pairs(scopes) do
       if vim.tbl_contains(scopes[side], iter_node) then
-        return iter_node, side, symbols[iter_node:id()]
+        return iter_node, side, symbols[_node_id(iter_node)]
       end
     end
     iter_node = iter_node:parent()
@@ -247,7 +260,7 @@ function M.get_matching(delim, down, bufnr)
   for _, side in ipairs(sides) do
     for _, node in ipairs(active_nodes[side]) do
       local row, col, _ = node:start()
-      if info.initial_node ~= node and symbols[node:id()] == info.key
+      if info.initial_node ~= node and symbols[_node_id(node)] == info.key
           and (down and (row > info.row or row == info.row and col > info.col)
             or not down and (row < info.row or row == info.row and col < info.col))
           and (row >= info.search_range[1]
