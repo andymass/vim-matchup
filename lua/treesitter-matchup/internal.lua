@@ -86,7 +86,7 @@ function M.get_active_nodes(bufnr)
 end
 
 function M.containing_scope(node, bufnr, key)
-  local bufnr = bufnr or api.nvim_get_current_buf()
+  bufnr = bufnr or api.nvim_get_current_buf()
 
   local scopes = M.get_scopes(bufnr)
   if not node or not scopes then return end
