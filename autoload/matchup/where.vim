@@ -115,8 +115,8 @@ endfunction
 
 function! matchup#where#print(args)
   let l:verbose = 0
-  if a:args =~ '!' || len(a:args) >= 2
-        \ || a:args =~ '?' && s:curpos == getcurpos()
+  if a:args =~? '!' || len(a:args) >= 2
+        \ || a:args =~? '?' && s:curpos == getcurpos()
     let l:verbose = 1
   endif
   let s:curpos = getcurpos()

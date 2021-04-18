@@ -381,7 +381,7 @@ function! s:get_delim(opts) abort " {{{1
     let l:check_skip = get(a:opts, 'check_skip',
           \ g:matchup_delim_noskips >= 2
           \ || g:matchup_delim_noskips >= 1
-          \     && getline(line('.'))[l:cursorpos-1] =~ '[^[:punct:]]')
+          \     && getline(line('.'))[l:cursorpos-1] =~? '[^[:punct:]]')
     if l:check_skip && matchup#delim#skip(line('.'), l:cursorpos)
       return {}
     endif
@@ -440,7 +440,7 @@ function! s:get_delim(opts) abort " {{{1
     " in 'current' mode, but be explicit
     if a:opts.direction !=# 'current'
           \ && (l:check_skip || g:matchup_delim_noskips == 1
-          \     && getline(l:lnum)[l:cnum-1] =~ '[^[:punct:]]')
+          \     && getline(l:lnum)[l:cnum-1] =~? '[^[:punct:]]')
           \ && matchup#delim#skip(l:lnum, l:cnum)
           \ && (a:opts.direction ==# 'prev' ? (l:lnum > 1 || l:cnum > 1)
           \     : (l:lnum < line('$') || l:cnum < len(getline('$'))))

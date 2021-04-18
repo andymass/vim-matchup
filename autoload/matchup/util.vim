@@ -10,7 +10,7 @@ set cpo&vim
 function! matchup#util#command(cmd) " {{{1
   let l:lines = ''
   try
-    silent! redir => l:lines
+    execute 'silent! redir => l:lines'
       silent! execute a:cmd
     redir END
   finally

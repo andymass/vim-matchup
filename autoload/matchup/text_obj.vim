@@ -68,8 +68,10 @@ function! matchup#text_obj#delimited(is_inner, visual, type) " {{{1
         call feedkeys("\<c-\>\<c-n>\<esc>", 'n')
 
         " and undo the text vim enters if necessary
+        " vint: -ProhibitUnnecessaryDoubleQuote
         call feedkeys(":call matchup#text_obj#undo("
               \ .undotree().seq_cur.")\<cr>:\<c-c>", 'n')
+        " vint: +ProhibitUnnecessaryDoubleQuote
       endif
       return
     endif

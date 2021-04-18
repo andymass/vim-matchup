@@ -8,7 +8,7 @@
 
 if !exists('g:loaded_matchup')
       \ || !exists('g:loaded_matchit')
-      \ || !exists(":MatchDebug")
+      \ || !exists(':MatchDebug')
   finish
 endif
 

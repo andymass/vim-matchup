@@ -73,7 +73,7 @@ endfunction
 " [@opts] user data dict passed to function
 function! matchup#custom#define_motion(modes, keys, fcn, ...) abort
   if a:modes !~# '^[nox]\+$'
-    echoerr "invalid modes"
+    echoerr 'invalid modes'
   endif
 
   let s:custom_counter += 1

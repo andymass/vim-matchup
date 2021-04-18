@@ -7,7 +7,7 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! matchup#init()
+function! matchup#init() abort
   call matchup#perf#tic('loading')
 
   call s:init_options()
@@ -293,7 +293,7 @@ function! s:snr()
 endfunction
 let s:sid = printf("\<SNR>%d_", s:snr())
 
-function! matchup#motion_sid()
+function! matchup#motion_sid() abort
   return s:sid
 endfunction
 

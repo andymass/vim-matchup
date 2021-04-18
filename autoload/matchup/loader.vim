@@ -75,6 +75,7 @@ function! matchup#loader#refresh_match_words() abort " {{{1
 
     " protect the cursor from the match_words function
     let l:save_pos = matchup#pos#get_cursor()
+    let l:match_words = ''
     execute 'let l:match_words = ' b:match_words
     if l:save_pos != matchup#pos#get_cursor()
       call matchup#pos#set_cursor(l:save_pos)
