@@ -17,4 +17,4 @@ jobs:
           sudo luarocks install luacheck
 
       - name: Run Luacheck
-        run: sudo ./.github/workflows/scripts/style-check.sh
+        run: sudo ./test/scripts/style-check.sh
