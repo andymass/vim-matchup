@@ -970,7 +970,7 @@ function! s:add_matches(corrlist, ...) " {{{1
       if strlen(l:corr.match) == 0
         call nvim_buf_set_extmark(0, s:ns_id,
               \ l:corr.lnum - 1, l:corr.cnum - 1, {
-              \   'virt_text': [['◀', l:group]],
+              \   'virt_text': [['◀ ' . a:corrlist[0].match, l:group]],
               \})
       else
         call nvim_buf_add_highlight(0, s:ns_id, l:group,
