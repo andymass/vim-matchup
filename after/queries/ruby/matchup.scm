@@ -17,20 +17,17 @@
 (while
     "while" @open.loop
   body: (do
-    (next
-      "next" @mid.loop.1)?
-    (break
-      "break" @mid.loop.2)?
     "end" @close.loop)) @scope.loop
 
 (for
     "for" @open.loop
   body: (do
-    (next
-      "next" @mid.loop.1)?
-    (break
-      "break" @mid.loop.2)?
     "end" @close.loop)) @scope.loop
+
+(next
+  "next" @mid.loop.1)?
+(break
+  "break" @mid.loop.2)?
 
 (case
   "case" @open.case
