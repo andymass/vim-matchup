@@ -105,7 +105,7 @@ end
 
 --- Walks up the tree from node until an active node is detected
 function M.active_node(node, bufnr)
-  local bufnr = bufnr or api.nvim_get_current_buf()
+  bufnr = bufnr or api.nvim_get_current_buf()
 
   local scopes, symbols = M.get_active_nodes(bufnr)
   if not node or not scopes then return end
