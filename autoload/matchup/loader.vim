@@ -21,36 +21,41 @@ endfunction
 function! matchup#loader#init_buffer() abort " {{{1
   call matchup#perf#tic('loader_init_buffer')
 
+  let l:has_ts = 0
+  if has('nvim-0.5.0') && matchup#ts_engine#is_enabled(bufnr('%'))
+    let l:has_ts = 1
+  endif
+
   " initialize lists of delimiter pairs and regular expressions
   " this is the data obtained from parsing b:match_words
-  let b:matchup_delim_lists = s:init_delim_lists()
+  let b:matchup_delim_lists = s:init_delim_lists(!l:has_ts)
 
   " this is the combined set of regular expressions used for matching
   " its structure is matchup_delim_re[type][open,close,both,mid,both_all]
   let b:matchup_delim_re = s:init_delim_regexes()
 
-  " process match_skip
+  " process b:match_skip
   let b:matchup_delim_skip = s:init_delim_skip()
-
-  " enable/disable for this buffer
-  let b:matchup_delim_enabled = !empty(b:matchup_delim_lists.all.regex)
 
   " enable matching engines
   let b:matchup_active_engines = {}
 
-  if has('nvim-0.5.0') && matchup#ts_engine#is_enabled(bufnr('%'))
+  if l:has_ts
     for l:t in ['all', 'delim_all', 'delim_py']
       let b:matchup_active_engines[l:t]
             \ = get(b:matchup_active_engines, l:t, []) + ['tree_sitter']
     endfor
   endif
 
-  if b:matchup_delim_enabled
+  if !empty(b:matchup_delim_lists.all.regex)
     for l:t in ['all', 'delim_all', 'delim_tex']
       let b:matchup_active_engines[l:t]
             \ = get(b:matchup_active_engines, l:t, []) + ['classic']
     endfor
   endif
+
+  " enable/disable for this buffer
+  let b:matchup_delim_enabled = !empty(b:matchup_active_engines)
 
   call matchup#perf#toc('loader_init_buffer', 'done')
 endfunction
@@ -100,7 +105,7 @@ let s:match_word_cache = {}
 
 " }}}1
 
-function! s:init_delim_lists(...) abort " {{{1
+function! s:init_delim_lists(use_match_words) abort " {{{1
   let l:lists = {
         \ 'delim_tex': {
         \   'regex': [],
@@ -128,7 +133,7 @@ function! s:init_delim_lists(...) abort " {{{1
   endif
 
   " parse matchpairs and b:match_words
-  let l:match_words = a:0 ? a:1 : get(b:, 'match_words', '')
+  let l:match_words = a:use_match_words ? get(b:, 'match_words', '') : ''
   if !empty(l:match_words) && l:match_words !~# ':'
     if a:0
       echohl ErrorMsg
@@ -137,10 +142,6 @@ function! s:init_delim_lists(...) abort " {{{1
       let l:match_words = ''
     else
       execute 'let l:match_words =' b:match_words
-      " echohl ErrorMsg
-      " echo 'match-up: function b:match_words not supported'
-      " echohl None
-      " let l:match_words = ''
     endif
   endif
   let l:simple = empty(l:match_words)
