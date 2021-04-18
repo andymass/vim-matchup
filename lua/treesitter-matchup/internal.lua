@@ -5,7 +5,6 @@ end
 local vim = vim
 local api = vim.api
 local configs = require'nvim-treesitter.configs'
-local locals = require'nvim-treesitter.locals'
 local parsers = require'nvim-treesitter.parsers'
 local queries = require'nvim-treesitter.query'
 local ts_utils = require'nvim-treesitter.ts_utils'
@@ -14,7 +13,7 @@ local util = require'treesitter-matchup.util'
 
 local M = {}
 
-local cache = lru.new(100)
+local cache = lru.new(150)
 
 function M.is_enabled(bufnr)
   local buf = bufnr or api.nvim_get_current_buf()
@@ -136,7 +135,7 @@ end
 
 --- Fill in a match result based on a seed node
 function M.do_node_result(initial_node, bufnr, opts)
-  local node, side, key = M.active_node(initial_node, bufnr)
+  local _, side, key = M.active_node(initial_node, bufnr)
   if not side then
     return nil
   end
@@ -146,7 +145,7 @@ function M.do_node_result(initial_node, bufnr, opts)
     return nil
   end
 
-  row, col, _ = initial_node:start()
+  local row, col, _ = initial_node:start()
 
   local result = {
     type = 'delim_py',
@@ -213,7 +212,7 @@ function M.get_delim(bufnr, opts)
       if opts.direction == 'next' and pos >= cur_pos
         or opts.direction == 'prev' and pos <= cur_pos then
 
-        dist = math.abs(pos - cur_pos)
+        local dist = math.abs(pos - cur_pos)
         if dist < closest_dist then
           closest_dist = dist
           closest_node = node
@@ -274,7 +273,7 @@ function M.get_matching(delim, down, bufnr)
 
   -- no stop marker is found, use enclosing scope
   if down and not got_close then
-    row, col, _ = info.scope:end_()
+    local row, col, _ = info.scope:end_()
     table.insert(matches, {'', row + 1, col + 1})
   end
 
