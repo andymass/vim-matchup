@@ -116,40 +116,9 @@ function M.containing_scope(node, bufnr, key)
   return nil
 end
 
---- Walks up the tree from node until an active node is detected
-function M.active_node(node, bufnr)
-  bufnr = bufnr or api.nvim_get_current_buf()
-
-  local scopes, symbols = M.get_active_nodes(bufnr)
-  if not node or not scopes then return end
-
-  local iter_node = node
-
-  while iter_node ~= nil do
-    for side, _ in pairs(scopes) do
-      if vim.tbl_contains(scopes[side], iter_node) then
-        return iter_node, side, symbols[_node_id(iter_node)]
-      end
-    end
-    iter_node = iter_node:parent()
-  end
-
-  return nil
-end
-
---- Get any node at cursor, even anonymous ones
-function M.get_node_at_cursor(winnr)
-  if not parsers.has_parser() then return end
-  local cursor = api.nvim_win_get_cursor(winnr or 0)
-  local root = parsers.get_parser():parse()[1]:root()
-  return root:descendant_for_range(cursor[1]-1, cursor[2],
-    cursor[1]-1, cursor[2])
-end
-
 --- Fill in a match result based on a seed node
-function M.do_node_result(initial_node, bufnr, opts)
-  local _, side, key = M.active_node(initial_node, bufnr)
-  if not side then
+function M.do_node_result(initial_node, bufnr, opts, side, key)
+  if not side or not key then
     return nil
   end
 
@@ -198,24 +167,46 @@ local side_table = {
 
 function M.get_delim(bufnr, opts)
   if opts.direction == 'current' then
-    local node_at_cursor = M.get_node_at_cursor()
+    -- get current by query
+    local active_nodes, symbols = M.get_active_nodes(bufnr)
+    local cursor = api.nvim_win_get_cursor(0)
 
-    if node_at_cursor:named() then
-      return nil
+    local smallest_len, result_info = 1e31, nil
+    for _, side in ipairs(side_table[opts.side]) do
+      for _, node in ipairs(active_nodes[side]) do
+
+        if ts_utils.is_in_node_range(node, cursor[1]-1, cursor[2]) then
+          local len = ts_utils.node_length(node)
+          if len < smallest_len then
+            smallest_len = len
+            result_info = {
+              node = node,
+              side = side,
+              key = symbols[_node_id(node)]
+            }
+          end
+        end
+      end
     end
 
-    return M.do_node_result(node_at_cursor, bufnr, opts)
+    if result_info then
+      return M.do_node_result(result_info.node, bufnr, opts,
+        result_info.side, result_info.key)
+    end
+
+    return
   end
 
   -- direction is next or prev
   -- look forwards or backwards for an active node
   local max_col = 1e5
 
-  local active_nodes = M.get_active_nodes(bufnr)
+  local active_nodes, symbols = M.get_active_nodes(bufnr)
 
   local cursor = api.nvim_win_get_cursor(0)
   local cur_pos = max_col * (cursor[1]-1) + cursor[2]
   local closest_node, closest_dist = nil, 1e31
+  local result_info = {}
 
   for _, side in ipairs(side_table[opts.side]) do
     for _, node in ipairs(active_nodes[side]) do
@@ -229,6 +220,7 @@ function M.get_delim(bufnr, opts)
         if dist < closest_dist then
           closest_dist = dist
           closest_node = node
+          result_info = { side=side, key=symbols[_node_id(node)] }
         end
       end
     end
@@ -238,8 +230,8 @@ function M.get_delim(bufnr, opts)
     return nil
   end
 
-  return M.do_node_result(closest_node, bufnr, opts)
-
+  return M.do_node_result(closest_node, bufnr, opts,
+    result_info.side, result_info.key)
 end
 
 function M.get_matching(delim, down, bufnr)
