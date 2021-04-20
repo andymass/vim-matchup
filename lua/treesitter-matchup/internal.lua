@@ -63,7 +63,7 @@ end
 local active_cache = caching.create_buffer_cache()
 
 function M.get_active_nodes(bufnr)
-  local cached_local = active_cache.get('', bufnr)
+  local cached_local = active_cache.get('matchup_active', bufnr)
   local changed_tick = api.nvim_buf_get_changedtick(bufnr)
   if cached_local and changed_tick == cached_local.tick then
     return unpack(cached_local.cache)
@@ -104,7 +104,7 @@ function M.get_active_nodes(bufnr)
     end
   end
 
-  active_cache.set('', bufnr, {
+  active_cache.set('matchup_active', bufnr, {
     tick = changed_tick,
     cache = {nodes, symbols}
   })
