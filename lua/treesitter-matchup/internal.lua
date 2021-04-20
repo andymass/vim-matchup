@@ -10,6 +10,7 @@ local queries = require'nvim-treesitter.query'
 local ts_utils = require'nvim-treesitter.ts_utils'
 local lru = require'treesitter-matchup.lru'
 local util = require'treesitter-matchup.util'
+local caching = require'nvim-treesitter.caching'
 
 local M = {}
 
@@ -59,7 +60,15 @@ local function _node_id(node)
   return node:id()
 end
 
+local active_cache = caching.create_buffer_cache()
+
 function M.get_active_nodes(bufnr)
+  local cached_local = active_cache.get('', bufnr)
+  local changed_tick = api.nvim_buf_get_changedtick(bufnr)
+  if cached_local and changed_tick == cached_local.tick then
+    return unpack(cached_local.cache)
+  end
+
   local matches = M.get_matches(bufnr)
 
   local nodes = { open = {}, mid = {}, close = {} }
@@ -94,6 +103,11 @@ function M.get_active_nodes(bufnr)
       end
     end
   end
+
+  active_cache.set('', bufnr, {
+    tick = changed_tick,
+    cache = {nodes, symbols}
+  })
 
   return nodes, symbols
 end
