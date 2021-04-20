@@ -32,7 +32,15 @@
 (case
   "case" @open.case
   (when
-    "when" @mid.case)?
+    "when" @mid.case.1)?
   (else
-    "else" @mid.case)?
+    "else" @mid.case.2)?
   "end" @close.case) @scope.case
+
+(begin
+  "begin" @open.begin
+  (rescue
+    "rescue" @mid.begin.1)?
+  (ensure
+    "ensure" @mid.begin.2)?
+  "end" @close.begin) @scope.begin
