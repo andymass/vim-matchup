@@ -10,15 +10,16 @@ local queries = require'nvim-treesitter.query'
 local ts_utils = require'nvim-treesitter.ts_utils'
 local lru = require'treesitter-matchup.lru'
 local util = require'treesitter-matchup.util'
-local caching = require'nvim-treesitter.caching'
+
+local unpack = unpack or table.unpack
 
 local M = {}
 
 local cache = lru.new(150)
 
 function M.is_enabled(bufnr)
-  local buf = bufnr or api.nvim_get_current_buf()
-  local lang = parsers.get_buf_lang(buf)
+  bufnr = bufnr or api.nvim_get_current_buf()
+  local lang = parsers.get_buf_lang(bufnr)
   return configs.is_enabled('matchup', lang)
 end
 
@@ -60,14 +61,9 @@ local function _node_id(node)
   return node:id()
 end
 
-local active_cache = caching.create_buffer_cache()
-
-function M.get_active_nodes(bufnr)
-  local cached_local = active_cache.get('matchup_active', bufnr)
-  local changed_tick = api.nvim_buf_get_changedtick(bufnr)
-  if cached_local and changed_tick == cached_local.tick then
-    return unpack(cached_local.cache)
-  end
+M.get_active_nodes = ts_utils.memoize_by_buf_tick(function(bufnr)
+  -- TODO: why do we need to force a parse?
+  parsers.get_parser():parse()
 
   local matches = M.get_matches(bufnr)
 
@@ -104,13 +100,8 @@ function M.get_active_nodes(bufnr)
     end
   end
 
-  active_cache.set('matchup_active', bufnr, {
-    tick = changed_tick,
-    cache = {nodes, symbols}
-  })
-
-  return nodes, symbols
-end
+  return {nodes, symbols}
+end)
 
 function M.containing_scope(node, bufnr, key)
   bufnr = bufnr or api.nvim_get_current_buf()
@@ -182,7 +173,7 @@ local side_table = {
 function M.get_delim(bufnr, opts)
   if opts.direction == 'current' then
     -- get current by query
-    local active_nodes, symbols = M.get_active_nodes(bufnr)
+    local active_nodes, symbols = unpack(M.get_active_nodes(bufnr))
     local cursor = api.nvim_win_get_cursor(0)
 
     local smallest_len, result_info = 1e31, nil
@@ -215,7 +206,7 @@ function M.get_delim(bufnr, opts)
   -- look forwards or backwards for an active node
   local max_col = 1e5
 
-  local active_nodes, symbols = M.get_active_nodes(bufnr)
+  local active_nodes, symbols = unpack(M.get_active_nodes(bufnr))
 
   local cursor = api.nvim_win_get_cursor(0)
   local cur_pos = max_col * (cursor[1]-1) + cursor[2]
@@ -259,7 +250,7 @@ function M.get_matching(delim, down, bufnr)
   local matches = {}
 
   local sides = down and {'mid', 'close'} or {'mid', 'open'}
-  local active_nodes, symbols = M.get_active_nodes(bufnr)
+  local active_nodes, symbols = unpack(M.get_active_nodes(bufnr))
 
   local got_close = false
 
@@ -300,6 +291,9 @@ function M.get_matching(delim, down, bufnr)
 end
 
 function M.attach(bufnr, lang)
+  -- local parser = parsers.get_parser(bufnr, lang)
+  -- local config = configs.get_module('matchup')
+
   api.nvim_call_function('matchup#ts_engine#attach', {bufnr, lang})
 end
 

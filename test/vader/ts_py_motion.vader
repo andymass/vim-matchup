@@ -35,22 +35,22 @@ Before (Cursor):
 Do (Move %):
   %
 Then (Verify line):
-  Assert line('.') == (TSActive() ? 4 : 2)
+  AssertEqual (TSActive() ? 4 : 2), line('.') 
 
 Do (Move % twice):
   %%
 Then (Verify line):
-  Assert line('.') == (TSActive() ? 11 : 2)
+  AssertEqual (TSActive() ? 11 : 2), line('.') 
 
 Do (Move % 3 times):
   %%%
 Then (Verify line):
-  Assert line('.') == (TSActive() ? 2 : 2)
+  AssertEqual (TSActive() ? 2 : 2), line('.') 
 
 Do (Move % 4 times):
   %%%%
 Then (Verify line):
-  Assert line('.') == (TSActive() ? 4 : 2)
+  AssertEqual (TSActive() ? 4 : 2), line('.') 
 
 # ----- inner if/elif/else -----
 
@@ -60,19 +60,19 @@ Before (Cursor):
 Do (Inner: Move %):
   %
 Then (Verify line):
-  Assert line('.') == (TSActive() ? 7 : 5)
+  AssertEqual (TSActive() ? 7 : 5), line('.') 
 
 Do (Inner: % 2 times):
   %%
 Then (Verify line):
-  Assert line('.') == (TSActive() ? 9 : 5)
+  AssertEqual (TSActive() ? 9 : 5), line('.') 
 
 Do (Inner: % 3 times):
   %%%
 Then (Verify line):
-  Assert line('.') == (TSActive() ? 5 : 5)
+  AssertEqual (TSActive() ? 5 : 5), line('.') 
 
 Do (Inner: % 4 times):
   %%%%
 Then (Verify line):
-  Assert line('.') == (TSActive() ? 7 : 5)
+  AssertEqual (TSActive() ? 7 : 5), line('.') 
