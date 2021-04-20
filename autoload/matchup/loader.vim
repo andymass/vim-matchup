@@ -91,7 +91,7 @@ function! matchup#loader#refresh_match_words() abort " {{{1
       call matchup#perf#toc('refresh', 'cache_hit')
     else
       " re-parse match words
-      let b:matchup_delim_lists = s:init_delim_lists()
+      let b:matchup_delim_lists = s:init_delim_lists(1)
       let b:matchup_delim_re = s:init_delim_regexes()
       let s:match_word_cache[l:match_words] = {
             \ 'delim_lists'  : b:matchup_delim_lists,
