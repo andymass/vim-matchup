@@ -1,8 +1,13 @@
 (method
   "def" @open.def
   "end" @close.def) @scope.def
+(singleton_method
+  "def" @open.def
+  "end" @close.def) @scope.def
 (return
   "return" @mid.def.1)
+(yield
+  "yield" @mid.def.2)
 
 (class
   "class" @open.class
@@ -44,3 +49,11 @@
   (ensure
     "ensure" @mid.begin.2)?
   "end" @close.begin) @scope.begin
+
+(module
+  "module" @open.module
+  "end" @close.module) @scope.module
+
+(do_block
+  "do" @open.do
+  "end" @close.do) @scope.do
