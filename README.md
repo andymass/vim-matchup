@@ -36,13 +36,18 @@ See [detailed feature documentation](#detailed-feature-documentation) for
 more information.  This plugin:
 
 - Extends vim's `%` motion to language-specific words.  The following vim
-  file type plugins currently provide support for match-up:
+  file type plugins currently provide special support for match-up:
 
-  > abaqus, ada, aspvbs, c, clojure, cobol, config, context, csc, csh,
-  > dtd, dtrace, eiffel, eruby, falcon, fortran, framescript, haml,
-  > hamster, hog, html, ishd, j, jsp, kconfig, liquid, lua, make, matlab,
-  > mf, mp, ocaml, pascal, pdf, perl, php, plaintex, postscr, ruby, sh,
-  > spec, sql, tex, vb, verilog, vhdl, vim, xhtml, xml, zimbu, zsh
+ > abaqus, ada, aspvbs, bash, c, cpp, chicken, clojure, cmake, cobol,
+ > context, csc, csh, dtd, dtrace, eiffel, eruby, falcon, fortran,
+ > framescript, haml, hamster, hog, html, ishd, j, javascript,
+ > javascriptreact, jsp, kconfig, liquid, lua, m3quake, make, matlab, mf,
+ > modula2, modula3, mp, nsis, ocaml, pascal, pdf, perl, php, plaintex,
+ > postscr, ruby, sh, spec, sql, tex (latex), typescriptreact, vb,
+ > verilog, vhdl, vim, xhtml, xml, zimbu, zsh
+
+  Other file types can be supported by installing additional filetype
+  plugins (not provided by match-up).
 
   Note: match-up uses the same `b:match_words` as matchit.
 - Adds motions `g%`, `[%`, `]%`, and `z%`.
