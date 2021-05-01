@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         neovim_version:
-          - 'nightly'
+          - 'head'
           - 'v0.4.3'
     runs-on: ubuntu-latest
     steps:
