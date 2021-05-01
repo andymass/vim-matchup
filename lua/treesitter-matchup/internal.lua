@@ -73,17 +73,19 @@ M.get_active_nodes = ts_utils.memoize_by_buf_tick(function(bufnr)
   for _, match in ipairs(matches) do
     if match.open then
       for key, open in pairs(match.open) do
-        if open.node and symbols[open.node:id()] == nil then
+        local id = _node_id(open.node)
+        if open.node and symbols[id] == nil then
           table.insert(nodes.open, open.node)
-          symbols[open.node:id()] = key
+          symbols[id] = key
         end
       end
     end
     if match.close then
       for key, close in pairs(match.close) do
-        if close.node and symbols[close.node:id()] == nil then
+        local id = _node_id(close.node)
+        if close.node and symbols[id] == nil then
           table.insert(nodes.close, close.node)
-          symbols[close.node:id()] = key
+          symbols[id] = key
         end
       end
     end
