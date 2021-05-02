@@ -11,6 +11,7 @@
 (if_statement
   "if" @open.if
   "end" @close.if) @scope.if
+(else "else" @mid.if.1)
 
 (function
   "function" @open.function
