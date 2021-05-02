@@ -8,8 +8,7 @@
 (start_tag (tag_name) @open.tag)
 (end_tag (tag_name) @close.tag)
 
-(self_closing_element
-  name: (identifier) @open.selftag
-  "/" @_start ">" @_end
-  (#make-range! "close.selftag" @_start @_end)
+(self_closing_tag
+  (tag_name) @open.selftag
+  "/>" @close.selftag
 ) @scope.selftag
