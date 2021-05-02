@@ -1,5 +1,7 @@
 # vim match-up
 
+[![Join the chat at https://gitter.im/andymass/vim-matchup](https://badges.gitter.im/andymass/vim-matchup.svg)](https://gitter.im/andymass/vim-matchup?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 match-up is a plugin that lets you highlight, navigate, and operate on
 sets of matching text.  It extends vim's `%` key to language-specific
 words instead of just single characters.
