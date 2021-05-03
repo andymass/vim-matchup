@@ -12,12 +12,15 @@
   "if" @open.if
   "end" @close.if) @scope.if
 (else "else" @mid.if.1)
+(elseif "elseif" @mid.if.2)
 
 (function
   "function" @open.function
   "end" @close.function) @scope.function
-
 (local_function
+  "function" @open.function
+  "end" @close.function) @scope.function
+(function_definition
   "function" @open.function
   "end" @close.function) @scope.function
 

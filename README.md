@@ -89,7 +89,7 @@ together with other plugins.
 
 ### Tree-sitter integration
 
-_Note: Currently this feature is possible in neovim 0.5.5+ only._
+_Note: Currently this feature is possible in neovim 0.5+ only._
 
 match-up now has experimental support for language syntax provided
 by tree-sitter.  The list of supported languages is available
