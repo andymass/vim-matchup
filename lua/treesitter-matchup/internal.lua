@@ -178,10 +178,14 @@ function M.get_delim(bufnr, opts)
     local active_nodes, symbols = unpack(M.get_active_nodes(bufnr))
     local cursor = api.nvim_win_get_cursor(0)
 
-    local smallest_len, result_info = 1e31, nil
+    local smallest_len = 1e31
+    local result_info = nil
     for _, side in ipairs(side_table[opts.side]) do
-      for _, node in ipairs(active_nodes[side]) do
+      if side == 'mid' and vim.g.matchup_delim_nomids > 0 then
+        goto continue
+      end
 
+      for _, node in ipairs(active_nodes[side]) do
         if ts_utils.is_in_node_range(node, cursor[1]-1, cursor[2]) then
           local len = ts_utils.node_length(node)
           if len < smallest_len then
@@ -194,6 +198,8 @@ function M.get_delim(bufnr, opts)
           end
         end
       end
+
+      ::continue::
     end
 
     if result_info then
@@ -251,7 +257,13 @@ function M.get_matching(delim, down, bufnr)
 
   local matches = {}
 
-  local sides = down and {'mid', 'close'} or {'mid', 'open'}
+  local sides
+  if vim.g.matchup_delim_nomids > 0 then
+    sides = down and {'close'} or {'open'}
+  else
+    sides = down and {'mid', 'close'} or {'mid', 'open'}
+  end
+
   local active_nodes, symbols = unpack(M.get_active_nodes(bufnr))
 
   local got_close = false
