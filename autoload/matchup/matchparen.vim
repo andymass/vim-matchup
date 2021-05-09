@@ -880,14 +880,14 @@ function! matchup#matchparen#status_str(offscreen, ...) abort " {{{1
   endif
 
   if has_key(l:opts, 'width')
-    " TODO subtract the gutter from above
-    let l:room = l:opts.width
+    " TODO subtract the gutter above more accurately
+    let l:room = l:opts.width - (wincol()-virtcol('.'))
   else
     let l:room = min([300, winwidth(0)]) - (wincol()-virtcol('.'))
   endif
   let l:room -= l:adjust ? 3+strdisplaywidth(a:offscreen.match) : 0
   let l:lasthi = ''
-  for l:c in range(min([l:room, strlen(l:line)]))
+  for l:c in range(strlen(l:line))
     if !l:adjust && a:offscreen.cnum <= l:c+1 && l:c+1 <= a:offscreen.cnum
           \ - 1 + strlen(a:offscreen.match)
       " TODO: we can't overlap groups, this might not be totally correct
@@ -901,8 +901,14 @@ function! matchup#matchparen#status_str(offscreen, ...) abort " {{{1
       endif
     endif
     let l:sl .= (l:curhi !=# l:lasthi ? '%#'.l:curhi.'#' : '')
-    if l:trimming && l:line[l:c] !~ '\s'
+    if l:trimming && l:line[l:c] !~? '\s'
       let l:trimming = 0
+    endif
+    if !l:trimming
+      let l:room -= 1
+      if l:room <= 0
+        break
+      endif
     endif
     if l:trimming
     elseif l:line[l:c] ==# "\t"
@@ -910,7 +916,7 @@ function! matchup#matchparen#status_str(offscreen, ...) abort " {{{1
             \ - strdisplaywidth(strpart(l:line, 0, l:c)))
     elseif char2nr(l:line[l:c]) < 32
       let l:sl .= strtrans(l:line[l:c])
-    elseif l:line[l:c] == '%'
+    elseif l:line[l:c] ==? '%'
       let l:sl .= '%%'
     else
       let l:sl .= l:line[l:c]
