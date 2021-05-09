@@ -895,7 +895,7 @@ function! matchup#matchparen#status_str(offscreen, ...) abort " {{{1
     elseif char2nr(l:line[l:c]) < 32
       let l:curhi = 'SpecialKey'
     else
-      let l:curhi = synIDattr(synID(l:lnum, l:c+1, 1), 'name')
+      let l:curhi = synIDattr(s:synID(l:lnum, l:c+1, 1), 'name')
       if empty(l:curhi)
         let l:curhi = 'Normal'
       endif
@@ -1009,6 +1009,14 @@ endfunction
 
 if has('nvim-0.5.0')
   let s:ns_id = nvim_create_namespace('vim-matchup')
+
+  function s:synID(lnum, col, trans)
+    return matchup#ts_syntax#synID(a:lnum, a:col, a:trans)
+  endfunction
+else
+  function s:synID(lnum, col, trans)
+    return synID(a:lnum, a:col, a:trans)
+  endfunction
 endif
 
 function! s:wordish(delim)
