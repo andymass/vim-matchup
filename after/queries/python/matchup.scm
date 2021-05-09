@@ -1,12 +1,14 @@
 (if_statement
-  "if" @open.if_
-  alternative: (elif_clause "elif" @mid.if_.1)?
-  alternative: (else_clause "else" @mid.if_.2)?) @scope.if_
+  "if" @open.if
+  alternative: (elif_clause "elif" @mid.if.1)?
+  alternative: (else_clause "else" @mid.if.2)?) @scope.if
 
 (function_definition
   "def" @open.function) @scope.function
 (return_statement
   "return" @mid.function.1)
+(yield
+  "yield" @mid.function.2)
 
 (for_statement
 	("for" @open.loop)
@@ -20,6 +22,7 @@
   "continue" @mid.loop.3)
 
 (try_statement
-  ("try" @open.try_)
-  (finally_clause "finally" @mid.try_.1)?
-  (except_clause "except" @mid.try_.2)?) @scope.try_
+  ("try" @open.try)
+  (finally_clause "finally" @mid.try.1)?
+  (except_clause "except" @mid.try.2)?
+  (else_clause "else" @mid.try.3)?) @scope.try
