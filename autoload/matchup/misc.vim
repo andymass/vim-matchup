@@ -16,7 +16,7 @@ if get(s:, 'reload_guard', 1)
     call matchup#init()
 
     if has('nvim-0.5.0')
-      silent! lua require('treesitter-matchup.reload')
+      silent! lua require('treesitter-matchup.third-party.reload')
             \ .reload_module('treesitter-matchup')
     endif
 

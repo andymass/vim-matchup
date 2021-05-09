@@ -1,7 +1,7 @@
 -- From https://github.com/nvim-lua/plenary.nvim
 -- MIT License
 -- Copyright (c) 2020 TJ DeVries
-
+-- See plenary.LICENSE-MIT
 
 local reload = {}
 

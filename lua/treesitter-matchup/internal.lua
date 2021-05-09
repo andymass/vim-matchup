@@ -8,7 +8,7 @@ local configs = require'nvim-treesitter.configs'
 local parsers = require'nvim-treesitter.parsers'
 local queries = require'nvim-treesitter.query'
 local ts_utils = require'nvim-treesitter.ts_utils'
-local lru = require'treesitter-matchup.lru'
+local lru = require'treesitter-matchup.third-party.lru'
 local util = require'treesitter-matchup.util'
 
 local unpack = unpack or table.unpack
