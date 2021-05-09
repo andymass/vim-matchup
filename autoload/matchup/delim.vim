@@ -594,7 +594,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
       " handle syntax check- currently used for 'same' matches
       if has_key(l:extra_entry, 'syn')
         let l:pat = l:extra_entry.syn
-        if l:pat[0] == '!'
+        if l:pat[0] ==? '!'
           let l:pat = l:pat[1:]
           if matchup#util#in_synstack(l:pat, a:lnum, a:cnum)
             continue

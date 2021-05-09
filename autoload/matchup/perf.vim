@@ -51,7 +51,7 @@ function! matchup#perf#show_times()
   end
 
   echohl Title
-  echo printf("%42s%11s%17s", 'average', 'last', 'maximum')
+  echo printf('%42s%11s%17s', 'average', 'last', 'maximum')
   echohl None
   for l:c in l:contexts
     echohl Special
@@ -60,7 +60,7 @@ function! matchup#perf#show_times()
     let l:states = filter(copy(l:keys), 'v:val =~# "^\\V'.l:c.'#"')
     call sort(l:states, 's:sort_by_last')
     for l:s in l:states
-      echo printf("  %-25s%12.2gms%12.2gms%12.2gms",
+      echo printf('  %-25s%12.2gms%12.2gms%12.2gms',
             \ join(split(l:s,'#')[1:],'#'),
             \ 1000*g:matchup#perf#times[l:s].emavg,
             \ 1000*g:matchup#perf#times[l:s].last,
