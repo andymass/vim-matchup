@@ -18,3 +18,21 @@ jobs:
 
       - name: Run Luacheck
         run: sudo ./test/scripts/style-check.sh
+
+  vint:
+    name: Vint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Install python
+        uses: actions/setup-python@v2
+
+      - name: Install vint
+      - run: |
+          python -m pip install --upgrade pip
+          pip install vim-vint
+
+      - name: Lint with vint
+      - run: |
+          vint plugin autoload
