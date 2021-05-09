@@ -721,8 +721,13 @@ function! s:populate_floating_win(offscreen) " {{{1
   if exists('*nvim_open_win')
     " neovim floating win
     let width = max(map(copy(l:body), 'strdisplaywidth(v:val)'))
+    if empty(a:offscreen.links.close.match)
+      " include the closing hint
+      let l:width += 3 + len(a:offscreen.links.open.match)
+    endif
     let l:width += wincol()-virtcol('.')
     call nvim_win_set_width(s:float_id, l:width + 1)
+
     if &winminheight != 1
       let l:save_wmh = &winminheight
       let &winminheight = 1
@@ -731,6 +736,7 @@ function! s:populate_floating_win(offscreen) " {{{1
     else
       call nvim_win_set_height(s:float_id, l:height)
     endif
+
     call nvim_win_set_option(s:float_id, 'wrap', v:false)
     silent! call nvim_win_set_option(s:float_id, 'scrolloff', 0)
     call nvim_win_set_cursor(s:float_id, [l:lnum, 0])
