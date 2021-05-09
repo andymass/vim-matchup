@@ -670,6 +670,12 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
           \ 'height': &previewheight,
           \ 'focusable': v:false,
           \}
+    if has_key(g:matchup_matchparen_offscreen, 'border')
+      let l:win_cfg.border = ['', '═' ,'╗', '║', '╝', '═', '', '']
+      if l:lnum >= line('.')
+        let l:win_cfg.row -= min([2, l:row - winline() - 1])
+      endif
+    endif
     let s:float_id = nvim_open_win(bufnr('%'), v:false, l:win_cfg)
 
     if has_key(g:matchup_matchparen_offscreen, 'highlight')
@@ -677,7 +683,8 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
             \ 'Normal:' . g:matchup_matchparen_offscreen.highlight .
             \ ',LineNr:CursorLineNr')
     else
-      call nvim_win_set_option(s:float_id, 'winhighlight', 'LineNr:CursorLineNr')
+      call nvim_win_set_option(s:float_id,
+            \ 'winhighlight', 'LineNr:CursorLineNr')
     endif
 
     if &cursorline
