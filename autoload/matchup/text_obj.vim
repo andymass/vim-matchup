@@ -130,7 +130,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) abort " {{{1
       if matchup#quirks#ishtmllike()
             \ && matchup#util#matchpref('classic_textobj', 1)
             \ && l:close.match =~? '/\w\+\s*>'
-        let l:c2 -= 1
+        let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
       endif
 
       " don't select only indent at close
