@@ -928,6 +928,12 @@ function! matchup#matchparen#status_str(offscreen, ...) abort " {{{1
     let l:sl .= '%#LineNr# … %#Normal#'
           \ . '%#MatchParen#' . a:offscreen.match . '%#Normal#'
   endif
+  if empty(a:offscreen.links.close.match)
+    let l:hi = s:wordish(a:offscreen.links.open)
+          \ ? 'MatchWord' : 'MatchParen'
+    let l:sl .= ' ◀ ' . '%#' . l:hi . '#'
+          \ . a:offscreen.links.open.match . '%#Normal#'
+  endif
 
   return [l:sl, l:lnum]
 endfunction
