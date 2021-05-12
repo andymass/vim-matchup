@@ -1,5 +1,10 @@
 if not pcall(require, 'nvim-treesitter') then
-  return { is_active = function() return false end }
+  return {
+    is_active = function() return false end,
+    synID = function(lnum, col, transparent)
+      return vim.fn.synID(lnum, col, transparent)
+    end
+  }
 end
 
 local api = vim.api
