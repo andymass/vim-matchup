@@ -1,7 +1,7 @@
 -- From https://github.com/nvim-treesitter/playground
 -- Copyright 2021
 -- licensed under the Apache License 2.0
--- See playground.LICENSE-APACHE-2.0
+-- See nvim-treesitter.LICENSE-APACHE-2.0
 
 local highlighter = require("vim.treesitter.highlighter")
 local ts_utils = require "nvim-treesitter.ts_utils"
