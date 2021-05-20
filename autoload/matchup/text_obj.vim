@@ -128,8 +128,8 @@ function! matchup#text_obj#delimited(is_inner, visual, type) abort " {{{1
 
       " make *i% more like *it for html
       if matchup#quirks#ishtmllike()
-            \ && matchup#util#matchpref('classic_textobj', 1)
-            \ && l:close.match =~? '/\w\+\s*>'
+            \ && !matchup#util#matchpref('classic_textobj', 0)
+            \ && l:close.match =~? '/\w\+\s*>\='
         let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
       endif
 
@@ -210,8 +210,8 @@ function! matchup#text_obj#delimited(is_inner, visual, type) abort " {{{1
 
       " make *a% more like *at for html
       if matchup#quirks#ishtmllike()
-            \ && matchup#util#matchpref('classic_textobj', 1)
-            \ && l:close.match =~? '/\w\+\s*>'
+            \ && !matchup#util#matchpref('classic_textobj', 0)
+            \ && l:close.match =~? '/\w\+\s*>\='
         let l:c1 -= 1
       endif
 

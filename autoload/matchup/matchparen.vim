@@ -722,6 +722,7 @@ function! s:populate_floating_win(offscreen) " {{{1
     " neovim floating win
     let width = max(map(copy(l:body), 'strdisplaywidth(v:val)'))
     if empty(a:offscreen.links.close.match)
+          \ && a:offscreen.lnum > line('.')
       " include the closing hint
       let l:width += 3 + len(a:offscreen.links.open.match)
     endif

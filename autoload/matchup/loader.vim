@@ -136,14 +136,7 @@ function! s:init_delim_lists(use_match_words) abort " {{{1
   " parse matchpairs and b:match_words
   let l:match_words = a:use_match_words ? get(b:, 'match_words', '') : ''
   if !empty(l:match_words) && l:match_words !~# ':'
-    if a:0
-      echohl ErrorMsg
-      echo 'match-up: function b:match_words error'
-      echohl None
-      let l:match_words = ''
-    else
-      execute 'let l:match_words =' b:match_words
-    endif
+    execute 'let l:match_words =' b:match_words
   endif
   let l:simple = empty(l:match_words)
 

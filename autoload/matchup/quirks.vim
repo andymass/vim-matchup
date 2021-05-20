@@ -32,7 +32,7 @@ let s:htmllikeft = [
     \ 'tidy', 'php', 'liquid', 'haml', 'tt2html',
     \ 'html', 'xhtml', 'jsp', 'htmldjango',
     \ 'aspvbs', 'rmd', 'markdown', 'eruby',
-    \ 'javascriptreact', 'typescriptreact',
+    \ 'javascriptreact', 'typescriptreact', 'svelte'
     \]
 
 " }}}1
