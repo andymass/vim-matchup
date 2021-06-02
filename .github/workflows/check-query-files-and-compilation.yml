@@ -30,7 +30,7 @@ jobs:
 
       - name: Install and prepare Neovim
         run: |
-          bash ./scripts/ci-install-${{ matrix.os }}.sh
+          bash ./test/scripts/ci-install-${{ matrix.os }}.sh
 
       - name: Compile parsers Unix like
         if: matrix.os != 'windows-latest'
