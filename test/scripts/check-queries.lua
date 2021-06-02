@@ -18,10 +18,10 @@ local function extract_captures()
   end
 
   -- Complete captures for injections.
-  local parsers = require 'nvim-treesitter.info'.installed_parsers()
-  for _, lang in pairs(parsers) do
-    table.insert(captures['injections'], lang)
-  end
+  -- local parsers = require 'nvim-treesitter.info'.installed_parsers()
+  -- for _, lang in pairs(parsers) do
+  --   table.insert(captures['injections'], lang)
+  -- end
 
   return captures
 end
