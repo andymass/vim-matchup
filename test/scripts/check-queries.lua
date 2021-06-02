@@ -29,7 +29,7 @@ end
 local function do_check()
   local parsers = require 'nvim-treesitter.info'.installed_parsers()
   local queries = require 'nvim-treesitter.query'
-  local query_types = ['matchup']
+  local query_types = {'matchup'}
 
   local captures = extract_captures()
   local last_error
