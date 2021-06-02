@@ -670,7 +670,7 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
           \ 'height': &previewheight,
           \ 'focusable': v:false,
           \}
-    if has_key(g:matchup_matchparen_offscreen, 'border')
+    if get(g:matchup_matchparen_offscreen, 'border', 0)
       let l:win_cfg.border = ['', '═' ,'╗', '║', '╝', '═', '', '']
       if l:lnum >= line('.')
         let l:win_cfg.row -= min([2, l:row - winline() - 1])
@@ -720,13 +720,18 @@ function! s:populate_floating_win(offscreen) " {{{1
 
   if exists('*nvim_open_win')
     " neovim floating win
-    let width = max(map(copy(l:body), 'strdisplaywidth(v:val)'))
-    if empty(a:offscreen.links.close.match)
-          \ && a:offscreen.lnum > line('.')
-      " include the closing hint
-      let l:width += 3 + len(a:offscreen.links.open.match)
+
+    if get(g:matchup_matchparen_offscreen, 'fullwidth', 0)
+      let l:width = winwidth(0) - 1
+    else
+      let l:width = max(map(copy(l:body), 'strdisplaywidth(v:val)'))
+      if empty(a:offscreen.links.close.match)
+            \ && a:offscreen.lnum > line('.')
+        " include the closing hint
+        let l:width += 3 + len(a:offscreen.links.open.match)
+      endif
+      let l:width += wincol()-virtcol('.')
     endif
-    let l:width += wincol()-virtcol('.')
     call nvim_win_set_width(s:float_id, l:width + 1)
 
     if &winminheight != 1
