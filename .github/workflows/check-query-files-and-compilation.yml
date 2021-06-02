@@ -30,9 +30,3 @@ jobs:
         env:
           ALLOWED_INSTALLATION_FAILURES: haskell
         run: nvim --headless -c "luafile ./test/scripts/check-queries.lua" -c "q"
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: parsers-${{ matrix.os }}-${{ matrix.cc }}-x86_64
-          path: parser/*
-
