@@ -29,7 +29,7 @@ jobs:
       - name: Check query files (Unix)
         env:
           ALLOWED_INSTALLATION_FAILURES: haskell
-        run: nvim --headless -c "luafile ./scripts/check-queries.lua" -c "q"
+        run: nvim --headless -c "luafile ./test/scripts/check-queries.lua" -c "q"
 
       - uses: actions/upload-artifact@v2
         with:

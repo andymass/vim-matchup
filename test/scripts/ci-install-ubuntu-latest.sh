@@ -6,7 +6,8 @@ sudo chmod uog+rwx /usr/bin/tree-sitter
 wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
 chmod u+x nvim.appimage
 mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/start
-ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter/start
+wget -O nvim-treesitter.zip https://github.com/nvim-treesitter/nvim-treesitter/archive/refs/heads/master.zip
+unzip nvim-treesitter.zip
+ln -s $(pwd)/nvim-treesitter-master ~/.local/share/nvim/site/pack/nvim-treesitter/start
 sudo cp ./nvim.appimage /usr/bin/nvim
 sudo chmod uog+rwx /usr/bin/nvim
-
