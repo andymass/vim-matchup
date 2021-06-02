@@ -24,7 +24,7 @@ jobs:
 
       - name: Compile parsers Unix like
         run: |
-          nvim --headless -c "TSInstallSync $(ls after/queries)" -c "q"
+          nvim --headless -c "TSInstallSync $(ls after/queries | tr '\n' ' ')" -c "q"
 
       - name: Check query files (Unix)
         env:
