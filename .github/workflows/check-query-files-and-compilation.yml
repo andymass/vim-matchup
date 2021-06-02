@@ -7,8 +7,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        cc: [ gcc, clang ]
+        os: [ ubuntu-latest ]
+        cc: [ gcc ]
         exclude:
           - os: macos-latest
             cc: gcc
