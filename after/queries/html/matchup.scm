@@ -2,7 +2,6 @@
     (element)
     (script_element)
     (style_element)
-    (template_element)
 ] @scope.tag
 
 (start_tag (tag_name) @open.tag)
