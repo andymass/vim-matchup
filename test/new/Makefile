@@ -28,4 +28,6 @@ env: env/pyvenv.cfg
 
 env/pyvenv.cfg:
 	python3 -m venv env
-	bash -c 'source env/bin/activate; pip install "click<8.0.0" covimerage'
+	. env/bin/activate;
+	pip install setuptools wheel
+	pip install "click<8.0.0" covimerage
