@@ -30,7 +30,7 @@ endfunction
 
 let s:htmllikeft = [
     \ 'tidy', 'php', 'liquid', 'haml', 'tt2html',
-    \ 'html', 'xhtml', 'jsp', 'htmldjango',
+    \ 'html', 'xhtml', 'xml', 'jsp', 'htmldjango',
     \ 'aspvbs', 'rmd', 'markdown', 'eruby',
     \ 'javascriptreact', 'typescriptreact', 'svelte'
     \]
