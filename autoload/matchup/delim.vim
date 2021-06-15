@@ -176,6 +176,10 @@ function! matchup#delim#get_surrounding_impl(type, ...) " {{{1
   endif
   let l:delimopts.stopline = get(l:opts, 'stopline', s:stopline)
 
+  if get(l:opts, 'insertmode', 0)
+    let l:delimopts.insertmode = 1
+  endif
+
   " keep track of the outermost pair found so far
   " returned when g:matchup_delim_count_fail = 1
   let l:best = []

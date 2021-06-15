@@ -777,8 +777,13 @@ endfunction
 
 " }}}1
 
-function! s:highlight_surrounding(_, current) " {{{1
-  let l:opts = {'local': 0, 'matches': [], 'stopline': 2*winheight(0)}
+function! s:highlight_surrounding(insertmode, current) " {{{1
+  let l:opts = {
+        \ 'local': 0,
+        \ 'matches': [],
+        \ 'stopline': 2*winheight(0),
+        \ 'insertmode': a:insertmode
+        \}
   let l:delims = matchup#delim#get_surrounding('delim_all',
         \ 1 + a:current, l:opts)
   let l:open = l:delims[0]
