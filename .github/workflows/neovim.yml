@@ -40,3 +40,7 @@ jobs:
       - name: 'Run test'
         run: |
           bash -c 'VIMCMD=nvim test/vader/run'
+
+      - name: 'Run new tests'
+        run: |
+          cd ./test/new && make -j1 && make -j1 coverage
