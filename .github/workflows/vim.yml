@@ -36,3 +36,9 @@ jobs:
       - name: 'Run test'
         run: |
           bash ./test/vader/run
+
+      - name: 'Run new tests'
+        env:
+          MYVIM: vim -T dumb --not-a-term -n
+        run: |
+          cd ./test/new && make -j1 && make -j1 coverage
