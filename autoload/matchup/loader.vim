@@ -35,7 +35,12 @@ function! matchup#loader#init_buffer() abort " {{{1
   let b:matchup_delim_re = s:init_delim_regexes()
 
   " process b:match_skip
-  let b:matchup_delim_skip = s:init_delim_skip()
+  if l:has_ts
+    let b:matchup_delim_skip
+          \ = "matchup#ts_syntax#skip_expr(line('.'), col('.'))"
+  else
+    let b:matchup_delim_skip = s:init_delim_skip()
+  endif
 
   " enable matching engines
   let b:matchup_active_engines = {}
