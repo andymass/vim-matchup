@@ -62,11 +62,16 @@ do
   function M.invalidate_query_cache(lang, query_name)
     if lang and query_name then
       cache[lang][query_name] = nil
+      if query_files_cache[lang] then
+        query_files_cache[lang][query_name] = nil
+      end
     elseif lang and not query_name then
+      query_files_cache[lang] = nil
       for query_name, _ in pairs(cache[lang]) do
         M.invalidate_query_cache(lang, query_name)
       end
     elseif not lang and not query_name then
+      query_files_cache = {}
       for lang, _ in pairs(cache) do
         for query_name, _ in pairs(cache[lang]) do
           M.invalidate_query_cache(lang, query_name)
@@ -76,6 +81,12 @@ do
       error("Cannot have query_name by itself!")
     end
   end
+end
+
+--- This function is meant for an autocommand and not to be used. Only use if file is a query file.
+function M.invalidate_query_file(fname)
+  local fnamemodify = vim.fn.fnamemodify
+  M.invalidate_query_cache(fnamemodify(fname, ':p:h:t'), fnamemodify(fname, ':t:r'))
 end
 
 local function get_byte_offset(buf, row, col)
