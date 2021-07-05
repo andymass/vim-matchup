@@ -367,9 +367,10 @@ function! s:treesitter_init_module() " {{{1
   augroup matchup_filetype_query
     au!
     autocmd FileType query
-          \ autocmd! MatchupTreesitter BufWritePost <buffer>
-          \ call v:lua.require('nvim-treesitter.third-party.query')
-          \   .invalidate_query_file(expand('%:p'))
+          \ augroup MatchupTreesitter|augroup END
+          \|autocmd! MatchupTreesitter BufWritePost <buffer>
+          \ call v:lua.require('treesitter-matchup.third-party.query')
+          \.invalidate_query_file(expand('%:p'))
   augroup END
 endfunction
 

@@ -197,10 +197,14 @@ end
 function M.iter_group_results(bufnr, query_group, root, root_lang)
   local buf_lang = parsers.get_buf_lang(bufnr)
 
-  if not buf_lang then return EMPTY_ITER end
+  if not buf_lang then
+    return EMPTY_ITER
+  end
 
   local parser = parsers.get_parser(bufnr, buf_lang)
-  if not parser then return EMPTY_ITER end
+  if not parser then
+    return EMPTY_ITER
+  end
 
   if not root then
     local first_tree = parser:trees()[1]
