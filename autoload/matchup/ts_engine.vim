@@ -27,7 +27,7 @@ function! matchup#ts_engine#attach(bufnr, lang) abort
   let s:attached[a:bufnr] = a:lang
 endfunction
 
-function! matchup#ts_engine#detach(bufnr, lang) abort
+function! matchup#ts_engine#detach(bufnr) abort
   unlet s:attached[a:bufnr]
 endfunction
 
