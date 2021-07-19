@@ -4,10 +4,10 @@
 -- See nvim-treesitter.LICENSE-APACHE-2.0
 
 local api = vim.api
-local tsq = require'vim.treesitter.query'
-local tsrange = require'nvim-treesitter.tsrange'
-local parsers = require'nvim-treesitter.parsers'
-local caching = require'nvim-treesitter.caching'
+local tsq = require "vim.treesitter.query"
+local tsrange = require "nvim-treesitter.tsrange"
+local parsers = require "nvim-treesitter.parsers"
+local caching = require "nvim-treesitter.caching"
 
 local M = {}
 
@@ -19,7 +19,7 @@ do
   local function update_cached_matches(bufnr, changed_tick, query_group)
     query_cache.set(query_group, bufnr, {
       tick = changed_tick,
-      cache= M.collect_group_results(bufnr, query_group) or {}
+      cache = M.collect_group_results(bufnr, query_group) or {},
     })
   end
 
@@ -27,7 +27,7 @@ do
     bufnr = bufnr or api.nvim_get_current_buf()
     local cached_local = query_cache.get(query_group, bufnr)
     if not cached_local or api.nvim_buf_get_changedtick(bufnr) > cached_local.tick then
-      update_cached_matches(bufnr,api.nvim_buf_get_changedtick(bufnr), query_group)
+      update_cached_matches(bufnr, api.nvim_buf_get_changedtick(bufnr), query_group)
     end
 
     return query_cache.get(query_group, bufnr).cache
@@ -73,7 +73,7 @@ do
         end
       end
     else
-      error("Cannot have query_name by itself!")
+      error "Cannot have query_name by itself!"
     end
   end
 end
@@ -81,7 +81,7 @@ end
 --- This function is meant for an autocommand and not to be used. Only use if file is a query file.
 function M.invalidate_query_file(fname)
   local fnamemodify = vim.fn.fnamemodify
-  M.invalidate_query_cache(fnamemodify(fname, ':p:h:t'), fnamemodify(fname, ':t:r'))
+  M.invalidate_query_cache(fnamemodify(fname, ":p:h:t"), fnamemodify(fname, ":t:r"))
 end
 
 local function get_byte_offset(buf, row, col)
@@ -120,7 +120,7 @@ function M.iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
   local function insert_to_path(object, path, value)
     local curr_obj = object
 
-    for index=1,(#path -1) do
+    for index = 1, (#path - 1) do
       if curr_obj[path[index]] == nil then
         curr_obj[path[index]] = {}
       end
@@ -214,9 +214,11 @@ function M.iter_group_results(bufnr, query_group, root, root_lang)
     end
   end
 
-  if not root then return EMPTY_ITER end
+  if not root then
+    return EMPTY_ITER
+  end
 
-  local range = {root:range()}
+  local range = { root:range() }
 
   if not root_lang then
     local lang_tree = parser:language_for_range(range)
@@ -226,10 +228,14 @@ function M.iter_group_results(bufnr, query_group, root, root_lang)
     end
   end
 
-  if not root_lang then return EMPTY_ITER end
+  if not root_lang then
+    return EMPTY_ITER
+  end
 
   local query = M.get_query(root_lang, query_group)
-  if not query then return EMPTY_ITER end
+  if not query then
+    return EMPTY_ITER
+  end
 
   -- The end row is exclusive so we need to add 1 to it.
   return M.iter_prepared_matches(query, root, bufnr, range[1], range[3] + 1)
