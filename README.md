@@ -640,13 +640,17 @@ enabled.
 
 In vim, `{count}%` goes to the `{count}` percentage in the file.
 match-up overrides this motion for small `{count}` (by default, anything
-less than 7).  To allow `{count}%` for `{count}` up to 11,
+less than 7).  To allow `{count}%` for `{count}` less than 12,
 ```vim
 g:matchup_motion_override_Npercent = 11
 ```
 To disable this feature, and restore vim's default `{count}%`,
 ```vim
 g:matchup_motion_override_Npercent = 0
+```
+To always enable this feature, use any value greater than 99,
+```vim
+g:matchup_motion_override_Npercent = 100
 ```
 default: 6
 

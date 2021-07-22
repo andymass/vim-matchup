@@ -99,14 +99,14 @@ For customization, see |matchup-custom-mappings|.
                         This is an |inclusive| motion.
 
                                                          *matchup-N%*
-{count}%                If {count} is less than 6, go forwards {count} times.
+{count}%                If {count} is less than 7, go forwards {count} times.
                         Otherwise, go to {count} percentage in the file (|N%|).
                         See |g:matchup_motion_override_Npercent|.
 
                                                          *g%*
 g%                      When on a recognized word, go backwards to [count]th
                         previous matching word.  If at an open word, cycle
-                        around to the corresponding open word.  If the cursor
+                        around to the corresponding close word.  If the cursor
                         is not on a word, seek forwards to one and then jump
                         to its match.
 
@@ -775,12 +775,17 @@ Module motion~
 
   In vim, {count}% goes to the {count} percentage in the file (see |N%|).
   match-up overrides this motion for small {count} (by default, anything less
-  than 7).  For example, to allow {count}% for {count} up to 11, >
+  than 7).  For example, to allow {count}% for {count} less than 12, >
     let g:matchup_motion_override_Npercent = 11
 <
   To disable this feature, and restore vim's default {count}%, >
     let g:matchup_motion_override_Npercent = 0
 <
+  To always enable this feature, use any value greater than 99 >
+    let g:matchup_motion_override_Npercent = 100
+<
+  Default: 6
+
 *g:matchup_motion_cursor_end*
 
   If enabled, cursor will land on the end of mid and close words while

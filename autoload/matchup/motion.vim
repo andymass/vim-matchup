@@ -30,7 +30,8 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
     normal! gv
   endif
 
-  if a:down && l:count > g:matchup_motion_override_Npercent
+  if a:down && g:matchup_motion_override_Npercent < 100
+        \ && l:count > g:matchup_motion_override_Npercent
     " TODO: dv50% does not work properly
     if a:visual && l:is_oper
       normal! V
