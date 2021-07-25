@@ -26,3 +26,8 @@
 ((if_statement
   "if" @open.if) @scope.if
  (#not-has-parent? @scope.if else_clause))
+
+; template strings
+(template_string
+ "`" @open.tmpl_str
+ "`" @close.tmpl_str) @scope.tmpl_str
