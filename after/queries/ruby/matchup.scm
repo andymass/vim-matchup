@@ -22,7 +22,6 @@
 (unless
   "unless" @open.unless
   "end" @close.unless) @scope.unless
-(else "else" @mid.unless.2)
 
 (while
     "while" @open.loop
