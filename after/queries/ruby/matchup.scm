@@ -15,8 +15,9 @@
 
 (if
   "if" @open.if
+  (else "else" @mid.if.2)?
   "end" @close.if) @scope.if
-(else "else" @mid.if.2)
+(elsif (else "else" @mid.if.2))
 (elsif "elsif" @mid.if.1)
 
 (unless
