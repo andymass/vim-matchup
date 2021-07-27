@@ -19,6 +19,11 @@
 (else "else" @mid.if.2)
 (elsif "elsif" @mid.if.1)
 
+(unless
+  "unless" @open.unless
+  "end" @close.unless) @scope.unless
+(else "else" @mid.unless.2)
+
 (while
     "while" @open.loop
   body: (do
