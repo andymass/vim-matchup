@@ -59,10 +59,11 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
     if empty(l:delim) | return | endif
   endif
 
+  let l:matches = matchup#delim#get_matching(l:delim, 1)
+  if len(l:matches) <= (l:delim.side ==# 'mid' ? 2 : 1) | return | endif
+
   " loop count number of times
   for l:dummy in range(l:count1)
-    let l:matches = matchup#delim#get_matching(l:delim, 1)
-    if len(l:matches) <= (l:delim.side ==# 'mid' ? 2 : 1) | return | endif
     if !has_key(l:delim, 'links') | return | endif
     let l:delim = get(l:delim.links, a:down ? 'next' : 'prev', {})
     if empty(l:delim) | return | endif

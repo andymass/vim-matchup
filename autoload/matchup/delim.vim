@@ -62,7 +62,7 @@ endfunction
 
 " }}}1
 
-function! matchup#delim#get_matching(delim, ...) " {{{1
+function! matchup#delim#get_matching(delim, ...) abort " {{{1
   if empty(a:delim) || !has_key(a:delim, 'lnum') | return {} | endif
 
   let l:opts = a:0 && type(a:1) == type({}) ? a:1 : {}
