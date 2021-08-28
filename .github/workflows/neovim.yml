@@ -32,7 +32,7 @@ jobs:
         run: git clone --depth=1 https://github.com/nvim-treesitter/nvim-treesitter.git test/vader/plugged/nvim-treesitter
 
       - name: Install python treesitter module
-        run: nvim --headless -Nu test/vader/minvimrc -c 'TSInstallSync python' -c 'q'
+        run: nvim --headless -Nu test/vader/minvimrc -c 'TSInstallSync python ruby' -c 'q'
 
       - name: 'Show version'
         run: nvim --version
