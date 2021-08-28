@@ -2,7 +2,7 @@ set nocompatible
 source ../common/bootstrap.vim
 
 if !has('nvim-0.5.0')
-  finish
+  call matchup#test#finished()
 endif
 
 function! s:assert_ts_active()
