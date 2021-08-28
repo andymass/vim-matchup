@@ -4,6 +4,24 @@
 " Email:      a@normed.space
 "
 
+function! matchup#test#finished() abort " {{{1
+  for l:error in v:errors
+    let l:match = matchlist(l:error, '\(.*\) line \(\d\+\): \(.*\)')
+    let l:file = fnamemodify(l:match[1], ':.')
+    let l:lnum = l:match[2]
+    let l:msg = l:match[3]
+    echo printf("%s:%d: %s\n", l:file, l:lnum, l:msg)
+  endfor
+
+  if len(v:errors) > 0
+    cquit
+  else
+    quitall!
+  endif
+endfunction
+
+" }}}1
+
 function! matchup#test#assert(condition) abort " {{{1
   if a:condition | return 1 | endif
 
