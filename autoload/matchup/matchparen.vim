@@ -671,8 +671,11 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
           \ 'height': &previewheight,
           \ 'focusable': v:false,
           \}
-    if get(g:matchup_matchparen_offscreen, 'border', 0)
-      let l:win_cfg.border = ['', '═' ,'╗', '║', '╝', '═', '', '']
+    let l:border = get(g:matchup_matchparen_offscreen, 'border', 0)
+    if !empty(l:border)
+      let l:win_cfg.border = has('nvim-0.5')
+            \ && type(l:border) == v:t_string
+            \ ? l:border : ['', '═' ,'╗', '║', '╝', '═', '', '']
       if l:lnum >= line('.')
         let l:win_cfg.row -= min([2, l:row - winline() - 1])
       endif
