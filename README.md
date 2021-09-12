@@ -803,12 +803,17 @@ See for instance one of the following plugins for this;
 ### Matchit
 
 match-up tries to work around matchit.vim in all cases, but if
-you experience problems, read the following.
-matchit.vim should not be loaded.  If it is loaded, it should be loaded
-after match-up (in this case, matchit.vim will be disabled).  Note that
-some plugins, such as
-[vim-sensible](https://github.com/tpope/vim-sensible),
-load matchit.vim so these should also be initialized after match-up.
+you experience problems, read the following:
+
+- For vim, matchit.vim should not be loaded.  If it is loaded, it should
+  be loaded after match-up (in this case, matchit.vim will be disabled).
+  Note that some plugins, such as
+  [vim-sensible](https://github.com/tpope/vim-sensible), load matchit.vim
+  so these should also be initialized after match-up.
+
+- For neovim, matchit.vim is loaded by default.  This should not cause any
+  problems, but you may see a very slight start-up time improvement by
+  setting `let g:loaded_matchit = 1` in your `init.vim`.
 
 ### Matchparen emulation
 

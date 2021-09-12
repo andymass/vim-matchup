@@ -10,7 +10,8 @@ Most issues are related to bugs or problems. In these cases, you should
 include a minimal working example and a minimal vimrc file (see below), as
 well as:
 
-1. What vim version are you using?
+1. What vim version are you using?  If using neovim, Are you using
+   tree-sitter or classic matching?
 2. Steps to reproduce
 3. Expected behavior
 4. Observed behavior
