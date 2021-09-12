@@ -18,7 +18,8 @@ if matchup#util#matchpref('tagnameonly', 0)
   call matchup#util#patch_match_words(':/>', ':/\g{hlend}>')
 endif
 
+call matchup#util#patch_match_words('[^/>]*', '[^>]*[^/>]')
+
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
-
