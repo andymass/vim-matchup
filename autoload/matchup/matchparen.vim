@@ -647,6 +647,12 @@ function! s:do_offscreen_popup(offscreen) " {{{1
     call setbufline(winbufnr(t:match_popup), 1, l:text)
   endif
 
+  if get(g:matchup_matchparen_offscreen, 'fullwidth', 0)
+        \ && exists('*popup_setoptions')
+    let l:rpad = winwidth(0) - len(l:text)
+    call popup_setoptions(t:match_popup, {'padding': [0, l:rpad, 0, 0]})
+  endif
+
   call popup_show(t:match_popup)
 endfunction
 
