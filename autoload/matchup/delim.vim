@@ -176,10 +176,6 @@ function! matchup#delim#get_surrounding_impl(type, ...) " {{{1
   endif
   let l:delimopts.stopline = get(l:opts, 'stopline', s:stopline)
 
-  if get(l:opts, 'insertmode', 0)
-    let l:delimopts.insertmode = 1
-  endif
-
   " keep track of the outermost pair found so far
   " returned when g:matchup_delim_count_fail = 1
   let l:best = []
@@ -193,7 +189,7 @@ function! matchup#delim#get_surrounding_impl(type, ...) " {{{1
 
   while l:pos_val_open < l:pos_val_last
     " store found delims in a cache by cursor position
-    let l:key = string(getcurpos())
+    let l:key = string(getcurpos()) . mode()
     if has_key(s:cache[l:bufnr], l:key)
       let l:open = s:cache[l:bufnr][l:key]
     else
