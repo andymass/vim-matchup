@@ -21,6 +21,13 @@ function! matchup#ts_engine#is_enabled(bufnr) abort
   return +s:forward('is_enabled', a:bufnr)
 endfunction
 
+function! matchup#ts_engine#is_hl_enabled(bufnr) abort
+  if !has('nvim-0.5.0')
+    return 0
+  endif
+  return +s:forward('is_hl_enabled', a:bufnr)
+endfunction
+
 let s:attached = {}
 
 function! matchup#ts_engine#attach(bufnr, lang) abort

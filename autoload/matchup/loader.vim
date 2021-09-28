@@ -26,6 +26,12 @@ function! matchup#loader#init_buffer() abort " {{{1
     let l:has_ts = 1
   endif
 
+  let l:has_ts_hl = 0
+  if has('nvim-0.5.0') && empty(&syntax)
+        \ && matchup#ts_engine#is_hl_enabled(bufnr('%'))
+    let l:has_ts_hl = 1
+  endif
+
   " initialize lists of delimiter pairs and regular expressions
   " this is the data obtained from parsing b:match_words
   let b:matchup_delim_lists = s:init_delim_lists(!l:has_ts)
@@ -35,7 +41,7 @@ function! matchup#loader#init_buffer() abort " {{{1
   let b:matchup_delim_re = s:init_delim_regexes()
 
   " process b:match_skip
-  if l:has_ts
+  if l:has_ts_hl
     let b:matchup_delim_skip
           \ = "matchup#ts_syntax#skip_expr(line('.'), col('.'))"
   else
