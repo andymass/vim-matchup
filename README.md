@@ -429,7 +429,8 @@ let g:matchup_surround_enabled = 1
 ```
 default: 0
 
-To enable the experimental [transmute](#d1-parallel-transmutation)
+To enable the experimental
+[transmute](https://github.com/andymass/vim-matchup/blob/5a1978e46a0e721b5c5d113379c685ff7ec339e7/doc/matchup.txt#L311)
 module,
 ```vim
 let g:matchup_transmute_enabled = 1
@@ -670,10 +671,6 @@ Modify the set of operators which may operate
 let g:matchup_text_obj_linewise_operators = ['d', 'y']
 ```
 default: `['d', 'y']`
-
-### Module transmute
-
-_Options planned_.
 
 ## FAQ
 
