@@ -1,5 +1,6 @@
 if not pcall(require, 'nvim-treesitter') then
-  return {is_enabled = function(bufnr) return 0 end}
+  return {is_enabled = function(bufnr) return 0 end,
+          is_hl_enabled = function(bufnr) return 0 end}
 end
 
 local vim = vim
