@@ -16,6 +16,8 @@ let b:match_midmap = [
       \]
 let b:undo_ftplugin .= '| unlet! b:match_midmap'
 
+call matchup#util#append_match_words('--\[\(=*\)\[:]\1]')
+
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
