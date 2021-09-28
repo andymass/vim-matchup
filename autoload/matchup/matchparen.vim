@@ -87,7 +87,7 @@ function! s:pi_paren_sid() " {{{1
   endif
   if s:pi_paren_sid
     let s:pi_paren_fcn = function('<SNR>'.s:pi_paren_sid
-      \ .'_Highlight_Matching_Pair')
+          \ .'_Highlight_Matching_Pair')
   endif
   return s:pi_paren_sid
 endfunction
@@ -611,50 +611,103 @@ function! s:do_offscreen_popup(offscreen) " {{{1
         \ 'maxheight': 1,
         \})
 
-  " set popup text
+  if exists('*prop_type_add') && exists('*popup_settext')
+    " requires patch 8.1.1553
+    let l:width = s:set_popup_text_2(l:lnum, l:adjust, a:offscreen)
+  else
+    let l:width = s:set_popup_text(l:lnum, l:adjust, a:offscreen)
+  endif
+
+  let l:rpad = 1
+  if get(g:matchup_matchparen_offscreen, 'fullwidth', 0)
+        \ && exists('*popup_setoptions')
+    let l:rpad = winwidth(0) - l:width
+  endif
+  call popup_setoptions(t:match_popup, {'padding': [0, l:rpad, 0, 0]})
+
+  call popup_show(t:match_popup)
+endfunction
+
+function! s:set_popup_text(lnum, adjust, offscreen) abort
   let l:text = ''
   if &number || &relativenumber
     if &relativenumber
-      let l:displaynumber = abs(l:lnum - line('.'))
+      let l:displaynumber = abs(a:lnum - line('.'))
     else
-      let l:displaynumber = l:lnum
+      let l:displaynumber = a:lnum
     endif
     let l:text = printf('%*S ', wincol()-virtcol('.')-1, l:displaynumber)
   endif
 
   " replace tab indent with spaces
   " (popup window doesn't follow tabstop option of current buffer)
-  let l:linestr = getline(l:lnum)
+  let l:linestr = getline(a:lnum)
   let l:indent = repeat(' ', strdisplaywidth(matchstr(l:linestr, '^\s\+')))
   let l:linestr = substitute(l:linestr, '^\s\+', l:indent, '')
 
   let l:prop_place = len(l:text) + len(l:indent) + 1
   let l:text .= l:linestr . ' '
-  if l:adjust
+  if a:adjust
     let l:prop_place = strlen(l:text) + 5
     let l:text .= '… ' . a:offscreen.match . ' '
   endif
 
-  if exists('*prop_type_add')
+  if exists('*prop_type_add') && exists('*popup_settext')
     let l:curhi = s:wordish(a:offscreen) ? 'MatchWord' : 'MatchParen'
+    " combine requires patch 8.1.1276
     let l:prop = {
           \ 'length': len(a:offscreen.match),
           \ 'col': l:prop_place,
           \ 'type': 'matchup__' . l:curhi,
+          \ 'combine': 1
           \}
     call popup_settext(t:match_popup, [{'text': l:text, 'props': [l:prop]}])
   else
     call setbufline(winbufnr(t:match_popup), 1, l:text)
   endif
-
-  if get(g:matchup_matchparen_offscreen, 'fullwidth', 0)
-        \ && exists('*popup_setoptions')
-    let l:rpad = winwidth(0) - len(l:text)
-    call popup_setoptions(t:match_popup, {'padding': [0, l:rpad, 0, 0]})
-  endif
-
-  call popup_show(t:match_popup)
+  return strdisplaywidth(l:text)
 endfunction
+
+function! s:set_popup_text_2(lnum, adjust, offscreen) abort
+  let [l:sl, l:lnum] = matchup#matchparen#status_str(
+        \ a:offscreen, {'noshowdir': 1})
+  let l:sl = substitute(l:sl, '%<', '', 'g')
+
+  let l:props = []
+  let l:col = 1
+  let l:text = ''
+  for l:item in split(l:sl, '%\@1<!%#')
+    let [l:hl; l:rest] = split(l:item, '#')
+
+    let l:key = 'matchup__' . l:hl
+    if !has_key(s:prop_cache, l:key)
+      if empty(prop_type_get(l:key, {'bufnr': winbufnr(t:match_popup)}))
+        call prop_type_add(l:key, {
+              \ 'bufnr': winbufnr(t:match_popup),
+              \ 'highlight': l:hl
+              \})
+      endif
+      let s:prop_cache[l:key] = 1
+    endif
+
+    let l:rest = join(l:rest, '')
+    let l:len = len(l:rest)
+    call add(l:props, {
+          \ 'length': l:len,
+          \ 'col': l:col,
+          \ 'type': l:key
+          \})
+    let l:text .= l:rest
+    let l:col += l:len
+  endfor
+
+  call popup_settext(t:match_popup, [{'text': l:text, 'props': l:props}])
+  return strdisplaywidth(l:text)
+endfunction
+
+if !exists('s:prop_cache')
+  let s:prop_cache = {}
+endif
 
 " }}}1
 function! s:do_offscreen_popup_nvim(offscreen) " {{{1
@@ -874,6 +927,7 @@ function! s:format_gutter(lnum, ...) " {{{1
     let l:fdl = foldlevel(a:lnum)
     let l:fdcstr = l:fdl <= l:fdc ? repeat('|', l:fdl)
           \ : join(range(l:fdl-l:fdc+1, l:fdl), '')
+    let l:fdcstr .= repeat(' ', &foldcolumn - len(l:fdcstr))
     let l:padding -= len(l:fdcstr)
     let l:fdcstr = '%#FoldColumn#' . l:fdcstr . '%#Normal#'
   elseif empty(l:sl)
@@ -975,13 +1029,13 @@ function! s:ensure_scroll_timer() " {{{1
 endfunction
 
 " }}}1
-function! matchup#matchparen#scroll_callback(tid) " {{{1
+function! matchup#matchparen#scroll_callback(tid) abort " {{{1
   call timer_pause(a:tid, 1)
   call s:matchparen.highlight(1)
 endfunction
 
 " }}}1
-function! matchup#matchparen#scroll_update(lnum) " {{{1
+function! matchup#matchparen#scroll_update(lnum) abort " {{{1
   if line('w0') <= a:lnum && a:lnum <= line('w$')
         \ && exists('s:scroll_timer')
     call timer_pause(s:scroll_timer, 0)
