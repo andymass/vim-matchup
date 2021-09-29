@@ -93,7 +93,7 @@ function! matchup#loader#refresh_match_words() abort " {{{1
     " protect the cursor from the match_words function
     let l:save_pos = matchup#pos#get_cursor()
     let l:match_words = ''
-    execute 'let l:match_words = ' b:match_words
+    execute 'let l:match_words =' b:match_words
     if l:save_pos != matchup#pos#get_cursor()
       call matchup#pos#set_cursor(l:save_pos)
     endif
@@ -169,7 +169,7 @@ function! s:init_delim_lists(no_words, filter_words) abort " {{{1
   let l:sets = split(l:match_words, g:matchup#re#not_bslash.',')
 
   if a:filter_words
-    call filter(l:sets, 'v:val =~ "^[^a-zA-Z]\\{3,18\\}$"')
+    call filter(l:sets, 'v:val =~? "^[^a-zA-Z]\\{3,18\\}$"')
     if empty(l:sets)
       return s:init_delim_lists_fast(l:match_words)
     endif
@@ -250,7 +250,7 @@ function! s:init_delim_lists(no_words, filter_words) abort " {{{1
     endfor
 
     " for the 'open' pattern, create a series of replacements
-    " of the capture groups with \9, \8, ..., \1
+    " of the capture groups with corresponding \9, \8, ..., \1
     " this must be done deepest to shallowest
     let l:augments = {}
     let l:order = matchup#loader#capture_group_replacement_order(l:cg)
