@@ -28,6 +28,10 @@ function! matchup#ts_engine#is_hl_enabled(bufnr) abort
   return +s:forward('is_hl_enabled', a:bufnr)
 endfunction
 
+function! matchup#ts_engine#get_option(bufnr, opt_name) abort
+  return s:forward('get_option', a:bufnr, a:opt_name)
+endfunction
+
 let s:attached = {}
 
 function! matchup#ts_engine#attach(bufnr, lang) abort

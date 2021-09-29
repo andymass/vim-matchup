@@ -311,9 +311,31 @@ function M.get_matching(delim, down, bufnr)
   return matches
 end
 
+local function opt_tbl_for_lang(opt, lang)
+  local is_table = type(opt) == "table"
+  if opt and (not is_table or vim.tbl_contains(opt, lang)) then
+    return true
+  end
+  return false
+end
+
+function M.get_option(bufnr, opt_name)
+  local config = configs.get_module('matchup')
+  local lang = parsers.get_buf_lang(bufnr)
+  if opt_name == 'include_match_words' then
+    return opt_tbl_for_lang(config[opt_name], lang)
+  end
+  error('invalid option ' .. opt_name)
+end
+
 function M.attach(bufnr, lang)
   -- local parser = parsers.get_parser(bufnr, lang)
-  -- local config = configs.get_module('matchup')
+  local config = configs.get_module('matchup')
+
+  if opt_tbl_for_lang(config.additional_vim_regex_highlighting, lang)
+      and api.nvim_buf_set_option(bufnr, 'syntax') == '' then
+    api.nvim_buf_set_option(bufnr, 'syntax', 'ON')
+  end
 
   api.nvim_call_function('matchup#ts_engine#attach', {bufnr, lang})
 end

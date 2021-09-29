@@ -22,8 +22,14 @@ function! matchup#loader#init_buffer() abort " {{{1
   call matchup#perf#tic('loader_init_buffer')
 
   let l:has_ts = 0
+  let [l:no_words, l:filt_words] = [0, 0]
   if has('nvim-0.5.0') && matchup#ts_engine#is_enabled(bufnr('%'))
     let l:has_ts = 1
+    if matchup#ts_engine#get_option(bufnr('%'), 'include_match_words')
+      let l:filt_words = 1
+    else
+      let l:no_words = 1
+    endif
   endif
 
   let l:has_ts_hl = 0
@@ -34,7 +40,7 @@ function! matchup#loader#init_buffer() abort " {{{1
 
   " initialize lists of delimiter pairs and regular expressions
   " this is the data obtained from parsing b:match_words
-  let b:matchup_delim_lists = s:init_delim_lists(!l:has_ts)
+  let b:matchup_delim_lists = s:init_delim_lists(l:no_words, l:filt_words)
 
   " this is the combined set of regular expressions used for matching
   " its structure is matchup_delim_re[type][open,close,both,mid,both_all]
@@ -102,7 +108,7 @@ function! matchup#loader#refresh_match_words() abort " {{{1
       call matchup#perf#toc('refresh', 'cache_hit')
     else
       " re-parse match words
-      let b:matchup_delim_lists = s:init_delim_lists(1)
+      let b:matchup_delim_lists = s:init_delim_lists(0, 0)
       let b:matchup_delim_re = s:init_delim_regexes()
       let s:match_word_cache[l:match_words] = {
             \ 'delim_lists'  : b:matchup_delim_lists,
@@ -117,7 +123,7 @@ let s:match_word_cache = {}
 
 " }}}1
 
-function! s:init_delim_lists(use_match_words) abort " {{{1
+function! s:init_delim_lists(no_words, filter_words) abort " {{{1
   let l:lists = {
         \ 'delim_tex': {
         \   'regex': [],
@@ -145,7 +151,7 @@ function! s:init_delim_lists(use_match_words) abort " {{{1
   endif
 
   " parse matchpairs and b:match_words
-  let l:match_words = a:use_match_words ? get(b:, 'match_words', '') : ''
+  let l:match_words = !a:no_words ? get(b:, 'match_words', '') : ''
   if !empty(l:match_words) && l:match_words !~# ':'
     execute 'let l:match_words =' b:match_words
   endif
@@ -161,6 +167,13 @@ function! s:init_delim_lists(use_match_words) abort " {{{1
   endif
 
   let l:sets = split(l:match_words, g:matchup#re#not_bslash.',')
+
+  if a:filter_words
+    call filter(l:sets, 'v:val =~ "^[^a-zA-Z]\\{3,18\\}$"')
+    if empty(l:sets)
+      return s:init_delim_lists_fast(l:match_words)
+    endif
+  endif
 
   " do not duplicate whole groups of match words
   let l:seen = {}
