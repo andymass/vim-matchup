@@ -88,4 +88,4 @@ call matchup#test#assert_equal(
       \ {'str': '\<\Vfoobar\m', 'unresolved': {}},
       \ s:cur.augment)
 
-quit!
+call matchup#test#finished()
