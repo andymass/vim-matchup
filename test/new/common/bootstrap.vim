@@ -6,7 +6,7 @@ let &rtp = &rtp . ',../../../after'
 profile start /tmp/vim-profile.txt
 profile! file */matchup/*.vim
 
-if has('nvim-0.5.0')
+if $TESTS_ENABLE_TREESITTER
   let s:path = simplify(expand('<sfile>:h').'/../../..')
   let &rtp = s:path.'/test/vader/plugged/nvim-treesitter,' . &rtp
   let &rtp .= ','.s:path.'/test/vader/plugged/nvim-treesitter/after'
