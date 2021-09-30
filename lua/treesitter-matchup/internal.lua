@@ -333,7 +333,7 @@ function M.attach(bufnr, lang)
   local config = configs.get_module('matchup')
 
   if opt_tbl_for_lang(config.additional_vim_regex_highlighting, lang)
-      and api.nvim_buf_set_option(bufnr, 'syntax') == '' then
+      and api.nvim_buf_get_option(bufnr, 'syntax') == '' then
     api.nvim_buf_set_option(bufnr, 'syntax', 'ON')
   end
 
