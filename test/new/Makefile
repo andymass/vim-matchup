@@ -23,6 +23,7 @@ htmlcov/index.html: env /tmp/vim-profile.txt
 	covimerage write_coverage /tmp/vim-profile.txt --source ../../autoload --source ../../plugin
 	coverage report -m
 	coverage html
+	coverage xml
 
 env: env/pyvenv.cfg
 
