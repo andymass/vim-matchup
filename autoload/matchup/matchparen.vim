@@ -683,7 +683,6 @@ function! s:set_popup_text_2(lnum, adjust, offscreen) abort
     let [l:hl; l:rest] = split(l:item, '#')
 
     if l:hl =~# '^\s*$'
-      echo l:hl
       continue
     endif
 
