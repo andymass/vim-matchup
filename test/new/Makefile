@@ -1,3 +1,7 @@
+COV ?= covimerage run --append --no-report \
+       --data-file $(CURDIR)/.coverage_covimerage \
+       --source $(CURDIR)/../../autoload \
+       --source $(CURDIR)/../../plugin
 MYVIM ?= nvim --headless
 MAKEFLAGS+=--no-print-directory
 
@@ -13,14 +17,14 @@ sysinfo:
 	@-$(MYVIM) --version
 	@echo "**** SYSTEM INFORMATION ****"
 
-$(TESTS):
-	$(MAKE) -C $@
+$(TESTS): env
+	@. env/bin/activate
+	MYVIM="$(COV) $(MYVIM)" $(MAKE) -C $@
 
-coverage: htmlcov/index.html
+coverage: coverage.xml
 
-htmlcov/index.html: env /tmp/vim-profile.txt
+coverage.xml: env .coverage_covimerage
 	. env/bin/activate
-	covimerage write_coverage /tmp/vim-profile.txt --source ../../autoload --source ../../plugin
 	coverage report -m
 	coverage html
 	coverage xml
@@ -29,6 +33,6 @@ env: env/pyvenv.cfg
 
 env/pyvenv.cfg:
 	python3 -m venv env
-	. env/bin/activate;
+	. env/bin/activate
 	pip install setuptools wheel
-	pip install "click<8.0.0" covimerage
+	pip install "click<8.0.0" coverage==4.5.4 covimerage==0.2.1
