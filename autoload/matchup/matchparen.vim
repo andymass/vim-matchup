@@ -611,14 +611,17 @@ function! s:do_offscreen_popup(offscreen) " {{{1
         \ 'maxheight': 1,
         \})
 
+  call matchup#perf#tic('matchparen.render_popup')
   if exists('*prop_type_add') && exists('*popup_settext')
+      \ && get(g:matchup_matchparen_offscreen, 'syntax_hl', 0)
     " requires patch 8.1.1553
     let l:width = s:set_popup_text_2(l:lnum, l:adjust, a:offscreen)
   else
     let l:width = s:set_popup_text(l:lnum, l:adjust, a:offscreen)
   endif
+  call matchup#perf#toc('matchparen.render_popup', 'done')
 
-  let l:rpad = 1
+  let l:rpad = 0
   if get(g:matchup_matchparen_offscreen, 'fullwidth', 0)
         \ && exists('*popup_setoptions')
     let l:rpad = winwidth(0) - l:width
@@ -678,6 +681,11 @@ function! s:set_popup_text_2(lnum, adjust, offscreen) abort
   let l:text = ''
   for l:item in split(l:sl, '%\@1<!%#')
     let [l:hl; l:rest] = split(l:item, '#')
+
+    if l:hl =~# '^\s*$'
+      echo l:hl
+      continue
+    endif
 
     let l:key = 'matchup__' . l:hl
     if !has_key(s:prop_cache, l:key)
