@@ -7,7 +7,7 @@ stages:
   before_script:
     - apk update
     - apk add curl git bash make
-    - apk add neovim python3
+    - apk add build-base neovim python3
     - curl -sSL https://bootstrap.pypa.io/get-pip.py | python3
 
 test-latest:
@@ -61,7 +61,7 @@ test-neovim:
 test-neovim-treesitter:
   stage: test
   extends: .setup
-  image: alpine:latest
+  image: alpine:edge
   variables:
     TESTS_ENABLE_TREESITTER: 1
   script:
