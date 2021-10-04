@@ -674,13 +674,20 @@ endfunction
 function! s:set_popup_text_2(lnum, adjust, offscreen) abort
   let [l:sl, l:lnum] = matchup#matchparen#status_str(
         \ a:offscreen, {'noshowdir': 1})
-  let l:sl = substitute(l:sl, '%<', '', 'g')
+  let l:sl = '%#Normal#' . substitute(l:sl, '%<', '', 'g')
 
   let l:props = []
   let l:col = 1
   let l:text = ''
   for l:item in split(l:sl, '%\@1<!%#')
     let [l:hl; l:rest] = split(l:item, '#')
+
+    let l:rest = join(l:rest, '')
+    let l:len = len(l:rest)
+
+    if !l:len
+      continue
+    endif
 
     if l:hl =~# '^\s*$'
       continue
@@ -697,13 +704,12 @@ function! s:set_popup_text_2(lnum, adjust, offscreen) abort
       let s:prop_cache[l:key] = 1
     endif
 
-    let l:rest = join(l:rest, '')
-    let l:len = len(l:rest)
     call add(l:props, {
           \ 'length': l:len,
           \ 'col': l:col,
           \ 'type': l:key
           \})
+
     let l:text .= l:rest
     let l:col += l:len
   endfor
