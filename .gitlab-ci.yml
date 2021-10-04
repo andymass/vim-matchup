@@ -60,6 +60,8 @@ test-neovim:
 
 coverage:
   stage: gen_coverage
+  extends: .setup
+  image: alpine:latest
   script: cd ./test/new && make -j1 coverage
   artifacts:
     reports:
