@@ -66,6 +66,8 @@ coverage:
   artifacts:
     reports:
       cobertura: ./test/new/coverage.xml
+    paths:
+      - ./test/new/htmlcov
 
 pages:
   stage: deploy
