@@ -18,4 +18,4 @@ let s:corresponding = matchup#delim#get_matching(s:current)
 call matchup#test#assert_equal(9, s:current.lnum)
 call matchup#test#assert_equal(1, len(s:corresponding))
 
-quit!
+call matchup#test#finished()
