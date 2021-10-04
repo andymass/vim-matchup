@@ -742,7 +742,7 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
       let l:win_cfg.border = has('nvim-0.5')
             \ && type(l:border) == v:t_string
             \ ? l:border : ['', '═' ,'╗', '║', '╝', '═', '', '']
-      if l:lnum >= line('.')
+      if !has('nvim-0.6') && l:lnum >= line('.')
         let l:win_cfg.row -= min([2, l:row - winline() - 1])
       endif
     endif
