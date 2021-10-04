@@ -40,3 +40,8 @@ env/pyvenv.cfg:
 	python3 -m venv env
 	. env/bin/activate
 	pip install -r requirements.txt
+
+ifndef MAKECMDGOALS
+test: sysinfo
+$(TESTS): sysinfo
+endif

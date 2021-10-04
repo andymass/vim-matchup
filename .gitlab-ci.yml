@@ -58,6 +58,21 @@ test-neovim:
     paths:
       - ./test/new/cov.tmp/
 
+test-neovim-treesitter:
+  stage: test
+  extends: .setup
+  image: alpine:latest
+  variables:
+    TESTS_ENABLE_TREESITTER: 1
+  script:
+    - git clone --depth=1 https://github.com/nvim-treesitter/nvim-treesitter.git test/vader/plugged/nvim-treesitter
+    - cd ./test/new
+    - nvim --headless -Nu common/bootstrap.vim -c 'TSInstallSync! python' -c 'TSInstallSync! ruby' -c 'q'
+    - make -j1
+  artifacts:
+    paths:
+      - ./test/new/cov.tmp/
+
 coverage:
   stage: gen_coverage
   extends: .setup
