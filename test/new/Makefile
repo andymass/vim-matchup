@@ -1,9 +1,10 @@
-COV ?= covimerage run --append --no-report \
-       --data-file $(CURDIR)/.coverage_covimerage \
+RANDOM := $(shell bash -c 'echo $$RANDOM')
+COVER = covimerage run --append --no-report \
+       --data-file $(CURDIR)/cov.tmp/_$(RANDOM)_coverage_covimerage_$@ \
        --source $(CURDIR)/../../autoload \
        --source $(CURDIR)/../../plugin
 MYVIM ?= nvim --headless
-MAKEFLAGS+=--no-print-directory
+MAKEFLAGS += --no-print-directory
 
 TESTS := $(wildcard test-*)
 
@@ -19,11 +20,15 @@ sysinfo:
 
 $(TESTS): env
 	@. env/bin/activate
-	MYVIM="$(COV) $(MYVIM)" $(MAKE) -C $@
+	mkdir -p cov.tmp
+	MYVIM="$(COVER) $(MYVIM)" $(MAKE) -C $@
 
 coverage: coverage.xml
 
-coverage.xml: env .coverage_covimerage
+cov.tmp/coverage_covimerage: $(wildcard cov.tmp/_*)
+	coverage combine $^
+
+coverage.xml: env cov.tmp/coverage_covimerage
 	. env/bin/activate
 	coverage report -m
 	coverage html
@@ -34,5 +39,4 @@ env: env/pyvenv.cfg
 env/pyvenv.cfg:
 	python3 -m venv env
 	. env/bin/activate
-	pip install setuptools wheel
-	pip install "click<8.0.0" coverage==4.5.4 covimerage==0.2.1
+	pip install -r requirements.txt

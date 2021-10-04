@@ -1,12 +1,13 @@
 stages:
   - test
+  - gen_coverage
   - deploy
 
 .setup:
   before_script:
     - apk update
-    - apk add curl git bash neovim
-    - apk add make python3
+    - apk add curl git bash make
+    - apk add neovim python3
     - curl -sSL https://bootstrap.pypa.io/get-pip.py | python3
 
 test-latest:
@@ -17,12 +18,10 @@ test-latest:
     entrypoint: [""]
   variables:
     MYVIM: vim -T dumb --not-a-term -n
-  script: cd ./test/new && make -j1 && make -j1 coverage
+  script: cd ./test/new && make -j1
   artifacts:
-    reports:
-      cobertura: ./test/new/coverage.xml
     paths:
-      - ./test/new/htmlcov/
+      - ./test/new/cov.tmp/
 
 test-8.0.1575:
   stage: test
@@ -33,6 +32,9 @@ test-8.0.1575:
   variables:
     MYVIM: vim -T dumb --not-a-term -n
   script: cd ./test/new && make -j1
+  artifacts:
+    paths:
+      - ./test/new/cov.tmp/
 
 test-7.4.2273:
   stage: test
@@ -43,18 +45,38 @@ test-7.4.2273:
   variables:
     MYVIM: vim -T dumb --not-a-term -n
   script: cd ./test/new && make -j1
+  artifacts:
+    paths:
+      - ./test/new/cov.tmp/
+
+test-neovim:
+  stage: test
+  extends: .setup
+  image: alpine:latest
+  script: cd ./test/new && make -j1
+  artifacts:
+    paths:
+      - ./test/new/cov.tmp/
+
+coverage:
+  stage: gen_coverage
+  script: cd ./test/new && make -j1 coverage
+  artifacts:
+    reports:
+      cobertura: ./test/new/coverage.xml
 
 pages:
   stage: deploy
   image: ruby:2.3
   script:
-    - mv ./test/new/htmlcov public
+    - mkdir public
+    - mv ./test/new/htmlcov public/
   artifacts:
     paths:
       - public
     expire_in: 30 days
   dependencies:
-    - test-latest
+    - coverage
   only:
     - master
     - dev-test-ts-split
