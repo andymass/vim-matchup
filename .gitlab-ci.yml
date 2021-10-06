@@ -9,6 +9,7 @@ stages:
     - apk add curl git bash make
     - apk add build-base neovim python3
     - curl -sSL https://bootstrap.pypa.io/get-pip.py | python3
+    - git clone --depth=1 https://github.com/junegunn/vader.vim.git ./test/vader/vader.vim
 
 test-latest:
   stage: test
