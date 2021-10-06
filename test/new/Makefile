@@ -1,5 +1,5 @@
 RANDOM := $(shell bash -c 'echo $$RANDOM')
-COVER = covimerage run --append --no-report \
+COVER = covimerage -q run --append --no-report \
        --data-file $(CURDIR)/cov.tmp/_$(RANDOM)_coverage_covimerage_$@ \
        --source $(CURDIR)/../../autoload \
        --source $(CURDIR)/../../plugin

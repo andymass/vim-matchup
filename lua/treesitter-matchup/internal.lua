@@ -322,7 +322,8 @@ end
 function M.get_option(bufnr, opt_name)
   local config = configs.get_module('matchup')
   local lang = parsers.get_buf_lang(bufnr)
-  if opt_name == 'include_match_words' then
+  if (opt_name == 'include_match_words'
+      or opt_name == 'additional_vim_regex_highlighting') then
     return opt_tbl_for_lang(config[opt_name], lang)
   end
   error('invalid option ' .. opt_name)
@@ -330,9 +331,9 @@ end
 
 function M.attach(bufnr, lang)
   -- local parser = parsers.get_parser(bufnr, lang)
-  local config = configs.get_module('matchup')
+  -- local config = configs.get_module('matchup')
 
-  if opt_tbl_for_lang(config.additional_vim_regex_highlighting, lang)
+  if M.get_option(bufnr, 'additional_vim_regex_highlighting')
       and api.nvim_buf_get_option(bufnr, 'syntax') == '' then
     api.nvim_buf_set_option(bufnr, 'syntax', 'ON')
   end
