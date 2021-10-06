@@ -636,9 +636,7 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
   let l:id = 0
 
   if l:side ==# 'open'
-    " XXX we might as well store all the groups...
-    "for l:br in keys(l:thisrecap.need_grp)
-    for l:br in range(1,9)
+    for l:br in keys(l:thisrecap.need_grp)
       if empty(l:matches[l:br]) | continue | endif
       let l:groups[l:br] = l:matches[l:br]
     endfor
@@ -647,10 +645,12 @@ function! s:parser_delim_new(lnum, cnum, opts) " {{{1
           \ ? len(l:thisrecap.mid_list)+1
           \ : l:mid_id
 
+    " groups here must be renumbered to match the open pattern
     if has_key(l:thisrecap.grp_renu, l:id)
       for [l:br, l:to] in items(l:thisrecap.grp_renu[l:id])
         let l:groups[l:to] = l:matches[l:br]
       endfor
+      " let l:groups[0] = l:matches[0]
     endif
 
     " fill in augment pattern
@@ -696,7 +696,8 @@ function! s:get_matching_delims(down, stopline) dict abort " {{{1
       \ : [self.regextwo.open, 'bW', max([line('.') - a:stopline, 1])]
 
   " these are the anchors for searchpairpos
-  let l:open = self.regexone.open     " TODO is this right? BADLOGIC
+  " default to the backref '\1' patterns which will be filled in
+  let l:open = self.regexone.open
   let l:close = self.regexone.close
 
   " if we're searching up, we anchor by the augment string, if it exists
@@ -704,18 +705,18 @@ function! s:get_matching_delims(down, stopline) dict abort " {{{1
     let l:open = self.augment.str
   endif
 
-  " TODO temporary workaround for BADLOGIC
-  if a:down && self.side ==# 'mid'
+  " if going down from mid, we might not have all the groups yet
+  " TODO this could be improved via close augment strings
+  if a:down && self.side ==# 'mid' && !empty(self.augment.unresolved)
     let l:open = self.regextwo.open
+    let l:close = self.regextwo.close
   endif
 
   " turn \(\) into \%(\) for searchpairpos
   let l:open  = matchup#loader#remove_capture_groups(l:open)
   let l:close = matchup#loader#remove_capture_groups(l:close)
 
-  " fill in back-references
-  " TODO: BADLOGIC2: when going up we don't have these groups yet..
-  " the second anchor needs to be mid/self for mid self
+  " fill in necessary back-references
   let l:open = matchup#delim#fill_backrefs(l:open, self.groups, 0)
   let l:close = matchup#delim#fill_backrefs(l:close, self.groups, 0)
 
@@ -784,24 +785,28 @@ function! s:get_matching_delims(down, stopline) dict abort " {{{1
     let l:re = s:process_hlend(l:re, -1)
   endif
 
-  " get the match and groups
+  " get the corresponding match and (additional) groups
   let l:has_zs = self.regextwo.extra_info.has_zs
   let l:re_anchored = l:ic . s:anchor_regex(l:re, l:cnum_corr, l:has_zs)
+
   let l:matches = matchlist(getline(l:lnum_corr), l:re_anchored)
   let l:match_corr = l:matches[0]
 
   " store these in these groups
   if a:down
-    " let l:id = len(self.regextwo.mid_list)+1
-    " for [l:from, l:to] in items(self.regextwo.grp_renu[l:id])
-    "   let self.groups[l:to] = l:matches[l:from]
-    " endfor
+    let l:id = len(self.regextwo.mid_list) + 1
+    for [l:from, l:to] in items(get(self.regextwo.grp_renu, l:id, {}))
+      if !has_key(self.groups, l:to) && !empty(l:matches[l:from])
+        let self.groups[l:to] = l:matches[l:from]
+      endif
+    endfor
   else
-    for l:to in range(1,9)
+    for l:to in keys(self.regextwo.need_grp)
       if !has_key(self.groups, l:to) && !empty(l:matches[l:to])
         " TODO mark context
         let self.groups[l:to] = l:matches[l:to]
       endif
+      " let self.groups[0] = l:matches[0]
     endfor
   endif
 
