@@ -1,1 +1,1 @@
-match-up: loading...normal_cmd( … { ▶ if (!(VIsual … { ▶ while (    ( … { ▶ if (ctrl_w) … {
+match-up: loading...normal_cmd( … { ▶ if (!(VIsual_active && … { ▶ while (    (c >= '1' & … { ▶ if (ctrl_w) … {
