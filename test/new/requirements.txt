@@ -1,0 +1,5 @@
+setuptools
+wheel
+click<8.0.0
+coverage==4.5.4
+covimerage==0.2.1

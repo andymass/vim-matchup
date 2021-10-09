@@ -1,5 +1,10 @@
+RANDOM := $(shell bash -c 'echo $$RANDOM')
+COVER = covimerage -q run --append --no-report \
+       --data-file $(CURDIR)/cov.tmp/_$(RANDOM)_coverage_covimerage_$@ \
+       --source $(CURDIR)/../../autoload \
+       --source $(CURDIR)/../../plugin
 MYVIM ?= nvim --headless
-MAKEFLAGS+=--no-print-directory
+MAKEFLAGS += --no-print-directory
 
 TESTS := $(wildcard test-*)
 
@@ -13,21 +18,30 @@ sysinfo:
 	@-$(MYVIM) --version
 	@echo "**** SYSTEM INFORMATION ****"
 
-$(TESTS):
-	$(MAKE) -C $@
+$(TESTS): env
+	@. env/bin/activate
+	mkdir -p cov.tmp
+	MYVIM="$(COVER) $(MYVIM)" $(MAKE) -C $@
 
-coverage: htmlcov/index.html
+coverage: coverage.xml
 
-htmlcov/index.html: env /tmp/vim-profile.txt
+cov.tmp/coverage_covimerage: $(wildcard cov.tmp/_*)
+	coverage combine $^
+
+coverage.xml: env cov.tmp/coverage_covimerage
 	. env/bin/activate
-	covimerage write_coverage /tmp/vim-profile.txt --source ../../autoload --source ../../plugin
 	coverage report -m
 	coverage html
+	coverage xml
 
 env: env/pyvenv.cfg
 
 env/pyvenv.cfg:
 	python3 -m venv env
-	. env/bin/activate;
-	pip install setuptools wheel
-	pip install "click<8.0.0" covimerage
+	. env/bin/activate
+	pip install -r requirements.txt
+
+ifndef MAKECMDGOALS
+test: sysinfo
+$(TESTS): sysinfo
+endif

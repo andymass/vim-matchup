@@ -1,10 +1,12 @@
 <div align="center">
 <p>
-<img src='https://github.com/andymass/matchup.vim/wiki/images/teaser.jpg' width='300px' alt='and in this corner...' />
+<img src='https://github.com/andymass/matchup.vim/wiki/images/teaser.jpg' width='250px' alt='and in this corner...' />
 </p>
 </div>
 
-# vim match-up
+<h1 align="center">
+  vim match-up :fist_right::fist_left:
+</h1>
 
 match-up is a plugin that lets you highlight, navigate, and operate on
 sets of matching text.  It extends vim's `%` key to language-specific

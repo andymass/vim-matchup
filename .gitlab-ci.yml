@@ -1,0 +1,102 @@
+stages:
+  - test
+  - gen_coverage
+  - deploy
+
+.setup:
+  before_script:
+    - apk update
+    - apk add curl git bash make
+    - apk add build-base neovim python3
+    - curl -sSL https://bootstrap.pypa.io/get-pip.py | python3
+    - git clone --depth=1 https://github.com/junegunn/vader.vim.git ./test/vader/vader.vim
+
+test-latest:
+  stage: test
+  extends: .setup
+  image:
+    name: thinca/vim:latest-full
+    entrypoint: [""]
+  variables:
+    MYVIM: vim -T dumb --not-a-term -n
+  script: cd ./test/new && make -j1
+  artifacts:
+    paths:
+      - ./test/new/cov.tmp/
+
+test-8.0.1575:
+  stage: test
+  extends: .setup
+  image:
+    name: thinca/vim:v8.0.1575-full
+    entrypoint: [""]
+  variables:
+    MYVIM: vim -T dumb --not-a-term -n
+  script: cd ./test/new && make -j1
+  artifacts:
+    paths:
+      - ./test/new/cov.tmp/
+
+test-7.4.2273:
+  stage: test
+  extends: .setup
+  image:
+    name: thinca/vim:v7.4.2273-full
+    entrypoint: [""]
+  variables:
+    MYVIM: vim -T dumb --not-a-term -n
+  script: cd ./test/new && make -j1
+  artifacts:
+    paths:
+      - ./test/new/cov.tmp/
+
+test-neovim:
+  stage: test
+  extends: .setup
+  image: alpine:latest
+  script: cd ./test/new && make -j1
+  artifacts:
+    paths:
+      - ./test/new/cov.tmp/
+
+test-neovim-treesitter:
+  stage: test
+  extends: .setup
+  image: alpine:edge
+  variables:
+    TESTS_ENABLE_TREESITTER: 1
+  script:
+    - git clone --depth=1 https://github.com/nvim-treesitter/nvim-treesitter.git test/vader/plugged/nvim-treesitter
+    - cd ./test/new
+    - nvim --headless -Nu common/bootstrap.vim -c 'TSInstallSync! python' -c 'TSInstallSync! ruby' -c 'q'
+    - make -j1
+  artifacts:
+    paths:
+      - ./test/new/cov.tmp/
+
+coverage:
+  stage: gen_coverage
+  extends: .setup
+  image: alpine:latest
+  script: cd ./test/new && make -j1 coverage
+  artifacts:
+    reports:
+      cobertura: ./test/new/coverage.xml
+    paths:
+      - ./test/new/htmlcov
+
+pages:
+  stage: deploy
+  image: ruby:2.3
+  script:
+    - mkdir public
+    - mv ./test/new/htmlcov public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  dependencies:
+    - coverage
+  only:
+    - master
+    - dev-test-ts-split
