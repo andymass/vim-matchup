@@ -404,7 +404,9 @@ function! s:get_delim(opts) abort " {{{1
   " note: we expect this to give false-positives with \ze
   if a:opts.direction ==# 'current'
     let l:re .= '\%>'.(l:cursorpos).'c'
-  "  let l:re = '\%<'.(l:cursorpos+1).'c' . l:re
+    if l:insertmode
+      let l:re = '\%<'.(l:cursorpos+1).'c' . l:re
+    endif
   endif
 
   " allow overlapping delimiters
@@ -420,8 +422,8 @@ function! s:get_delim(opts) abort " {{{1
   " move cursor one left for searchpos if necessary
   let l:need_restore_cursor = 0
   if l:insertmode
-    call matchup#pos#set_cursor(line('.'), col('.')-1)
-    let l:need_restore_cursor = 1
+    " call matchup#pos#set_cursor(line('.'), col('.')-1)
+    " let l:need_restore_cursor = 1
   endif
 
   " stopline may depend on the current action
