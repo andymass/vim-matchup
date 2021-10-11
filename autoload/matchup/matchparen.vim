@@ -342,6 +342,9 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
   if !g:matchup_matchparen_pumvisible && pumvisible() | return | endif
 
+  " try to avoid interfering with some auto-complete plugins
+  if has('*state') && state('a') !=# '' | return | endif
+
   if !get(b:, 'matchup_matchparen_enabled', 1)
         \ && get(b:, 'matchup_matchparen_fallback', 1) && s:pi_paren_sid()
     return call(s:pi_paren_fcn, [])

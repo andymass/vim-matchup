@@ -361,6 +361,8 @@ function! s:get_delim(opts) abort " {{{1
     return {}
   endif
 
+  if has('*state') && state('a') !=# '' | return {} | endif
+
   call matchup#perf#tic('s:get_delim')
 
   let l:save_pos = matchup#pos#get_cursor()
@@ -750,6 +752,7 @@ function! s:get_matching_delims(down, stopline) dict abort " {{{1
   " improves perceptual performance in insert mode
   if mode() ==# 'i' || mode() ==# 'R'
     if !g:matchup_matchparen_deferred
+          \ && exists('*state') && state('s') ==# ''
       sleep 1m
     endif
   endif
