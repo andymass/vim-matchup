@@ -187,8 +187,9 @@ void some_func() {
 Since in C and C++, blocks are delimited using braces (`{` & `}`),
 match-up will recognize `{` as the open word and `}` as the close word.
 It will ignore the `if` and `else if` because they are not defined in
-vim's C file type plugin.
-With [Tree-sitter](#tree-sitter-integration)
+vim's default C file type plugin.
+(Note: In neovim, this is optionally supported via
+[Tree-sitter](#tree-sitter-integration))
 
 On the other hand, match-up will recognize the `#if`, `#else`, `#endif`
 preprocessor directives.
@@ -562,8 +563,9 @@ following optional keys:
   `'popup'`: Show off-screen matches in a popup (vim) or
   floating (neovim) window.
 
-  `'status_manual'`: Compute the status-line but do not display it (future
-  extension).
+  `'status_manual'`: Compute the string which would be displayed in the
+  status-line or popup, but do not display it.  The function
+  `MatchupStatusOffscreen()` can be used to get the text.
 
 - `scrolloff`:
   When enabled, off-screen matches will not be shown in the statusline while
@@ -780,7 +782,8 @@ have customized vimtex's delimiters.
 ### Surroundings
 
 match-up provides built-in support for [vim-surround]-style `ds%` and
-`cs%` operations.  If vim-surround is installed, you can use vim-surround
+`cs%` operations (`let g:matchup_surround_enabled = 1`).
+If vim-surround is installed, you can use vim-surround
 replacements such as `cs%)`.  `%` cannot be used as a replacement.
 An alternative plugin is [vim-sandwich], which allows more complex
 surround replacement rules but is not currently supported.

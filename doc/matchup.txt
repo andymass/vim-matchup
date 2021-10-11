@@ -629,8 +629,9 @@ Module matchparen~
     an additional Δ symbol will be shown to indicate that the matching line is
     really above the cursor line.
 
-    `'status_manual'`: Compute the status-line but do not display it (future
-    extension).
+    `'status_manual'`: Compute the string which would be displayed in the
+    status-line or popup, but do not display it.  The function
+    `MatchupStatusOffscreen()` can be used to get the text.
 
     `'popup'`: Use a popup window (requires at least vim 8.1.1406) or
     a floating window (in neovim) to show the off-screen match.
@@ -650,6 +651,19 @@ Module matchparen~
       let g:matchup_matchparen_offscreen
           \ = {'method': 'popup', 'highlight': 'OffscreenPopup'}
 <
+  syntax_hl~
+    For popup method on vim only: syntax highlight the code in the popup.
+    May have performance implications.
+
+    Default: 0
+
+  border~
+    For floating window on neovim only: set to add a border.  If the value
+    is the integer 1, default borders are enabled.  A list or string can
+    be specified as described in |nvim_open_win()|.
+
+    Default: 0
+
   Default: `{'method': 'status'}`
 
 *g:matchup_matchparen_stopline*
