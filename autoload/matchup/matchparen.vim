@@ -47,6 +47,9 @@ function! matchup#matchparen#enable() " {{{1
     autocmd WinLeave,BufLeave * call s:matchparen.clear()
     autocmd InsertEnter,InsertChange * call s:matchparen.highlight(1, 1)
     autocmd InsertLeave * call s:matchparen.highlight(1)
+    if v:version >= 800
+      autocmd OptionSet signcolumn call s:matchparen.highlight(1)
+    endif
   augroup END
 
   if has('vim_starting')
