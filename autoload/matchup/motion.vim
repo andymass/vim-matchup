@@ -313,6 +313,59 @@ function! matchup#motion#jump_inside(visual) " {{{1
 endfunction
 
 " }}}1
+function! matchup#motion#jump_inside_prev(visual) abort " {{{1
+  let l:count = v:count1
+
+  let l:save_pos = matchup#pos#get_cursor()
+
+  call matchup#perf#timeout_start(750)
+
+  if a:visual
+    normal! gv
+  endif
+
+  for l:counter in range(l:count + 1)
+    if l:counter
+      let l:delim = matchup#delim#get_prev('all', 'open')
+    else
+      let l:delim = matchup#delim#get_current('all', 'open')
+      if empty(l:delim)
+        let l:delim = matchup#delim#get_prev('all', 'open')
+      endif
+    endif
+    if empty(l:delim)
+      call matchup#pos#set_cursor(l:save_pos)
+      return
+    endif
+
+    let l:new_pos = [l:delim.lnum, l:delim.cnum]
+    call matchup#pos#set_cursor(matchup#pos#prev(l:delim))
+    let l:new_pos[1] += matchup#delim#end_offset(l:delim)
+  endfor
+
+  call matchup#pos#set_cursor(l:save_pos)
+
+  " convert to [~, lnum, cnum, ~] format
+  let l:new_pos = matchup#pos#next(l:new_pos)
+
+  let l:is_oper = !empty(get(s:, 'v_operator', ''))
+
+  " handle selection option 'exclusive'
+  if l:is_oper && &selection ==# 'exclusive'
+    let l:new_pos = matchup#pos#next_eol(l:new_pos)
+    " normal! o
+    " call matchup#pos#set_cursor(matchup#pos#next_eol(
+    "       \ matchup#pos#get_cursor()))
+    " normal! o
+  endif
+
+  if !g:matchup_motion_keepjumps
+    normal! m`
+  endif
+  call matchup#pos#set_cursor(l:new_pos)
+endfunction
+
+" }}}1
 function! matchup#motion#insert_mode() " {{{1
   call matchup#perf#timeout_start(0) " disable the timeout
 

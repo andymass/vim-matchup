@@ -294,6 +294,16 @@ function! s:motion_init_module() " {{{1
   onoremap <silent> <plug>(matchup-z%)
         \ :<c-u>call matchup#motion#op('z%')<cr>
 
+  " 'opposite' of z%
+  nnoremap <silent> <plug>(matchup-Z%)
+        \ :<c-u>call matchup#motion#jump_inside_prev(0)<cr>
+
+  xnoremap <silent> <sid>(matchup-Z%)
+        \ :<c-u>call matchup#motion#jump_inside_prev(1)<cr>
+  xmap     <silent> <plug>(matchup-Z%) <sid>(matchup-Z%)
+  onoremap <silent> <plug>(matchup-Z%)
+        \ :<c-u>call matchup#motion#op('Z%')<cr>
+
   inoremap <silent> <plug>(matchup-c_g%)
         \ <c-\><c-o>:call matchup#motion#insert_mode()<cr>
 
