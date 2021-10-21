@@ -609,7 +609,7 @@ function! s:do_offscreen_popup(offscreen) " {{{1
   let l:line = l:lnum < line('.') ? l:row : l:row + l:height - 1
 
   " if popup would overlap with cursor
-  if l:line == winline() | return | endif
+  if l:line == winline() + l:row - 1 | return | endif
 
   call popup_move(t:match_popup, {
         \ 'line': l:line,
