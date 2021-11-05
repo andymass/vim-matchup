@@ -1086,7 +1086,8 @@ function! s:add_matches(corrlist, ...) " {{{1
     endif
 
     if exists('s:ns_id')
-      if strlen(l:corr.match) == 0
+      if strlen(l:corr.match) == 0 && !matchup#ts_engine#get_option(
+            \ bufnr('%'), 'disable_virtual_text')
         call nvim_buf_set_extmark(0, s:ns_id,
               \ l:corr.lnum - 1, l:corr.cnum - 1, {
               \   'virt_text': [['◀ ' . a:corrlist[0].match, l:group]],

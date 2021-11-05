@@ -320,10 +320,11 @@ local function opt_tbl_for_lang(opt, lang)
 end
 
 function M.get_option(bufnr, opt_name)
-  local config = configs.get_module('matchup')
+  local config = configs.get_module('matchup') or {}
   local lang = parsers.get_buf_lang(bufnr)
   if (opt_name == 'include_match_words'
-      or opt_name == 'additional_vim_regex_highlighting') then
+      or opt_name == 'additional_vim_regex_highlighting'
+      or opt_name == 'disable_virtual_text') then
     return opt_tbl_for_lang(config[opt_name], lang)
   end
   error('invalid option ' .. opt_name)
