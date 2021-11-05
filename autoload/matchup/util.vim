@@ -158,7 +158,31 @@ endfunction
 
 " }}}1
 
+function! matchup#util#standard_html(...) abort " {{{1
+  let l:prefs = a:0 ? a:1 : {}
+
+  let l:words = '<:>,<\@<=!--:-->'
+
+  if get(l:prefs, 'lists', 0)
+    let l:words .= ',<\@<=[ou]l\>[^>]*\%(>\|$\):<\@<=li\>:<\@<=/[ou]l>'
+    let l:words .= ',<\@<=dl\>[^>]*\%(>\|$\):<\@<=d[td]\>:<\@<=/dl>'
+  endif
+
+  if get(l:prefs, 'tagnameonly', 1)
+    let l:words .= ',<\@<=\([^/][^ \t>]*\)\g{hlend}'
+          \ . '\%(>\|$\|[ \t][^>]*\%(>\|$\)\)'
+          \ . ':<\@<=/\1\g{hlend}>'
+  else
+    let l:words .= ',<\@<=\([^/][^ \t>]*\)'
+          \ . '\%(>\|$\|[ \t][^>]*\%(>\|$\)\)'
+          \ . ':<\@<=/\1>'
+  endif
+
+  return l:words
+endfunction
+
+" }}}1
+
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
-
