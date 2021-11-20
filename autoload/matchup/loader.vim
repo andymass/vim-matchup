@@ -32,10 +32,14 @@ function! matchup#loader#init_buffer() abort " {{{1
     endif
   endif
 
+  echo 'loader' has('nvim-0.5.0') &syntax '|'
+
   let l:has_ts_hl = 0
   if has('nvim-0.5.0') && empty(&syntax)
         \ && matchup#ts_engine#is_hl_enabled(bufnr('%'))
     let l:has_ts_hl = 1
+
+    echo 'fix syn'
 
     if matchup#ts_engine#get_option(
           \ bufnr('%'), 'additional_vim_regex_highlighting')

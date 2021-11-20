@@ -57,6 +57,7 @@ if empty(&syntax)
 endif
 
 function! s:match_test(pos, check) abort
+  echo b:matchup_delim_skip
   call matchup#pos#set_cursor(a:pos)
   echo matchup#pos#get_cursor()
   normal %
