@@ -54,7 +54,7 @@ function! matchup#loader#init_buffer() abort " {{{1
   " process b:match_skip
   if l:has_ts_hl
     let b:matchup_delim_skip
-          \ = "matchup#ts_syntax#skip_expr(line('.'), col('.'))"
+          \ = "matchup#ts_syntax#skip_expr(s:effline('.'),s:effcol('.'))"
   else
     let b:matchup_delim_skip = s:init_delim_skip()
   endif

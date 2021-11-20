@@ -43,6 +43,8 @@ call matchup#loader#init_buffer()
 
 if s:expect_ts_engine
   call assert_equal(2, len(b:matchup_active_engines.delim_all))
+else
+  call assert_equal(1, len(b:matchup_active_engines.delim_all))
 endif
 
 if $MODE == 2
