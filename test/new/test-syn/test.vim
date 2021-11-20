@@ -57,6 +57,7 @@ if empty(&syntax)
 endif
 
 function! s:match_test(pos, check) abort
+  call matchup#delim#skip()
   call matchup#pos#set_cursor(a:pos)
   normal %
   let l:curpos = matchup#pos#get_cursor()[1:2]
