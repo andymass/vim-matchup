@@ -57,13 +57,13 @@ if empty(&syntax)
 endif
 
 function! s:match_test(pos, check) abort
-  echo b:matchup_delim_skip
+  " echo b:matchup_delim_skip
   " call matchup#delim#set_invert_skip(0)
   echo 'skip' matchup#delim#skip()
   call matchup#pos#set_cursor(a:pos)
-  echo matchup#pos#get_cursor()
+  " echo matchup#pos#get_cursor()
   normal %
-  echo matchup#pos#get_cursor()
+  " echo matchup#pos#get_cursor()
   let l:curpos = matchup#pos#get_cursor()[1:2]
   call matchup#test#assert_equal(a:check, l:curpos)
 endfunction
