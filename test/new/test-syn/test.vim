@@ -2,7 +2,6 @@ set nocompatible
 source ../common/bootstrap.vim
 
 if !$TESTS_ENABLE_TREESITTER && $MODE > 0
-  echo 'Exiting'
   call matchup#test#finished()
 endif
 
