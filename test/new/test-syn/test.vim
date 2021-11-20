@@ -60,7 +60,9 @@ function! s:match_test(pos, check) abort
   call matchup#pos#set_cursor(a:pos)
   echo b:match_words
   echo b:matchup_delim_lists
+  sleep 1m
   normal %
+  sleep 1m
   let l:curpos = matchup#pos#get_cursor()[1:2]
   call matchup#test#assert_equal(a:check, l:curpos)
 endfunction
