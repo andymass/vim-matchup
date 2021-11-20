@@ -9,7 +9,7 @@ scriptencoding utf-8
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! matchup#matchparen#init_module() " {{{1
+function! matchup#matchparen#init_module() abort " {{{1
   if !g:matchup_matchparen_enabled | return | endif
 
   call matchup#matchparen#enable()
@@ -1088,10 +1088,13 @@ function! s:add_matches(corrlist, ...) " {{{1
     if exists('s:ns_id')
       if strlen(l:corr.match) == 0 && !matchup#ts_engine#get_option(
             \ bufnr('%'), 'disable_virtual_text')
+        if hlexists('MatchupVirtualText')
+          let l:group = 'MatchupVirtualText'
+        endif
         call nvim_buf_set_extmark(0, s:ns_id,
               \ l:corr.lnum - 1, l:corr.cnum - 1, {
-              \   'virt_text': [[g:matchup_matchparen_end_sign . ' ' .
-              \    a:corrlist[0].match, l:group]],
+              \   'virt_text': [[g:matchup_matchparen_end_sign . ' '
+              \                  . a:corrlist[0].match, l:group]],
               \})
       else
         call nvim_buf_add_highlight(0, s:ns_id, l:group,
