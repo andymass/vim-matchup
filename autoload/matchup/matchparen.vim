@@ -1025,7 +1025,7 @@ function! matchup#matchparen#status_str(offscreen, ...) abort " {{{1
   if empty(a:offscreen.links.close.match)
     let l:hi = s:wordish(a:offscreen.links.open)
           \ ? 'MatchWord' : 'MatchParen'
-    let l:sl .= ' ◀ ' . '%#' . l:hi . '#'
+    let l:sl .= ' ' . g:matchup_matchparen_end_sign . ' %#' . l:hi . '#'
           \ . a:offscreen.links.open.match . '%#Normal#'
   endif
 
@@ -1090,7 +1090,8 @@ function! s:add_matches(corrlist, ...) " {{{1
             \ bufnr('%'), 'disable_virtual_text')
         call nvim_buf_set_extmark(0, s:ns_id,
               \ l:corr.lnum - 1, l:corr.cnum - 1, {
-              \   'virt_text': [['◀ ' . a:corrlist[0].match, l:group]],
+              \   'virt_text': [[g:matchup_matchparen_end_sign . ' ' .
+              \    a:corrlist[0].match, l:group]],
               \})
       else
         call nvim_buf_add_highlight(0, s:ns_id, l:group,

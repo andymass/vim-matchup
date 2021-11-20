@@ -106,7 +106,7 @@ endfunction
 
 function! s:arrow()
   if empty(g:matchup_where_separator)
-    return '▶'
+    return g:matchup_matchparen_start_sign
   endif
   return g:matchup_where_separator
 endfunction
