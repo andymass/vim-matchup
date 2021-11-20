@@ -58,6 +58,8 @@ endif
 
 function! s:match_test(pos, check) abort
   echo b:matchup_delim_skip
+  call matchup#delim#set_invert_skip(0)
+  echo 'skip' matchup#delim#skip()
   call matchup#pos#set_cursor(a:pos)
   echo matchup#pos#get_cursor()
   normal %
