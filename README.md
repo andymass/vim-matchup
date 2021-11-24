@@ -121,6 +121,7 @@ EOF
 | ([a.2]) | jump to open & close words       | :thumbsup:     | :thumbsup:    | :x:           |
 | ([a.3]) | jump inside (`z%`)               | :thumbsup:     | :x:           | :x:           |
 | ([b.1]) | full set of text objects         | :thumbsup:     | :question:    | :x:           |
+| ([b.2]) | delete surrounding matched words | :thumbsup:     | :x:           | :x:           |
 | ([c.1]) | highlight `()`, `[]`, & `{}`     | :thumbsup:     | :x:           | :thumbsup:    |
 | ([c.2]) | highlight _all_ matching words   | :thumbsup:     | :x:           | :x:           |
 | ([c.3]) | display matches off-screen       | :thumbsup:     | :x:           | :x:           |
@@ -131,6 +132,7 @@ EOF
 [a.2]: #a2-jump-to-open-and-close-words
 [a.3]: #a3-jump-inside
 [b.1]: #b1-full-set-of-text-objects
+[b.2]: #surroundings
 [c.1]: #c1-highlight---and-
 [c.2]: #c2-highlight-all-matches
 [c.3]: #c3-display-matches-off-screen
