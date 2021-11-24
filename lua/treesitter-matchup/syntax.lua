@@ -9,6 +9,8 @@ end
 
 local api = vim.api
 local hl_info = require'treesitter-matchup.third-party.hl-info'
+local queries = require'treesitter-matchup.third-party.query'
+local ts_utils = require'nvim-treesitter.ts_utils'
 
 local M = {}
 
@@ -16,6 +18,40 @@ function M.is_active(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
   return (hl_info.active()
     and api.nvim_buf_get_option(bufnr, 'syntax') == '')
+end
+
+--- Get all nodes that are marked as skip
+function M.get_skips(bufnr)
+  local matches = queries.get_matches(bufnr, 'matchup')
+
+  local skips = {}
+
+  for _, match in ipairs(matches) do
+    if match.skip then
+      skips[match.skip.node:id()] = 1
+    end
+  end
+
+  return skips
+end
+
+function M.lang_skip(lnum, col)
+  local bufnr = api.nvim_get_current_buf()
+  local skips = M.get_skips(bufnr)
+
+  if vim.tbl_isempty(skips) then
+    return false
+  end
+
+  local node = ts_utils.get_node_at_cursor()
+  if not node then
+    return false
+  end
+  if skips[node:id()] then
+    return true
+  end
+
+  return false
 end
 
 function M.synID(lnum, col, transparent)

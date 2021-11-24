@@ -63,3 +63,5 @@
 (do_block
   "do" @open.do
   "end" @close.do) @scope.do
+
+(if_modifier) @skip
