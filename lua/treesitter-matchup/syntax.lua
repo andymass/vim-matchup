@@ -11,6 +11,7 @@ local api = vim.api
 local hl_info = require'treesitter-matchup.third-party.hl-info'
 local queries = require'treesitter-matchup.third-party.query'
 local ts_utils = require'nvim-treesitter.ts_utils'
+local parsers = require'nvim-treesitter.parsers'
 
 local M = {}
 
@@ -35,6 +36,25 @@ function M.get_skips(bufnr)
   return skips
 end
 
+local function get_node_at_pos(cursor)
+  local cursor_range = { cursor[1] - 1, cursor[2] }
+
+  local buf = vim.api.nvim_win_get_buf(0)
+  local root_lang_tree = parsers.get_parser(buf)
+  if not root_lang_tree then
+    return
+  end
+  local root = ts_utils.get_root_for_position(
+    cursor_range[1], cursor_range[2], root_lang_tree)
+
+  if not root then
+    return
+  end
+
+  return root:named_descendant_for_range(
+    cursor_range[1], cursor_range[2], cursor_range[1], cursor_range[2])
+end
+
 function M.lang_skip(lnum, col)
   local bufnr = api.nvim_get_current_buf()
   local skips = M.get_skips(bufnr)
@@ -43,7 +63,7 @@ function M.lang_skip(lnum, col)
     return false
   end
 
-  local node = ts_utils.get_node_at_cursor()
+  local node = get_node_at_pos({lnum, col - 1})
   if not node then
     return false
   end
