@@ -643,6 +643,12 @@ Module matchparen~
 
     Default: 0
 
+  fullwidth~
+    For popup method: make the floating or popup window as wide as the
+    current window.
+
+    Default: 0
+
   highlight~
     For popup method on vim only: set to a highlight group to override the
     colors in the popup window.  The default is to use *hl-Pmenu*.  Example:
