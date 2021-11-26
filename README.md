@@ -76,8 +76,9 @@ Plug 'andymass/vim-matchup'
 and then use `:PlugInstall`.  Or, you can use any other plugin manager such as
 [vundle](https://github.com/gmarik/vundle),
 [dein](https://github.com/Shougo/dein.vim),
-[neobundle](https://github.com/Shougo/neobundle.vim), or
-[pathogen](https://github.com/tpope/vim-pathogen).
+[neobundle](https://github.com/Shougo/neobundle.vim),
+[pathogen](https://github.com/tpope/vim-pathogen), or
+[packer](https://github.com/wbthomason/packer.nvim).
 
 match-up should automatically disable matchit and matchparen, but if you
 are still having trouble, try placing this near the top of your vimrc:
@@ -108,10 +109,25 @@ require'nvim-treesitter.configs'.setup {
   matchup = {
     enable = true,              -- mandatory, false will disable the whole extension
     disable = { "c", "ruby" },  -- optional, list of language that will be disabled
+    -- [options]
   },
 }
 EOF
 ```
+
+Beside `enable` and `disable`, the following options are available, all
+defaulting to disabled:
+
+  - `disable_virtual_text`: do not use virtual text to highlight the
+  virtual end of a block, for languages without explicit end markers
+  (e.g., Python).
+  - `include_match_words`: additionally include traditional vim regex
+  matches for symbols.  For example, highlights `/* */` comments in C++
+  which are not supported in tree-sitter matching.
+
+Screenshot:
+
+<img src='https://user-images.githubusercontent.com/6655373/143594648-c178c4f0-24c3-4b81-a213-3e615dbd17c6.png' width='450px'>
 
 ## Features
 
