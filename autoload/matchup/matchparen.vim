@@ -143,8 +143,9 @@ function! s:matchparen.clear() abort dict " {{{1
     call nvim_buf_clear_namespace(0, s:ns_id, 0, -1)
   endif
 
-  if exists('t:match_popup') && (exists('*win_gettype')
+  if !has('nvim') && exists('t:match_popup') && (exists('*win_gettype')
         \ ? win_gettype() !=# 'popup' : &buftype !=# 'terminal')
+    call s:do_popup_autocmd_leave(t:match_popup)
     call popup_hide(t:match_popup)
   elseif has('nvim')
     call s:close_floating_win()
@@ -516,6 +517,23 @@ endfunction
 
 " }}}1
 
+function! s:do_popup_autocmd_enter(win_context) abort "{{{1
+  if exists('#User#MatchupOffscreenEnter') && exists('*win_execute')
+    call win_execute(a:win_context,
+          \ 'doautocmd <nomodeline> User MatchupOffscreenEnter')
+  endif
+endfunction
+
+" }}}1
+function! s:do_popup_autocmd_leave(win_context) abort "{{{1
+  if exists('#User#MatchupOffscreenEnter') && exists('*win_execute')
+    call win_execute(a:win_context,
+          \ 'doautocmd <nomodeline> User MatchupOffscreenLeave')
+  endif
+endfunction
+
+" }}}1
+
 function! s:do_offscreen(current, method) " {{{1
   let l:offscreen = {}
 
@@ -635,6 +653,8 @@ function! s:do_offscreen_popup(offscreen) " {{{1
   call popup_setoptions(t:match_popup, {'padding': [0, l:rpad, 0, 0]})
 
   call popup_show(t:match_popup)
+
+  call s:do_popup_autocmd_enter(t:match_popup)
 endfunction
 
 function! s:set_popup_text(lnum, adjust, offscreen) abort
@@ -789,6 +809,10 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
               \ . '|if s:float_id == 0|au! matchup_matchparen_scroll|endif'
       augroup END
     endif
+
+    if s:float_id
+      call s:do_popup_autocmd_enter(s:float_id)
+    endif
   endif
 endfunction
 
@@ -838,6 +862,7 @@ function! s:close_floating_win() " {{{1
     return
   endif
   if win_id2win(s:float_id) > 0
+    call s:do_popup_autocmd_leave(s:float_id)
     call nvim_win_close(s:float_id, 0)
   endif
   let s:float_id = 0
