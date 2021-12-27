@@ -1116,9 +1116,10 @@ function! s:add_matches(corrlist, ...) " {{{1
         if hlexists('MatchupVirtualText')
           let l:group = 'MatchupVirtualText'
         endif
+        echo l:corr.lnum l:corr.cnum
         call nvim_buf_set_extmark(0, s:ns_id,
-              \ l:corr.lnum - 1, l:corr.cnum, {
-              \   'virt_text': [[g:matchup_matchparen_end_sign . ' '
+              \ l:corr.lnum - 1, l:corr.cnum - 1, {
+              \   'virt_text': [[' ' . g:matchup_matchparen_end_sign . ' '
               \                  . a:corrlist[0].match, l:group]],
               \   'virt_text_pos': 'overlay'
               \})
