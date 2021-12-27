@@ -598,10 +598,6 @@ function! s:ensure_match_popup() abort " {{{1
   if has_key(g:matchup_matchparen_offscreen, 'highlight')
     let l:opts.highlight = g:matchup_matchparen_offscreen.highlight
   endif
-  if has_key(g:matchup_matchparen_offscreen, 'popup_options')
-    call extend(l:opts,
-          \ g:matchup_matchparen_offscreen.popup_options)
-  endif
   let t:match_popup = popup_create('', l:opts)
 
   if !has('patch-8.1.1406')
@@ -781,10 +777,6 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
       if !has('nvim-0.6') && l:lnum >= line('.')
         let l:win_cfg.row -= min([2, l:row - winline() - 1])
       endif
-    endif
-    if has_key(g:matchup_matchparen_offscreen, 'float_options')
-      call extend(l:win_cfg,
-            \ g:matchup_matchparen_offscreen.float_options)
     endif
     let s:float_id = nvim_open_win(bufnr('%'), v:false, l:win_cfg)
 
