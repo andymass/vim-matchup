@@ -166,13 +166,16 @@ endfunction
 
 " }}}1
 
+let s:ignore_key = len(expand("\<ignore>")) > 0 ? '<ignore>' : ''
+
 function! s:init_default_mappings()
   if !get(g:,'matchup_mappings_enabled', 1) | return | endif
 
   function! s:map(mode, lhs, rhs, ...)
+    let l:ign = a:mode ==# 'o' ? s:ignore_key : ''
     if !hasmapto(a:rhs, a:mode)
           \ && ((a:0 > 0) || (maparg(a:lhs, a:mode) ==# ''))
-      silent execute a:mode . 'map <silent> ' a:lhs a:rhs
+      silent execute a:mode . 'map <silent> ' a:lhs l:ign . a:rhs
     endif
   endfunction
 

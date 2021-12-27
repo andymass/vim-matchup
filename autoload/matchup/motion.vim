@@ -26,6 +26,10 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
 
   let l:is_oper = !empty(get(s:, 'v_operator', ''))
 
+  " echo mode(1)
+  "       \ a:visual l:is_oper get(s:, 'v_operator') 
+  "       \ v:operator reg_executing()
+
   if a:visual && !l:is_oper
     normal! gv
   endif

@@ -12,6 +12,10 @@ local function do_setup(opts, validate)
   end
 end
 
+function additional_setup()
+  require'match-up.which-key'.setup_which_key()
+end
+
 function M.setup(opts)
   local sync = opts.sync
   if sync then
@@ -19,6 +23,8 @@ function M.setup(opts)
   end
 
   do_setup(opts, sync)
+
+  additional_setup()
 end
 
 return M
