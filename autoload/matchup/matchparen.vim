@@ -720,14 +720,15 @@ function! s:set_popup_text_2(lnum, adjust, offscreen) abort
     endif
 
     let l:key = 'matchup__' . l:hl
-    if !has_key(s:prop_cache, l:key)
-      if empty(prop_type_get(l:key, {'bufnr': winbufnr(t:match_popup)}))
+    let l:popup_bufnr = winbufnr(t:match_popup)
+    if !has_key(s:prop_cache, l:key . '__' . l:popup_bufnr)
+      if empty(prop_type_get(l:key, {'bufnr': l:popup_bufnr}))
         call prop_type_add(l:key, {
-              \ 'bufnr': winbufnr(t:match_popup),
+              \ 'bufnr': l:popup_bufnr,
               \ 'highlight': l:hl
               \})
       endif
-      let s:prop_cache[l:key] = 1
+      let s:prop_cache[l:key . '__' . l:popup_bufnr] = 1
     endif
 
     call add(l:props, {
