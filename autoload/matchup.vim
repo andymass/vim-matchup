@@ -166,6 +166,8 @@ endfunction
 
 " }}}1
 
+let s:ignore_key = len(expand("\<ignore>")) > 0 ? '<ignore>' : ''
+
 function! s:init_default_mappings()
   if !get(g:,'matchup_mappings_enabled', 1) | return | endif
 
@@ -173,6 +175,13 @@ function! s:init_default_mappings()
     if !hasmapto(a:rhs, a:mode)
           \ && ((a:0 > 0) || (maparg(a:lhs, a:mode) ==# ''))
       silent execute a:mode . 'map <silent> ' a:lhs a:rhs
+    endif
+  endfunction
+
+  function! s:omap(mode, lhs, rhs, ...)  " issues/199
+    if !hasmapto(a:rhs, a:mode)
+          \ && ((a:0 > 0) || (maparg(a:lhs, a:mode) ==# ''))
+      silent execute a:mode . 'map <silent> ' a:lhs s:ignore_key . a:rhs
     endif
   endfunction
 
@@ -198,8 +207,8 @@ function! s:init_default_mappings()
     call s:map('x', 'z%', '<plug>(matchup-z%)')
 
     if !s:old_style_ops
-      call s:map('o', '%', '<plug>(matchup-%)')
-      call s:map('o', 'g%', '<plug>(matchup-g%)')
+      call s:omap('o', '%', '<plug>(matchup-%)')
+      call s:omap('o', 'g%', '<plug>(matchup-g%)')
       call s:map('o', ']%', '<plug>(matchup-]%)')
       call s:map('o', '[%', '<plug>(matchup-[%)')
       call s:map('o', 'z%', '<plug>(matchup-z%)')
