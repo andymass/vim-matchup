@@ -666,6 +666,8 @@ function! s:set_popup_text(lnum, adjust, offscreen) abort
       let l:displaynumber = a:lnum
     endif
     let l:text = printf('%*S ', wincol()-virtcol('.')-1, l:displaynumber)
+  else
+    let l:text = repeat(' ', wincol()-virtcol('.'))
   endif
 
   " replace tab indent with spaces
