@@ -362,7 +362,7 @@ endfunction
 
 " }}}1
 function! s:treesitter_init_module() " {{{1
-  if !has('nvim-0.5.0')
+  if !matchup#loader#_treesitter_may_be_supported()
     return
   endif
 
