@@ -1112,8 +1112,10 @@ function! s:add_matches(corrlist, ...) " {{{1
     endif
 
     if exists('s:ns_id')
-      if strlen(l:corr.match) == 0 && !matchup#ts_engine#get_option(
-            \ bufnr('%'), 'disable_virtual_text')
+      if strlen(l:corr.match) == 0
+            \ && matchup#loader#_treesitter_may_be_supported()
+            \ && !matchup#ts_engine#get_option(
+            \   bufnr('%'), 'disable_virtual_text')
         if hlexists('MatchupVirtualText')
           let l:group = 'MatchupVirtualText'
         endif
@@ -1141,7 +1143,9 @@ endfunction
 
 if has('nvim-0.5.0')
   let s:ns_id = nvim_create_namespace('vim-matchup')
+endif
 
+if has('nvim-0.5.0') && matchup#loader#_treesitter_may_be_supported()
   function s:synID(lnum, col, trans)
     return matchup#ts_syntax#synID(a:lnum, a:col, a:trans)
   endfunction
