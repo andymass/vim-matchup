@@ -196,7 +196,7 @@ function! matchup#motion#find_unmatched(visual, down, ...) " {{{1
     " this is an exclusive motion, ]%
     if l:delim.side ==# 'close'
       if l:exclusive
-        let l:new_pos[1] -= 1
+        let l:new_pos = matchup#pos#prev_eol(l:new_pos)[1:2]
       else
         let l:new_pos[1] += matchup#delim#end_offset(l:delim)
       endif

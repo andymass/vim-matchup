@@ -74,6 +74,17 @@ function! matchup#pos#next(...) " {{{1
 endfunction
 
 " }}}1
+function! matchup#pos#prev_eol(...) " {{{1
+  let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
+
+  if l:cnum >= 1 && l:lnum > 1
+    return [0, l:lnum - 1, strlen(getline(l:lnum - 1)) + 1, 0]
+  else
+    return matchup#pos#prev(l:lnum, l:cnum)
+  endif
+endfunction
+
+" }}}1
 function! matchup#pos#prev(...) " {{{1
   let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
 
@@ -86,6 +97,7 @@ function! matchup#pos#prev(...) " {{{1
 endfunction
 
 " }}}1
+
 function! matchup#pos#larger(pos1, pos2) " {{{1
   return matchup#pos#val(a:pos1) > matchup#pos#val(a:pos2)
 endfunction
@@ -140,4 +152,3 @@ endfunction
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
-
