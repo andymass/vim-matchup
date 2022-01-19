@@ -1,4 +1,4 @@
-(for_in_statement
+(for_statement
   "do" @open.loop
   "end" @close.loop) @scope.loop
 
@@ -11,13 +11,10 @@
 (if_statement
   "if" @open.if
   "end" @close.if) @scope.if
-(else "else" @mid.if.1)
-(elseif "elseif" @mid.if.2)
+(else_statement "else" @mid.if.1)
+(elseif_statement "elseif" @mid.if.2)
 
-(function
-  "function" @open.function
-  "end" @close.function) @scope.function
-(local_function
+(function_declaration
   "function" @open.function
   "end" @close.function) @scope.function
 (function_definition

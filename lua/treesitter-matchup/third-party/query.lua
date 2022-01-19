@@ -142,9 +142,9 @@ function M.iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
       for id, node in pairs(match) do
         local name = query.captures[id] -- name of the capture in the query
         if name ~= nil then
-          local path = split(name..'.node')
+          local path = split(name .. ".node")
           insert_to_path(prepared_match, path, node)
-          insert_to_path(prepared_match, split(name..'.metadata'), metadata)
+          insert_to_path(prepared_match, split(name .. '.metadata'), metadata)
         end
       end
 
