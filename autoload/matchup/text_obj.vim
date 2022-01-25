@@ -130,7 +130,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) abort " {{{1
       " don't include next <
       if matchup#quirks#ishtmllike()
             \ && !matchup#util#matchpref('classic_textobj', 0)
-            \ && l:close.match =~? '/\w\+\s*>\='
+            \ && l:close.match =~? '^/\w\+\s*>\=$'
             \ && !(a:visual
             \      && matchup#pos#equal([l:l1, l:c1], [l:l2, l:c2]))
         let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
@@ -215,7 +215,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) abort " {{{1
       " capture starting <
       if matchup#quirks#ishtmllike()
             \ && !matchup#util#matchpref('classic_textobj', 0)
-            \ && l:close.match =~? '/\w\+\s*>\='
+            \ && l:close.match =~? '^/\w\+\s*>\=$'
         let l:c1 -= 1
       endif
 
