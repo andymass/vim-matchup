@@ -70,7 +70,10 @@ end
 
 M.get_active_nodes = ts_utils.memoize_by_buf_tick(function(bufnr)
   -- TODO: why do we need to force a parse?
-  parsers.get_parser():parse()
+  if not pcall(function() parsers.get_parser():parse() end) then
+    -- TODO workaround a crash due to tree-sitter parsing
+    return {{ open={}, mid={}, close={} }, {}}
+  end
 
   local matches = M.get_matches(bufnr)
 
