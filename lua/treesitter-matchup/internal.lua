@@ -260,7 +260,7 @@ end
 function M.get_matching(delim, down, bufnr)
   down = down > 0
 
-  local info = cache:get(delim._id)
+  local info = cache:get(delim._id) or {}
   if info.bufnr ~= bufnr then
     return {}
   end
