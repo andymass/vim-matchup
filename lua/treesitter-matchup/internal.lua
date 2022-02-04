@@ -191,25 +191,21 @@ function M.get_delim(bufnr, opts)
     local smallest_len = 1e31
     local result_info = nil
     for _, side in ipairs(side_table[opts.side]) do
-      if side == 'mid' and vim.g.matchup_delim_nomids > 0 then
-        goto continue
-      end
-
-      for _, node in ipairs(active_nodes[side]) do
-        if ts_utils.is_in_node_range(node, cursor[1]-1, cursor[2]) then
-          local len = ts_utils.node_length(node)
-          if len < smallest_len then
-            smallest_len = len
-            result_info = {
-              node = node,
-              side = side,
-              key = symbols[_node_id(node)]
-            }
+      if not(side == 'mid' and vim.g.matchup_delim_nomids > 0) then
+        for _, node in ipairs(active_nodes[side]) do
+          if ts_utils.is_in_node_range(node, cursor[1]-1, cursor[2]) then
+            local len = ts_utils.node_length(node)
+            if len < smallest_len then
+              smallest_len = len
+              result_info = {
+                node = node,
+                side = side,
+                key = symbols[_node_id(node)]
+              }
+            end
           end
         end
       end
-
-      ::continue::
     end
 
     if result_info then
