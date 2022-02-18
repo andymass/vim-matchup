@@ -43,7 +43,7 @@ function M.get_treesitter_hl(cursor)
 
     local iter = query:query():iter_captures(root, self.bufnr, row, row + 1)
 
-    for capture, node, metadata in iter do
+    for capture, node, _ in iter do
       if ts_utils.is_in_node_range(node, row, col) then
         local c = query._query.captures[capture] -- name of the capture in the query
         if c ~= nil then
