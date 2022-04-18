@@ -133,6 +133,14 @@ function M.containing_scope(node, bufnr, key)
   return nil
 end
 
+local function _node_text(node, bufnr)
+  local text = vim.treesitter.query.get_node_text(node, bufnr)
+  if type(text) == "table" then
+    text = text[1]
+  end
+  return text
+end
+
 --- Fill in a match result based on a seed node
 function M.do_node_result(initial_node, bufnr, opts, side, key)
   if not side or not key then
@@ -148,7 +156,7 @@ function M.do_node_result(initial_node, bufnr, opts, side, key)
 
   local result = {
     type = 'delim_py',
-    match = ts_utils.get_node_text(initial_node, bufnr)[1],
+    match = _node_text(initial_node, bufnr),
     side = side,
     lnum = row + 1,
     cnum = col + 1,
@@ -285,7 +293,7 @@ function M.get_matching(delim, down, bufnr)
 
         local target_scope = M.containing_scope(node, bufnr, info.key)
         if info.scope == target_scope then
-          local text = ts_utils.get_node_text(node, bufnr)[1]
+          local text = _node_text(node, bufnr)
           table.insert(matches, {text, row + 1, col + 1})
 
           if side == 'close' then
