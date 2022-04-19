@@ -135,10 +135,7 @@ end
 
 local function _node_text(node, bufnr)
   local text = vim.treesitter.query.get_node_text(node, bufnr)
-  if type(text) == "table" then
-    text = text[1]
-  end
-  return text
+  return text:match("(%S+).*")
 end
 
 --- Fill in a match result based on a seed node
