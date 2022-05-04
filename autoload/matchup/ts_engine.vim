@@ -59,7 +59,12 @@ function! matchup#ts_engine#get_delim(opts) abort
 endfunction
 
 function! matchup#ts_engine#get_matching(down, _) dict abort
+  call matchup#perf#tic('ts_engine.get_matching')
+
   let l:list = s:forward('get_matching', self, a:down, bufnr('%'))
+
+  call matchup#perf#toc('ts_engine.get_matching', 'done')
+
   return l:list
 endfunction
 

@@ -34,26 +34,9 @@ function M.get_matches(bufnr)
   return queries.get_matches(bufnr, 'matchup')
 end
 
---- Get all nodes belonging to defined scopes (organized by key)
-function M.get_scopes(bufnr)
-  local matches = M.get_matches(bufnr)
-
-  local scopes = {}
-
-  for _, match in ipairs(matches) do
-    if match.scope then
-      for key, scope in pairs(match.scope) do
-        if scope.node then
-          if not scopes[key] then
-            scopes[key] = {}
-          end
-          table.insert(scopes[key], scope.node)
-        end
-      end
-    end
-  end
-
-  return scopes
+local function _time()
+  s, u = vim.loop.gettimeofday()
+  return s * 1000 + u * 1e-3
 end
 
 --- Returns a (mostly) unique id for this node
@@ -67,6 +50,29 @@ local function _node_id(node)
   end
   return node:id()
 end
+
+--- Get all nodes belonging to defined scopes (organized by key)
+M.get_scopes = ts_utils.memoize_by_buf_tick(function(bufnr)
+  local matches = M.get_matches(bufnr)
+
+  local scopes = {}
+
+  for _, match in ipairs(matches) do
+    if match.scope then
+      for key, scope in pairs(match.scope) do
+        local id = _node_id(scope.node)
+        if scope.node then
+          if not scopes[key] then
+            scopes[key] = {}
+          end
+          scopes[key][id] = true
+        end
+      end
+    end
+  end
+
+  return scopes
+end)
 
 M.get_active_nodes = ts_utils.memoize_by_buf_tick(function(bufnr)
   -- TODO: why do we need to force a parse?
@@ -119,12 +125,12 @@ function M.containing_scope(node, bufnr, key)
   bufnr = bufnr or api.nvim_get_current_buf()
 
   local scopes = M.get_scopes(bufnr)
-  if not node or not scopes then return end
+  if not node or not scopes or not scopes[key] then return end
 
   local iter_node = node
 
   while iter_node ~= nil do
-    if scopes[key] and vim.tbl_contains(scopes[key], iter_node) then
+    if scopes[key][_node_id(iter_node)] then
       return iter_node
     end
     iter_node = iter_node:parent()
@@ -279,9 +285,16 @@ function M.get_matching(delim, down, bufnr)
 
   local got_close = false
 
+  local stop_time = _time() + vim.fn['matchup#perf#timeout']()
+
   for _, side in ipairs(sides) do
     for _, node in ipairs(active_nodes[side]) do
       local row, col, _ = node:start()
+
+      if _time() > stop_time then
+        return {}
+      end
+
       if info.initial_node ~= node and symbols[_node_id(node)] == info.key
           and (down and (row > info.row or row == info.row and col > info.col)
             or not down and (row < info.row or row == info.row and col < info.col))
