@@ -16,7 +16,7 @@ if $TESTS_ENABLE_TREESITTER
   }
 EOF
 
-  runtime! plugin/nvim-treesitter.vim
+  runtime! plugin/nvim-treesitter.{vim,lua}
 endif
 
 filetype plugin indent on
