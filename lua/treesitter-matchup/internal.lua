@@ -35,7 +35,7 @@ function M.get_matches(bufnr)
 end
 
 local function _time()
-  s, u = vim.loop.gettimeofday()
+  local s, u = vim.loop.gettimeofday()
   return s * 1000 + u * 1e-3
 end
 
