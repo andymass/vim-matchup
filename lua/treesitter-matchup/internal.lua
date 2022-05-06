@@ -303,7 +303,7 @@ function M.get_matching(delim, down, bufnr)
 
         local target_scope = M.containing_scope(node, bufnr, info.key)
         if info.scope == target_scope then
-          local text = _node_text(node, bufnr)
+          local text = _node_text(node, bufnr) or ''
           table.insert(matches, {text, row + 1, col + 1})
 
           if side == 'close' then
