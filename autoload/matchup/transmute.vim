@@ -27,7 +27,7 @@ endfunction
 
 " }}}1
 
-function! matchup#transmute#tick(insertmode) " {{{1
+function! matchup#transmute#tick(insertmode) abort " {{{1
   if !g:matchup_transmute_enabled | return 0 | endif
 
   if a:insertmode
@@ -48,13 +48,32 @@ function! matchup#transmute#tick(insertmode) " {{{1
 endfunction
 
 " }}}1
-function! matchup#transmute#reset() " {{{1
+function! matchup#transmute#reset() abort " {{{1
   if !g:matchup_transmute_enabled | return 0 | endif
   let w:matchup_transmute_last_changenr = changenr()
 endfunction
 
 " }}}1
-function! matchup#transmute#dochange(list, pri, cur) " {{{1
+function! matchup#transmute#dochange(list, pri, cur) abort " {{{1
+  if empty(a:pri) || a:cur.type !=# a:pri.type
+    return 0
+  endif
+  if !has_key(s:dochange, a:cur.type)
+    return 0
+  endif
+  return s:dochange[a:cur.type](a:list, a:pri, a:cur)
+endfunction
+
+" }}}1
+
+let s:dochange = {}
+
+function! s:dochange.delim_py(list, pri, cur) abort " {{{1
+  return 0
+endfunction
+
+" }}}1
+function! s:dochange.delim_tex(list, pri, cur) abort " {{{1
   if empty(a:list) || empty(a:pri) || empty(a:cur) | return 0 | endif
 
   let l:cur = a:cur
@@ -143,4 +162,3 @@ endfunction
 let &cpo = s:save_cpo
 
 " vim: fdm=marker sw=2
-
