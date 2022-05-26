@@ -83,7 +83,7 @@ coverage:
   artifacts:
     reports:
       coverage_report:
-        format: cobertura
+        coverage_format: cobertura
         path: ./test/new/coverage.xml
     paths:
       - ./test/new/htmlcov
