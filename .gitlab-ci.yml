@@ -1,3 +1,4 @@
+---
 stages:
   - test
   - gen_coverage
@@ -81,7 +82,9 @@ coverage:
   script: cd ./test/new && make -j1 coverage
   artifacts:
     reports:
-      cobertura: ./test/new/coverage.xml
+      coverage_report:
+        format: cobertura
+        path: ./test/new/coverage.xml
     paths:
       - ./test/new/htmlcov
 
