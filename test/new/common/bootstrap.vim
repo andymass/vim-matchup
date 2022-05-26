@@ -8,6 +8,9 @@ if $TESTS_ENABLE_TREESITTER
   let &rtp = s:path.'/test/vader/plugged/nvim-treesitter,' . &rtp
   let &rtp .= ','.s:path.'/test/vader/plugged/nvim-treesitter/after'
 
+  runtime! plugin/nvim-treesitter.vim
+  runtime! plugin/nvim-treesitter.lua
+
   lua <<EOF
   require'nvim-treesitter.configs'.setup {
     matchup = {
@@ -15,8 +18,6 @@ if $TESTS_ENABLE_TREESITTER
     }
   }
 EOF
-
-  runtime! plugin/nvim-treesitter.{vim,lua}
 endif
 
 filetype plugin indent on
