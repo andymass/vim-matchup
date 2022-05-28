@@ -621,6 +621,9 @@ endfunction
 function! s:do_offscreen_popup(offscreen) " {{{1
   " screen position of top-left corner of current window
   let [l:row, l:col] = win_screenpos(winnr())
+  if getwininfo(win_getid())[0].winbar
+    let l:row = l:row + 1
+  endif
   let l:height = winheight(0) " height of current window
   let l:adjust = matchup#quirks#status_adjust(a:offscreen)
   let l:lnum = a:offscreen.lnum + l:adjust
