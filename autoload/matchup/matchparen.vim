@@ -618,7 +618,7 @@ function! s:ensure_match_popup() abort " {{{1
 endfunction
 
 " }}}1
-function! s:do_offscreen_popup(offscreen) " {{{1
+function! s:do_offscreen_popup(offscreen) abort " {{{1
   " screen position of top-left corner of current window
   let [l:row, l:col] = win_screenpos(winnr())
   if getwininfo(win_getid())[0].winbar
@@ -713,7 +713,7 @@ function! s:set_popup_text_2(lnum, adjust, offscreen) abort
   for l:item in split(l:sl, '%\@1<!%#')
     let [l:hl; l:rest] = split(l:item, '#')
 
-    let l:rest = join(l:rest, '')
+    let l:rest = join(l:rest, '#')
     let l:len = len(l:rest)
 
     if !l:len
@@ -726,14 +726,15 @@ function! s:set_popup_text_2(lnum, adjust, offscreen) abort
 
     let l:key = 'matchup__' . l:hl
     let l:popup_bufnr = winbufnr(t:match_popup)
-    if !has_key(s:prop_cache, l:key . '__' . l:popup_bufnr)
+    let l:cache_key = l:key . '__' . l:popup_bufnr . '__' . t:match_popup
+    if !has_key(s:prop_cache, l:cache_key)
       if empty(prop_type_get(l:key, {'bufnr': l:popup_bufnr}))
         call prop_type_add(l:key, {
               \ 'bufnr': l:popup_bufnr,
               \ 'highlight': l:hl
               \})
       endif
-      let s:prop_cache[l:key . '__' . l:popup_bufnr] = 1
+      let s:prop_cache[l:cache_key] = 1
     endif
 
     call add(l:props, {
