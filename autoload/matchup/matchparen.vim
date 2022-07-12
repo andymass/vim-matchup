@@ -579,7 +579,7 @@ function! s:do_offscreen_statusline(offscreen, manual) " {{{1
     let w:matchup_oldstatus = &l:statusline
   endif
   if !a:manual
-    let &l:statusline =  w:matchup_statusline
+    let &l:statusline = w:matchup_statusline
   endif
 
   if exists('#User#MatchupOffscreenEnter')
@@ -756,22 +756,30 @@ if !exists('s:prop_cache')
 endif
 
 " }}}1
-function! s:do_offscreen_popup_nvim(offscreen) " {{{1
+function! s:do_offscreen_popup_nvim(offscreen) abort " {{{1
   if exists('*nvim_open_win')
     " neovim floating window
     call s:close_floating_win()
 
-    let l:lnum = a:offscreen.lnum
-    let [l:row, l:anchor] = l:lnum < line('.')
-          \ ? [0, 'NW'] : [winheight(0), 'SW']
-    if l:row == winline() | return | endif
+    let l:pos = get(g:matchup_matchparen_offscreen, 'position', '')
+    if l:pos ==# 'cursor'
+      let l:row = winline()
+      let l:col = wincol() - col('.') + col('$')
+      let l:anchor = 'SW'
+    else
+      let l:lnum = a:offscreen.lnum
+      let [l:row, l:anchor] = l:lnum < line('.')
+            \ ? [0, 'NW'] : [winheight(0), 'SW']
+      if l:row == winline() | return | endif
+      let l:col = 0
+    endif
 
     " Set default width and height for now.
     let l:win_cfg = {
           \ 'relative': 'win',
           \ 'anchor': l:anchor,
           \ 'row': l:row,
-          \ 'col': 0,
+          \ 'col': l:col,
           \ 'width': 42,
           \ 'height': &previewheight,
           \ 'focusable': v:false,
@@ -810,9 +818,9 @@ function! s:do_offscreen_popup_nvim(offscreen) " {{{1
     if exists('##WinScrolled')
       augroup matchup_matchparen_scroll
         au!
-        execute 'autocmd WinScrolled * if s:ensure_scroll_timer()'
-              \ . '|call matchup#matchparen#scroll_update('
-              \ . a:offscreen.lnum . ')|endif'
+        execute 'autocmd WinScrolled * '
+              \ . 'call matchup#matchparen#scroll_update_float('
+              \ . a:offscreen.lnum . ', ' . string(l:pos) . ')'
               \ . '|if s:float_id == 0|au! matchup_matchparen_scroll|endif'
       augroup END
     endif
@@ -1092,6 +1100,22 @@ function! matchup#matchparen#scroll_update(lnum) abort " {{{1
     call timer_pause(s:scroll_timer, 0)
   endif
   return ''
+endfunction
+
+" }}}1
+function! matchup#matchparen#scroll_update_float(lnum, position) abort " {{{1
+  if !s:float_id
+    return
+  endif
+  if line('w0') <= a:lnum && a:lnum <= line('w$')
+    call s:matchparen.highlight(1)
+  elseif a:position ==# 'cursor'
+    call nvim_win_set_config(s:float_id, {
+          \ 'relative': 'win',
+          \ 'row': winline(),
+          \ 'col': wincol() - col('.') + col('$')
+          \})
+  endif
 endfunction
 
 " }}}1
