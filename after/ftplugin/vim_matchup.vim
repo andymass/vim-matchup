@@ -16,19 +16,6 @@ let b:match_skip = 's:comment\|string\|vimSynReg'
       \ . '\|vimVar\|vimFuncVar\|vimFBVar\|vimOperParen'
       \ . '\|vimUserFunc'
 
-if matchup#util#check_match_words('9071a9a')
-  " fix broken b:match_words provided by upstream
-  let b:match_words
-        \ = '\<\%(fu\%[nction]\|def\)!\=\s\+\S\+(:\<retu\%[rn]\>'
-        \   . ':\<\%(endf\%[unction]\|enddef\)\>,'
-        \ . '\<\(wh\%[ile]\|for\)\>:\<brea\%[k]\>:\<con\%[tinue]\>'
-        \   . ':\<end\(w\%[hile]\|fo\%[r]\)\>,'
-        \ . '\<if\>:\<el\%[seif]\>:\<en\%[dif]\>,'
-        \ . '{:},'
-        \ . '\<try\>:\<cat\%[ch]\>:\<fina\%[lly]\>:\<endt\%[ry]\>,'
-        \ . '\<aug\%[roup]\s\+\%(END\>\)\@!\S:\<aug\%[roup]\s\+END\>,'
-endif
-
 call matchup#util#patch_match_words(
       \ '\<aug\%[roup]\s\+\%(END\>\)\@!\S:',
       \ '\<aug\%[roup]\ze\s\+\%(END\>\)\@!\S:'
