@@ -33,13 +33,15 @@ function! matchup#loader#init_buffer() abort " {{{1
   endif
 
   let l:has_ts_hl = 0
-  if s:ts_may_be_supported && empty(&syntax)
-        \ && matchup#ts_engine#is_hl_enabled(bufnr('%'))
+  if s:ts_may_be_supported && matchup#ts_engine#is_hl_enabled(bufnr('%'))
     let l:has_ts_hl = 1
-
+ 
     if matchup#ts_engine#get_option(
           \ bufnr('%'), 'additional_vim_regex_highlighting')
-      set syntax=ON
+      augroup matchup_syntax
+        au!
+        autocmd OptionSet syntax ++once if empty(&syntax) | set syntax=ON | endif
+      augroup END
     endif
   endif
 
