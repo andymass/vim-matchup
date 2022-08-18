@@ -38,10 +38,14 @@ function! matchup#loader#init_buffer() abort " {{{1
  
     if matchup#ts_engine#get_option(
           \ bufnr('%'), 'additional_vim_regex_highlighting')
-      augroup matchup_syntax
-        au!
-        autocmd OptionSet syntax ++once if empty(&syntax) | set syntax=ON | endif
-      augroup END
+      if empty(&syntax)
+        set syntax=ON
+      else
+        augroup matchup_syntax
+          au!
+          autocmd VimEnter * if empty(&syntax) | set syntax=ON | endif
+        augroup END
+      endif
     endif
   endif
 
