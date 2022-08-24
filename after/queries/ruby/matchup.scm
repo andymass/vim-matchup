@@ -65,3 +65,6 @@
   "end" @close.do) @scope.do
 
 (if_modifier) @skip
+(unless_modifier) @skip
+(while_modifier) @skip
+(until_modifier) @skip
