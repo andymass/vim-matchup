@@ -3,7 +3,7 @@
 -- licensed under the Apache License 2.0
 -- See nvim-treesitter.LICENSE-APACHE-2.0
 
-local utils = require "nvim-treesitter-playground.utils"
+local utils = require "treesitter-matchup.third-party.utils"
 local highlighter = require "vim.treesitter.highlighter"
 local ts_utils = require "nvim-treesitter.ts_utils"
 local parsers = require "nvim-treesitter.parsers"
