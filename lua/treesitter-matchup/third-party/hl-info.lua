@@ -6,7 +6,6 @@
 local utils = require "treesitter-matchup.third-party.utils"
 local highlighter = require "vim.treesitter.highlighter"
 local ts_utils = require "nvim-treesitter.ts_utils"
-local parsers = require "nvim-treesitter.parsers"
 
 local M = {}
 
