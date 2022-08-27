@@ -23,3 +23,7 @@
 
 (return_statement
   "return" @mid.function.1)
+
+(do_statement
+  "do" @open.block
+  "end" @close.block) @scope.block
