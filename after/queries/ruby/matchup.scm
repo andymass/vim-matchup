@@ -68,3 +68,9 @@
 (unless_modifier) @skip
 (while_modifier) @skip
 (until_modifier) @skip
+
+(block_parameters
+  ("|") @open.block_param
+  (_)
+  ("|") @close.block_param
+) @scope.block_param
