@@ -1,0 +1,34 @@
+Execute (Helper):
+  function! TSActive()
+    return exists(':TSInstall')
+  endfunction
+
+  if TSActive()
+    Log 'nvim-treesitter active'
+  else
+    Log 'nvim-treesitter not active'
+  endif
+
+Given rust (Rust):
+  // source: https://github.com/rust-lang/rust/blob/54f20bbb8a7aeab93da17c0019c1aaa10329245a/compiler/rustc_parse/src/lexer/tokentrees.rs#L207-L213
+  match self.token.kind {
+      token::CloseDelim(d) if d == delim => {
+          // fn foo() {
+          //     bar(baz(
+          // }  // Incorrect delimiter but matches the earlier `{`
+          if !self.open_braces.iter().any(|&(b, _)| b == other) {
+              self.bump();
+          }
+      }
+  }
+
+Do (Move %):
+  11gg%
+Then (Verify line):
+  Assert line('.') == 2
+
+Do (Move %):
+  10gg%
+Then (Verify line):
+  Assert line('.') == 3
+
