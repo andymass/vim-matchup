@@ -1,5 +1,10 @@
 ; functions
-(function_declaration "function" @open.function) @scope.function
+[
+  (arrow_function "=>" @open.function)
+  (function "function" @open.function)
+  (function_declaration "function" @open.function)
+] @scope.function
+
 (return_statement "return" @mid.function.1)
 
 ; switch case
