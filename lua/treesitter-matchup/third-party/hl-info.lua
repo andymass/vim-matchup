@@ -75,11 +75,8 @@ else
     local highlights = {}
     for _, hl in pairs(results) do
       local line = { "@" .. hl.capture }
-      if hl.specific then
-        table.insert(line, hl.specific)
-      end
-      if hl.general then
-        table.insert(line, hl.general)
+      if hl.priority then
+        table.insert(line, hl.priority)
       end
       table.insert(highlights, line)
     end
