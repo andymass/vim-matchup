@@ -70,15 +70,7 @@ function M.get_hl_groups_at_position(bufnr, row, col)
       if hl and ts_utils.is_in_node_range(node, row, col) then
         local c = query._query.captures[capture] -- name of the capture in the query
         if c ~= nil then
-          local name = query._query.captures[capture]
-          local id = 0
-          if not vim.startswith(name, '_') then
-            id = api.nvim_get_hl_id_by_name('@' .. name .. '.' .. tree:lang())
-          end
-          table.insert(
-            matches,
-            { capture = c, specific = id, general = id, priority = metadata.priority }
-          )
+          table.insert(matches, { capture = c, priority = metadata.priority })
         end
       end
     end
