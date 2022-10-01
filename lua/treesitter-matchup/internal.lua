@@ -21,13 +21,13 @@ local cache = lru.new(150)
 function M.is_enabled(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
-  return configs.is_enabled('matchup', lang)
+  return configs.is_enabled('matchup', lang, bufnr)
 end
 
 function M.is_hl_enabled(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
-  return configs.is_enabled('highlight', lang)
+  return configs.is_enabled('highlight', lang, bufnr)
 end
 
 function M.get_matches(bufnr)
