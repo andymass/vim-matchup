@@ -68,35 +68,6 @@ endfunction
 
 " }}}1
 
-function! matchup#util#uniq(list) " {{{1
-  if exists('*uniq') | return uniq(a:list) | endif
-  if len(a:list) <= 1 | return a:list | endif
-
-  let l:uniq = [a:list[0]]
-  for l:next in a:list[1:]
-    if l:uniq[-1] != l:next
-      call add(l:uniq, l:next)
-    endif
-  endfor
-  return l:uniq
-endfunction
-
-" }}}1
-function! matchup#util#uniq_unsorted(list) " {{{1
-  if len(a:list) <= 1 | return a:list | endif
-
-  let l:visited = [a:list[0]]
-  for l:index in reverse(range(1, len(a:list)-1))
-    if index(l:visited, a:list[l:index]) >= 0
-      call remove(a:list, l:index)
-    else
-      call add(l:visited, a:list[l:index])
-    endif
-  endfor
-  return a:list
-endfunction
-
-" }}}1
 function! matchup#util#has_duplicate_str(list) " {{{1
   if len(a:list) <= 1 | return 0 | endif
   let l:seen = {}
@@ -133,7 +104,7 @@ function! matchup#util#patch_match_words(from, to, ...) abort " {{{1
 endfunction
 
 " }}}1
-function! matchup#util#check_match_words(sha256) " {{{1
+function! matchup#util#check_match_words(sha256) abort " {{{1
   if !exists('b:match_words') | return 0 | endif
   return sha256(b:match_words) =~# '^'.a:sha256
 endfunction
@@ -152,7 +123,7 @@ endfunction
 
 " }}}1
 
-function! matchup#util#matchpref(id, default) " {{{1
+function! matchup#util#matchpref(id, default) abort " {{{1
   return get(get(g:matchup_matchpref, &filetype, {}), a:id, a:default)
 endfunction
 
@@ -160,22 +131,38 @@ endfunction
 
 function! matchup#util#standard_html(...) abort " {{{1
   let l:prefs = a:0 ? a:1 : {}
+  let l:variant = get(l:prefs, 'variant', 'html')
 
   let l:words = '<:>,<\@<=!--:-->'
 
-  if get(l:prefs, 'lists', 0)
-    let l:words .= ',<\@<=[ou]l\>[^>]*\%(>\|$\):<\@<=li\>:<\@<=/[ou]l>'
-    let l:words .= ',<\@<=dl\>[^>]*\%(>\|$\):<\@<=d[td]\>:<\@<=/dl>'
+  if l:variant ==# 'html' && get(l:prefs, 'lists', 0)
+    let l:words .= ',<\@<=[ou]l\>\g{hlend}[^>]*\%(>\|$\)'
+          \ . ':<\@<=li\>'
+          \ . ':<\@<=/[ou]l\g{hlend}>'
+    let l:words .= ',<\@<=dl\>\g{hlend}[^>]*\%(>\|$\)'
+          \ . ':<\@<=d[td]\>'
+          \ . ':<\@<=/dl\g{hlend}>'
   endif
 
-  if get(l:prefs, 'tagnameonly', 1)
-    let l:words .= ',<\@<=\([^/][^ \t>]*\)\g{hlend}'
+  if l:variant ==# 'html'
+    let l:words .= ',<\@<=\([^/!][^ \t>]*\)\g{hlend}'
           \ . '\%(>\|$\|[ \t][^>]*\%(>\|$\)\)'
           \ . ':<\@<=/\1\g{hlend}>'
-  else
-    let l:words .= ',<\@<=\([^/][^ \t>]*\)'
-          \ . '\%(>\|$\|[ \t][^>]*\%(>\|$\)\)'
+  elseif l:variant ==# 'xml'
+    let l:words .= ',<\@<=!\[CDATA\[:]]>'
+    let l:words .= ',<\@<=?\k\+:?>'
+    let l:words .= ',<\@<=\([^ \t>/]\+\)\g{hlend}'
+          \ . '\%(\s\+[^>]*\%([^/]>\|$\)\|>\|$\)'
           \ . ':<\@<=/\1>'
+    let l:words .= ',<\@<=\%([^ \t>/]\+\)\g{hlend}'
+          \ . '\%(\s\+[^>]*[^/>]\|$\)'
+          \ . ':/>'
+  else
+    echoerr 'match-up: invalid variant' l:variant
+  endif
+
+  if !get(l:prefs, 'tagnameonly', 1)
+    let l:words = substitute(l:words, '\\g{hlend}', '', 'g')
   endif
 
   return l:words

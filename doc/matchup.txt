@@ -6,7 +6,7 @@ Web: https://github.com/andymass/vim-matchup
 Script ID: 5624
 License: MIT license {{{
 
-  Copyright (c) 2021 Andy Massimino
+  Copyright (c) 2017--2022 Andy Massimino
 
   Copyright (c) 2016 Karl Yngve Lervåg
 

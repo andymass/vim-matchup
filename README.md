@@ -12,8 +12,6 @@ match-up is a plugin that lets you highlight, navigate, and operate on
 sets of matching text.  It extends vim's `%` key to language-specific
 words instead of just single characters.
 
-[![Gitter](https://badges.gitter.im/vim-matchup/community.svg)](https://gitter.im/vim-matchup/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
 ## Screenshot
 
 <img src='https://raw.githubusercontent.com/wiki/andymass/vim-matchup/images/match-up-hl1.gif' width='450px'>
