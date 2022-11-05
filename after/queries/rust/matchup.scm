@@ -1,7 +1,7 @@
 ; --------------- if/else ---------------
 (block (if_expression "if" @open.if_) @scope.if_)
+(expression_statement (if_expression "if" @open.if_) @scope.if_)
 (let_declaration (if_expression "if" @open.if_) @scope.if_)
-(if_let_expression "if" @open.if_) @scope.if_
 
 (else_clause "else" @mid.if_.1 (block))
 (else_clause
@@ -22,7 +22,7 @@
 
 ; --------------- while/loop/for + break/continue ---------------
 (for_expression . "for" @open.loop) @scope.loop
-(while_let_expression . "while" @open.loop) @scope.loop
+(while_expression . "while" @open.loop) @scope.loop
 (loop_expression . "loop" @open.loop) @scope.loop
 
 (break_expression "break" @mid.loop.1 .)
