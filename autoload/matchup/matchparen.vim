@@ -696,8 +696,10 @@ function! s:set_popup_text(lnum, adjust, offscreen) abort
           \ 'combine': 1
           \}
     call popup_settext(t:match_popup, [{'text': l:text, 'props': [l:prop]}])
-  else
+  elseif exists('t:match_popup')
     call setbufline(winbufnr(t:match_popup), 1, l:text)
+  elseif exists('s:float_id')
+    call setbufline(winbufnr(s:float_id), 1, l:text)
   endif
   return strdisplaywidth(l:text)
 endfunction
@@ -793,7 +795,21 @@ function! s:do_offscreen_popup_nvim(offscreen) abort " {{{1
         let l:win_cfg.row -= min([2, l:row - winline() - 1])
       endif
     endif
-    let s:float_id = nvim_open_win(bufnr('%'), v:false, l:win_cfg)
+
+    let l:text_method = 0
+    if &relativenumber
+      let l:text_method = 1
+    endif
+
+    if l:text_method
+      if !exists('s:float_bufnr')
+        let s:float_bufnr = nvim_create_buf(0, 1)
+      endif
+      let l:bufnr = s:float_bufnr
+    else
+      let l:bufnr = bufnr('%')
+    endif
+    let s:float_id = nvim_open_win(l:bufnr, v:false, l:win_cfg)
 
     if has_key(g:matchup_matchparen_offscreen, 'highlight')
       call nvim_win_set_option(s:float_id, 'winhighlight',
@@ -808,12 +824,7 @@ function! s:do_offscreen_popup_nvim(offscreen) abort " {{{1
       call nvim_win_set_option(s:float_id, 'cursorline', v:false)
     endif
 
-    if &relativenumber
-      call nvim_win_set_option(s:float_id, 'number', v:true)
-      call nvim_win_set_option(s:float_id, 'relativenumber', v:false)
-    endif
-
-    call s:populate_floating_win(a:offscreen)
+    call s:populate_floating_win(a:offscreen, l:text_method)
 
     if exists('##WinScrolled')
       augroup matchup_matchparen_scroll
@@ -832,12 +843,15 @@ function! s:do_offscreen_popup_nvim(offscreen) abort " {{{1
 endfunction
 
 " }}}1
-function! s:populate_floating_win(offscreen) " {{{1
+function! s:populate_floating_win(offscreen, text_method) abort " {{{1
   let l:adjust = matchup#quirks#status_adjust(a:offscreen)
   let l:lnum = a:offscreen.lnum + l:adjust
   let l:body = getline(l:lnum, a:offscreen.lnum)
   let l:body_length = len(l:body)
-  let l:height = min([l:body_length, &previewheight])
+  let l:height = 1
+  if !a:text_method
+    let l:height = min([l:body_length, &previewheight])
+  endif
 
   if exists('*nvim_open_win')
     " neovim floating win
@@ -866,8 +880,18 @@ function! s:populate_floating_win(offscreen) " {{{1
 
     call nvim_win_set_option(s:float_id, 'wrap', v:false)
     silent! call nvim_win_set_option(s:float_id, 'scrolloff', 0)
-    call nvim_win_set_cursor(s:float_id, [l:lnum, 0])
-    call nvim_win_set_cursor(s:float_id, [a:offscreen.lnum, 0])
+
+    if a:text_method
+      call nvim_win_set_option(s:float_id, 'number', v:false)
+      call nvim_win_set_option(s:float_id, 'relativenumber', v:false)
+      call nvim_win_set_option(s:float_id, 'colorcolumn', '')
+      call s:set_popup_text(l:lnum, l:adjust, a:offscreen)
+    else
+      call nvim_win_set_option(s:float_id, 'number', v:true)
+      call nvim_win_set_option(s:float_id, 'relativenumber', v:false)
+      call nvim_win_set_cursor(s:float_id, [l:lnum, 0])
+      call nvim_win_set_cursor(s:float_id, [a:offscreen.lnum, 0])
+    endif
   endif
 endfunction
 
