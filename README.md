@@ -65,18 +65,59 @@ more information.  This plugin:
 
 ## Installation
 
-If you use [vim-plug](https://github.com/junegunn/vim-plug), then add the following line to your vimrc file:
+If you use [vim-plug](https://github.com/junegunn/vim-plug), then add the
+following line to your vimrc's plugin section:
 
 ```vim
 Plug 'andymass/vim-matchup'
 ```
 
-and then use `:PlugInstall`.  Or, you can use any other plugin manager such as
+and then use `:PlugInstall`.
+
+Or, if you use [packer](https://github.com/wbthomason/packer.nvim), add
+it to your init.vim
+
+```lua
+return require('packer').startup(function(use)
+  use {
+    'andymass/vim-matchup',
+    config = function()
+      -- may set any options here
+      vim.g.matchup_matchparen_offscreen = { method = "popup" }
+    end
+  }
+end)
+```
+
+and run `:PackerSync` or similar.
+
+See [Tree-sitter integration](https://github.com/andymass/vim-matchup#tree-sitter-integration)
+for information on how to enable tree-sitter matching with neovim.
+
+Note: I do not recommend using alternative loading strategies such as
+`event = 'VimEnter'` or `event = 'CursorMoved'` as match-up already
+loads a minimal amount of code on start-up.  It may work, but if you run
+into issues, remove the event key as a first debugging step.
+
+With [LunarVim](https://www.lunarvim.org/), tree-sitter integration can be
+enabled as follows:
+
+```lua
+{
+  "andymass/vim-matchup",
+  config = function()
+    vim.g.matchup_matchparen_offscreen = { method = "popup" }
+  end,
+},
+
+lvim.builtin.treesitter.matchup.enable = true
+```
+
+You can use any other plugin manager such as
 [vundle](https://github.com/gmarik/vundle),
 [dein](https://github.com/Shougo/dein.vim),
-[neobundle](https://github.com/Shougo/neobundle.vim),
-[pathogen](https://github.com/tpope/vim-pathogen), or
-[packer](https://github.com/wbthomason/packer.nvim).
+[neobundle](https://github.com/Shougo/neobundle.vim), or
+[pathogen](https://github.com/tpope/vim-pathogen),
 
 match-up should automatically disable matchit and matchparen, but if you
 are still having trouble, try placing this near the top of your vimrc:
@@ -90,10 +131,11 @@ together with other plugins.
 
 ### Tree-sitter integration
 
-_Note: Currently this feature is possible in neovim 0.5+ only._
+_Note: Currently this feature is possible in neovim only.  Only the latest
+version of neovim is supported._
 
-match-up now has experimental support for language syntax provided
-by tree-sitter.  The list of supported languages is available
+match-up has support for language syntax provided by tree-sitter.  The
+list of supported languages is available
 [here](https://github.com/andymass/vim-matchup/tree/master/after/queries).
 
 This feature requires manual opt-in in your init.vim and requires
@@ -705,15 +747,24 @@ default: `['d', 'y']`
 
 - Why does jumping not work for construct X in language Y?
 
-  Please open a new issue
+  You can configure custom match expressions for a file type using
+
+  ```vim
+  autocmd FileType myft let b:match_words = 'something:else'`
+  ```
+
+  For more information about how to customize matching, see
+  [the wiki](https://github.com/andymass/vim-matchup/wiki/The-match-up-wiki).
+
+  For help, please open a new issue and be as specific as possible.
 
 - Highlighting is not correct for construct X
 
   match-up uses matchit's filetype-specific data, which may not give
   enough information to create proper highlights.  To fix this, you may
-  need to modify `b:match_words`.
+  need to modify `b:match_words` in your configuration.
 
-  For help, please open a new issue and be as specific as possible.
+  For more help, please open a new issue and be as specific as possible.
 
 - I'm having performance problems
 
