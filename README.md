@@ -81,7 +81,7 @@ it to your init.vim
 return require('packer').startup(function(use)
   use {
     'andymass/vim-matchup',
-    config = function()
+    setup = function()
       -- may set any options here
       vim.g.matchup_matchparen_offscreen = { method = "popup" }
     end
@@ -105,7 +105,7 @@ enabled as follows:
 ```lua
 {
   "andymass/vim-matchup",
-  config = function()
+  setup = function()
     vim.g.matchup_matchparen_offscreen = { method = "popup" }
   end,
 },
