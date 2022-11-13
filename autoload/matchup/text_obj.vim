@@ -128,7 +128,7 @@ function! matchup#text_obj#delimited(is_inner, visual, type) abort " {{{1
 
       " make *i% more like *it for html
       " don't include next <
-      if matchup#quirks#ishtmllike()
+      if !l:linewise_op && matchup#quirks#ishtmllike()
             \ && !matchup#util#matchpref('classic_textobj', 0)
             \ && l:close.match =~? '^/\w\+\s*>\=$'
             \ && !(a:visual
