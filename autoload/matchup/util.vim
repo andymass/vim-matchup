@@ -169,6 +169,13 @@ function! matchup#util#standard_html(...) abort " {{{1
 endfunction
 
 " }}}1
+function! matchup#util#standard_xml(...) abort " {{{1
+  let l:prefs = a:0 ? copy(a:1) : {}
+  let l:prefs['variant'] = 'xml'
+  return matchup#util#standard_html(l:prefs)
+endfunction
+
+" }}}1
 
 let &cpo = s:save_cpo
 
