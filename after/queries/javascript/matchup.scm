@@ -22,6 +22,11 @@
   "if" @open.if) @scope.if
  (#not-has-parent? @scope.if else_clause))
 
+; try
+(try_statement "try" @open.try) @scope.try
+(catch_clause "catch" @mid.try.1)
+(finally_clause "finally" @mid.try.2)
+
 ; template strings
 (template_string
  "`" @open.tmpl_str
