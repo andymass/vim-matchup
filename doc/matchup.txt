@@ -347,7 +347,7 @@ pressing `d]%` will produce (cursor on the `e`) >
 
   if endif
 <
-To include the close word, use either `dv]%` or `vd]%`.  This is also
+To include the close word, use either `dv]%` or `v]%d`.  This is also
 compatible with vim's `dv])` and `dv]}`.
 
 Operators over backward exclusive motions will instead exclude the position
@@ -372,7 +372,7 @@ leave behind nothing. >
 
      )
 <
-To operate character-wise in this situation, use `dv%` or `vd%`.  This is vim
+To operate character-wise in this situation, use `dv%` or `v%d`.  This is vim
 compatible with the built-in `d%` on items in 'matchpairs'.
 
                                                         *matchup-feat-linewise*

@@ -388,7 +388,7 @@ pressing `d]%` will produce (cursor on the `e`)
 if endif
 ```
 
-To include the close word, use either `dv]%` or `vd]%`.  This is also
+To include the close word, use either `dv]%` or `v]%d`.  This is also
 compatible with vim's `d])` and `d]}`.
 
 Operators over _backward_ exclusive motions will instead exclude the
@@ -416,7 +416,7 @@ example, pressing `d%` will leave behind nothing.
    )
 ```
 
-To operate character-wise in this situation, use `dv%` or `vd%`.
+To operate character-wise in this situation, use `dv%` or `v%d`.
 This is vim compatible with the built-in `d%` on `matchpairs`.
 
 ### Line-wise operator/text-object combinations
