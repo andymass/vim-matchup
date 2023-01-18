@@ -9,7 +9,7 @@ local ts_utils = require "nvim-treesitter.ts_utils"
 
 local M = {}
 
-if vim.treesitter.highlighter.hl_map and not vim.fn.has('nvim-0.9.0') then
+if vim.treesitter.highlighter.hl_map and vim.fn.has('nvim-0.9.0') == 0 then
   function M.get_treesitter_hl(cursor)
     local buf = vim.api.nvim_get_current_buf()
     local row, col = unpack(cursor or vim.api.nvim_win_get_cursor(0))
