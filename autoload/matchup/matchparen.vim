@@ -174,7 +174,7 @@ function! s:timer_callback(win_id, timer_id) abort " {{{1
   endif
 
   " if we timed out, do a highlight and pause the timer
-  let l:elapsed = 1000*s:reltimefloat(reltime(w:matchup_pulse_time))
+  let l:elapsed = 1000 * reltimefloat(reltime(w:matchup_pulse_time))
   if l:elapsed >= s:show_delay
     call timer_pause(a:timer_id, 1)
     if exists('#TextYankPost') && !has('patch-8.1.0192')
@@ -191,7 +191,7 @@ function! s:timer_callback(win_id, timer_id) abort " {{{1
     endif
   elseif w:matchup_need_clear && exists('w:matchup_hi_time')
     " if highlighting becomes too stale, clear it
-    let l:elapsed = 1000*s:reltimefloat(reltime(w:matchup_hi_time))
+    let l:elapsed = 1000 * reltimefloat(reltime(w:matchup_hi_time))
     if l:elapsed >= s:hide_delay
       call s:matchparen.clear()
     endif
@@ -278,25 +278,12 @@ function! s:fade_timer_callback(win_id, timer_id) abort " {{{1
     return
   endif
 
-  let l:elapsed = 1000*s:reltimefloat(reltime(w:matchup_fade_start))
+  let l:elapsed = 1000 * reltimefloat(reltime(w:matchup_fade_start))
   if l:elapsed >= s:fade_time
     call s:matchparen.clear()
     call timer_pause(a:timer_id, 1)
   endif
 endfunction
-
-" }}}1
-
-" function! s:reltimefloat(time) {{{1
-if exists('*reltimefloat')
-  function! s:reltimefloat(time)
-    return reltimefloat(a:time)
-  endfunction
-else
-  function! s:reltimefloat(time)
-    return str2float(reltimestr(a:time))
-  endfunction
-endif
 
 " }}}1
 

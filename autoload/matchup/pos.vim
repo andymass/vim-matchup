@@ -7,18 +7,18 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! matchup#pos#set_cursor(...) " {{{1
+function! matchup#pos#set_cursor(...) abort " {{{1
   call cursor(s:parse_args(a:000))
 endfunction
 
 " }}}1
 " function! matchup#pos#get_cursor() {{{1
 if exists('*getcurpos')
-  function! matchup#pos#get_cursor()
+  function! matchup#pos#get_cursor() abort
     return getcurpos()
   endfunction
 else
-  function! matchup#pos#get_cursor()
+  function! matchup#pos#get_cursor() abort
     return getpos('.')
   endfunction
 endif
@@ -26,7 +26,7 @@ endif
 " }}}1
 
 " }}}1
-function! matchup#pos#get_cursor_line() " {{{1
+function! matchup#pos#get_cursor_line() abort " {{{1
   let l:pos = matchup#pos#get_cursor()
   return l:pos[1]
 endfunction
@@ -46,7 +46,7 @@ function! matchup#pos#val(...) " {{{1
 endfunction
 
 " }}}1
-function! matchup#pos#next_eol(...) " {{{1
+function! matchup#pos#next_eol(...) abort " {{{1
   let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
 
   if l:cnum > strlen(getline(l:lnum))
@@ -61,7 +61,7 @@ function! matchup#pos#next_eol(...) " {{{1
 endfunction
 
 " }}}1
-function! matchup#pos#next(...) " {{{1
+function! matchup#pos#next(...) abort " {{{1
   let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
 
   let l:line = getline(l:lnum)
@@ -74,7 +74,7 @@ function! matchup#pos#next(...) " {{{1
 endfunction
 
 " }}}1
-function! matchup#pos#prev_eol(...) " {{{1
+function! matchup#pos#prev_eol(...) abort " {{{1
   let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
 
   if l:cnum >= 1 && l:lnum > 1
@@ -85,7 +85,7 @@ function! matchup#pos#prev_eol(...) " {{{1
 endfunction
 
 " }}}1
-function! matchup#pos#prev(...) " {{{1
+function! matchup#pos#prev(...) abort " {{{1
   let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
 
   if l:cnum > 1
@@ -98,30 +98,30 @@ endfunction
 
 " }}}1
 
-function! matchup#pos#larger(pos1, pos2) " {{{1
+function! matchup#pos#larger(pos1, pos2) abort " {{{1
   return matchup#pos#val(a:pos1) > matchup#pos#val(a:pos2)
 endfunction
 
 " }}}1
-function! matchup#pos#equal(p1, p2) " {{{1
+function! matchup#pos#equal(p1, p2) abort " {{{1
   let l:pos1 = s:parse_args(a:p1)
   let l:pos2 = s:parse_args(a:p2)
   return l:pos1[:1] == l:pos2[:1]
 endfunction
 
 " }}}1
-function! matchup#pos#smaller(pos1, pos2) " {{{1
+function! matchup#pos#smaller(pos1, pos2) abort " {{{1
   return matchup#pos#val(a:pos1) < matchup#pos#val(a:pos2)
 endfunction
 
 " }}}1
-function! matchup#pos#smaller_or_equal(pos1, pos2) " {{{1
+function! matchup#pos#smaller_or_equal(pos1, pos2) abort " {{{1
   return matchup#pos#smaller(a:pos1, a:pos2)
         \ || matchup#pos#equal(a:pos1, a:pos2)
 endfunction
 
 " }}}1
-function! s:parse_args(args) " {{{1
+function! s:parse_args(args) abort " {{{1
   "
   " The arguments should be in one of the following forms (when unpacked):
   "
