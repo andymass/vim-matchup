@@ -27,7 +27,7 @@
 (finally_clause
   "finally" @mid.try.1)
 
-(compound_expression
+(compound_statement
   "begin" @open.block
   "end" @close.block) @scope.block
 (do_clause
