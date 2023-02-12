@@ -67,7 +67,7 @@ function M.get_hl_groups_at_position(bufnr, row, col)
     for capture, node, metadata in iter do
       local hl = query.hl_cache[capture]
 
-      if hl and ts_utils.is_in_node_range(node, row, col) then
+      if hl and vim.treesitter.is_in_node_range(node, row, col) then
         local c = query._query.captures[capture] -- name of the capture in the query
         if c ~= nil then
           table.insert(matches, { capture = c, priority = metadata.priority })
