@@ -3,9 +3,9 @@
 -- licensed under the Apache License 2.0
 -- See nvim-treesitter.LICENSE-APACHE-2.0
 
+local ts = vim.treesitter
 local utils = require "treesitter-matchup.third-party.utils"
 local highlighter = require "vim.treesitter.highlighter"
-local ts_utils = require "nvim-treesitter.ts_utils"
 
 local M = {}
 
@@ -46,7 +46,7 @@ if vim.treesitter.highlighter.hl_map and vim.fn.has('nvim-0.9.0') == 0 then
       local iter = query:query():iter_captures(root, self.bufnr, row, row + 1)
 
       for capture, node, _ in iter do
-        if vim.treesitter.is_in_node_range(node, row, col) then
+        if ts.is_in_node_range(node, row, col) then
           local c = query._query.captures[capture] -- name of the capture in the query
           if c ~= nil then
             local general_hl, is_vim_hl = query:_get_hl_from_capture(capture)

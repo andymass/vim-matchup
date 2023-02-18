@@ -5,6 +5,7 @@ end
 
 local vim = vim
 local api = vim.api
+local ts = vim.treesitter
 local configs = require'nvim-treesitter.configs'
 local parsers = require'nvim-treesitter.parsers'
 local queries = require'treesitter-matchup.third-party.query'
@@ -140,7 +141,7 @@ function M.containing_scope(node, bufnr, key)
 end
 
 local function _node_text(node, bufnr)
-  local text = vim.treesitter.query.get_node_text(node, bufnr)
+  local text = ts.query.get_node_text(node, bufnr)
   return text:match("(%S+).*")
 end
 
@@ -204,7 +205,7 @@ function M.get_delim(bufnr, opts)
     for _, side in ipairs(side_table[opts.side]) do
       if not(side == 'mid' and vim.g.matchup_delim_nomids > 0) then
         for _, node in ipairs(active_nodes[side]) do
-          if vim.treesitter.is_in_node_range(node, cursor[1]-1, cursor[2]) then
+          if ts.is_in_node_range(node, cursor[1]-1, cursor[2]) then
             local len = ts_utils.node_length(node)
             if len < smallest_len then
               smallest_len = len
