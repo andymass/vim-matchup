@@ -1,8 +1,8 @@
 Given vim (Nesting):
 
-  if
-    if
-      if
+  if x
+    if y
+      if z
 
       endif
     endif
