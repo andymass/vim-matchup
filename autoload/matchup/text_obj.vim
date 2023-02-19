@@ -128,13 +128,13 @@ function! matchup#text_obj#delimited(is_inner, visual, type) abort " {{{1
 
       " make *i% more like *it for html
       " don't include next <
-      if !l:linewise_op && matchup#quirks#ishtmllike()
+      if l:line_count < 2 && matchup#quirks#ishtmllike()
             \ && !matchup#util#matchpref('classic_textobj', 0)
             \ && l:close.match =~? '^/\w\+\s*>\=$'
             \ && !(a:visual
             \      && matchup#pos#equal([l:l1, l:c1], [l:l2, l:c2]))
         let [l:l2, l:c2] = matchup#pos#prev(l:l2, l:c2)[1:2]
-        if l:open.match !~? '^<'
+        if l:open.match !~? '>$'
           let [l:l1, l:c1] = matchup#pos#next(l:l1, l:c1)[1:2]
         endif
       endif
