@@ -12,6 +12,9 @@
 (class
   "class" @open.class
   "end" @close.class) @scope.class
+(singleton_class
+  "class" @open.class
+  "end" @close.class) @scope.class
 
 (if
   "if" @open.if
