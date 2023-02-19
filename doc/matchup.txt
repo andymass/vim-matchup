@@ -6,7 +6,7 @@ Web: https://github.com/andymass/vim-matchup
 Script ID: 5624
 License: MIT license {{{
 
-  Copyright (c) 2017--2022 Andy Massimino
+  Copyright (c) 2017--2023 Andy Massimino
 
   Copyright (c) 2016 Karl Yngve Lervåg
 
@@ -702,8 +702,7 @@ Module matchparen~
   Default: 0 (disabled)
 
 Note: this feature is only available if your vim version has |timers| and
-the function |timer_pause|, version 7.4.2180 and after.  For neovim, this
-will only work in nvim-0.2.1 and after.
+the function |timer_pause|, version 7.4.2180 and after.
 
 *g:matchup_matchparen_deferred_show_delay*
 
