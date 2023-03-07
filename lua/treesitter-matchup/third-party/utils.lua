@@ -112,6 +112,23 @@ function M.node_contains(node, range)
   return start_fits and end_fits
 end
 
+function M.is_in_node_range(node, line, col)
+  local start_line, start_col, end_line, end_col = ts.get_node_range(node)
+  if line >= start_line and line <= end_line then
+    if line == start_line and line == end_line then
+      return col >= start_col and col < end_col
+    elseif line == start_line then
+      return col >= start_col
+    elseif line == end_line then
+      return col < end_col
+    else
+      return true
+    end
+  else
+    return false
+  end
+end
+
 --- Returns a tuple with the position of the last line and last column (0-indexed).
 function M.get_end_pos(bufnr)
   local bufnr = bufnr or api.nvim_get_current_buf()

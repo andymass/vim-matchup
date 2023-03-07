@@ -12,6 +12,7 @@ local queries = require'treesitter-matchup.third-party.query'
 local ts_utils = require'nvim-treesitter.ts_utils'
 local lru = require'treesitter-matchup.third-party.lru'
 local util = require'treesitter-matchup.util'
+local utils2 = require'treesitter-matchup.third-party.utils'
 
 local unpack = unpack or table.unpack
 
@@ -218,7 +219,7 @@ function M.get_delim(bufnr, opts)
     for _, side in ipairs(side_table[opts.side]) do
       if not(side == 'mid' and vim.g.matchup_delim_nomids > 0) then
         for _, node in ipairs(active_nodes[side]) do
-          if ts.is_in_node_range(node, cursor[1]-1, cursor[2]) then
+          if utils2.is_in_node_range(node, cursor[1]-1, cursor[2]) then
             local len = ts_utils.node_length(node)
             if len < smallest_len then
               smallest_len = len
