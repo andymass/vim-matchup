@@ -5,7 +5,7 @@ end
 
 local vim = vim
 local api = vim.api
-local ts = vim.treesitter
+local ts = require'treesitter-matchup.compat'
 local configs = require'nvim-treesitter.configs'
 local parsers = require'nvim-treesitter.parsers'
 local queries = require'treesitter-matchup.third-party.query'
@@ -155,7 +155,7 @@ function M.containing_scope(node, bufnr, key)
 end
 
 local function _node_text(node, bufnr)
-  local text = ts.query.get_node_text(node, bufnr)
+  local text = ts.get_node_text(node, bufnr)
   return text:match("(%S+).*")
 end
 
