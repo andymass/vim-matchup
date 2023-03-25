@@ -155,7 +155,7 @@ function M.containing_scope(node, bufnr, key)
 end
 
 local function _node_text(node, bufnr)
-  local text = ts.query.get_node_text(node, bufnr)
+  local text = ts.get_node_text(node, bufnr)
   return text:match("(%S+).*")
 end
 
