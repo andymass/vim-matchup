@@ -130,7 +130,7 @@ endfunction
 
 function! s:EchoHLString(str)
   let l:str = '%<' . substitute(a:str, '%{[^}]\+}', '', 'g')
-  let l:pat = '\%(%\(<\)\|%#\(\w*\)#\)'
+  let l:pat = '\%(%\(<\)\|%#\([0-9A-Za-z_@.]*\)#\)'
   let l:components = split(l:str, l:pat.'\&')
   call map(l:components, 'matchlist(v:val, "^".l:pat."\\(.*\\)")')
 
