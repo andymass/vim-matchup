@@ -789,7 +789,8 @@ function! s:do_offscreen_popup_nvim(offscreen) abort " {{{1
     endif
 
     if l:text_method
-      if !exists('s:float_bufnr')
+      if !exists('s:float_bufnr') || bufnr(s:float_bufnr) < 0
+        call s:close_floating_win()
         let s:float_bufnr = nvim_create_buf(0, 1)
       endif
       let l:bufnr = s:float_bufnr
