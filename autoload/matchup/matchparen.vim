@@ -626,6 +626,7 @@ function! s:do_offscreen_popup(offscreen) abort " {{{1
         \})
 
   call matchup#perf#tic('matchparen.render_popup')
+
   if exists('*prop_type_add') && exists('*popup_settext')
       \ && get(g:matchup_matchparen_offscreen, 'syntax_hl', 0)
     " requires patch 8.1.1553
@@ -633,6 +634,7 @@ function! s:do_offscreen_popup(offscreen) abort " {{{1
   else
     let l:width = s:set_popup_text(l:lnum, l:adjust, a:offscreen)
   endif
+
   call matchup#perf#toc('matchparen.render_popup', 'done')
 
   let l:rpad = 0
@@ -696,6 +698,9 @@ function! s:set_popup_text_2(lnum, adjust, offscreen) abort
         \ a:offscreen, {'noshowdir': 1})
   let l:sl = '%#Normal#' . substitute(l:sl, '%<', '', 'g')
 
+  let l:popup_winnr = !has('nvim') ? t:match_popup : s:float_id
+  let l:popup_bufnr = winbufnr(l:popup_winnr)
+
   let l:props = []
   let l:col = 1
   let l:text = ''
@@ -714,10 +719,10 @@ function! s:set_popup_text_2(lnum, adjust, offscreen) abort
     endif
 
     let l:key = 'matchup__' . l:hl
-    let l:popup_bufnr = winbufnr(t:match_popup)
-    let l:cache_key = l:key . '__' . l:popup_bufnr . '__' . t:match_popup
+    let l:cache_key = l:key . '__' . l:popup_bufnr . '__' . l:popup_winnr
     if !has_key(s:prop_cache, l:cache_key)
-      if empty(prop_type_get(l:key, {'bufnr': l:popup_bufnr}))
+      if exists('*prop_type_get')
+            \ && empty(prop_type_get(l:key, {'bufnr': l:popup_bufnr}))
         call prop_type_add(l:key, {
               \ 'bufnr': l:popup_bufnr,
               \ 'highlight': l:hl
@@ -729,14 +734,27 @@ function! s:set_popup_text_2(lnum, adjust, offscreen) abort
     call add(l:props, {
           \ 'length': l:len,
           \ 'col': l:col,
-          \ 'type': l:key
+          \ 'type': l:key,
+          \ 'hl': l:hl
           \})
 
     let l:text .= l:rest
     let l:col += l:len
   endfor
 
-  call popup_settext(t:match_popup, [{'text': l:text, 'props': l:props}])
+  if !has('nvim')
+    call popup_settext(t:match_popup,
+          \ [{'text': l:text, 'props': l:props}])
+  else
+    call setbufline(l:popup_bufnr, 1, l:text)
+    for l:prop in l:props
+      call nvim_buf_set_extmark(l:popup_bufnr, s:ns_id,
+            \ 0, l:prop.col - 1, {
+            \   'end_col' : l:prop.col + l:prop.length - 1,
+            \   'hl_group' : l:prop.hl,
+            \})
+    endfor
+  endif
   return strdisplaywidth(l:text)
 endfunction
 
@@ -745,6 +763,7 @@ if !exists('s:prop_cache')
 endif
 
 " }}}1
+
 function! s:do_offscreen_popup_nvim(offscreen) abort " {{{1
   if exists('*nvim_open_win')
     " neovim floating window
@@ -797,7 +816,7 @@ function! s:do_offscreen_popup_nvim(offscreen) abort " {{{1
     else
       let l:bufnr = bufnr('%')
     endif
-    let s:float_id = nvim_open_win(l:bufnr, v:false, l:win_cfg)
+    silent let s:float_id = nvim_open_win(l:bufnr, v:false, l:win_cfg)
 
     if has_key(g:matchup_matchparen_offscreen, 'highlight')
       call nvim_win_set_option(s:float_id, 'winhighlight',
@@ -854,6 +873,7 @@ function! s:populate_floating_win(offscreen, text_method) abort " {{{1
         let l:width += 3 + len(a:offscreen.links.open.match)
       endif
       let l:width += wincol()-virtcol('.')
+      let l:width = min([l:width, winwidth(0) - 1])
     endif
     call nvim_win_set_width(s:float_id, l:width + 1)
 
@@ -873,7 +893,11 @@ function! s:populate_floating_win(offscreen, text_method) abort " {{{1
       call nvim_win_set_option(s:float_id, 'number', v:false)
       call nvim_win_set_option(s:float_id, 'relativenumber', v:false)
       call nvim_win_set_option(s:float_id, 'colorcolumn', '')
-      call s:set_popup_text(l:lnum, l:adjust, a:offscreen)
+      if get(g:matchup_matchparen_offscreen, 'syntax_hl', 0)
+        call s:set_popup_text_2(l:lnum, l:adjust, a:offscreen)
+      else
+        call s:set_popup_text(l:lnum, l:adjust, a:offscreen)
+      endif
     else
       call nvim_win_set_option(s:float_id, 'number', v:true)
       call nvim_win_set_option(s:float_id, 'relativenumber', v:false)
