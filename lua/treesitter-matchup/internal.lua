@@ -32,7 +32,7 @@ function M.is_hl_enabled(bufnr)
   return configs.is_enabled('highlight', lang, bufnr)
 end
 
-function M.get_matches(bufnr)
+M.get_matches = ts_utils.memoize_by_buf_tick(function(bufnr)
   local parser = parsers.get_parser(bufnr)
   local matches = {}
 
@@ -47,7 +47,7 @@ function M.get_matches(bufnr)
   end
 
   return matches
-end
+end)
 
 local function _time()
   local s, u = vim.loop.gettimeofday()
