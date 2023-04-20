@@ -8,6 +8,10 @@
   "return" @mid.def.1)
 (yield
   "yield" @mid.def.2)
+(body_statement
+  (rescue "rescue" @mid.def.1))
+(body_statement
+  (ensure "ensure" @mid.def.2))
 
 (class
   "class" @open.class
