@@ -38,7 +38,9 @@ M.get_matches = ts_utils.memoize_by_buf_tick(function(bufnr)
 
   if parser then
     parser:for_each_tree(function(tree, lang_tree)
-      local lang = lang_tree:lang()
+      if not tree or lang_tree:lang() == 'comment' then
+        return
+      end
 
       local group_results = queries.collect_group_results(
         bufnr, 'matchup', tree:root(), lang) or {}
