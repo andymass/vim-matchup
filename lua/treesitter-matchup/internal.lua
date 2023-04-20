@@ -42,6 +42,7 @@ M.get_matches = ts_utils.memoize_by_buf_tick(function(bufnr)
         return
       end
 
+      local lang = lang_tree:lang()
       local group_results = queries.collect_group_results(
         bufnr, 'matchup', tree:root(), lang) or {}
       vim.list_extend(matches, group_results)
