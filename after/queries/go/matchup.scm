@@ -10,3 +10,8 @@
 
 ; if
 (block (if_statement "if" @open.if) @scope.if)
+
+; switch
+(expression_switch_statement "switch" @open.switch
+  (expression_case "case" @mid.switch.1)
+  (default_case "default" @mid.switch.2)) @scope.switch
