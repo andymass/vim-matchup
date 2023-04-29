@@ -13,7 +13,7 @@ set cpo&vim
 
 if matchup#util#matchpref('template', 0)
   call matchup#util#append_match_words(
-        \ '\%(\s\@<!<\|<\s\@!\)=\@!:\%(\s\@<!>\|>\s\@!\)=\@!')
+        \ '\%(\s\@<!<\|<\s\@!\)[=(]\@!:\%(\s\@<!>\|>\s\@!\)=\@!')
   if stridx(&matchpairs, '<:>')
     setlocal matchpairs-=<:>
   endif
