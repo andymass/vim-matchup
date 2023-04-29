@@ -13,3 +13,5 @@
 (for_loop
   "for" @open.for
   "endfor" @close.for) @scope.for
+(continue_statement "continue" @mid.for.1)
+(break_statement "break" @mid.for.2)
