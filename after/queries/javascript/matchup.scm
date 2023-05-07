@@ -1,3 +1,5 @@
+; inherits: quote
+
 ; functions
 [
   (arrow_function "=>" @open.function)

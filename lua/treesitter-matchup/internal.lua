@@ -107,8 +107,10 @@ M.get_active_nodes = ts_utils.memoize_by_buf_tick(function(bufnr)
   for _, match in ipairs(matches) do
     if match.open then
       for key, open in pairs(match.open) do
+        local reject = key:find('quote')
+          and not M.get_option(bufnr, 'enable_quotes')
         local id = _node_id(open.node)
-        if open.node and symbols[id] == nil then
+        if not reject and open.node and symbols[id] == nil then
           table.insert(nodes.open, open.node)
           symbols[id] = key
         end
@@ -116,8 +118,10 @@ M.get_active_nodes = ts_utils.memoize_by_buf_tick(function(bufnr)
     end
     if match.close then
       for key, close in pairs(match.close) do
+        local reject = key:find('quote')
+          and not M.get_option(bufnr, 'enable_quotes')
         local id = _node_id(close.node)
-        if close.node and symbols[id] == nil then
+        if not reject and close.node and symbols[id] == nil then
           table.insert(nodes.close, close.node)
           symbols[id] = key
         end
@@ -359,7 +363,8 @@ function M.get_option(bufnr, opt_name)
   local lang = parsers.get_buf_lang(bufnr)
   if (opt_name == 'include_match_words'
       or opt_name == 'additional_vim_regex_highlighting'
-      or opt_name == 'disable_virtual_text') then
+      or opt_name == 'disable_virtual_text'
+      or opt_name == 'enable_quotes') then
     return opt_tbl_for_lang(config[opt_name], lang)
   end
   error('invalid option ' .. opt_name)

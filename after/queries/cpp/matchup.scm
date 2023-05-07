@@ -1,4 +1,4 @@
-; inherits: c
+; inherits: c,quote
 
 (template_parameter_list
   "<" @open.template
