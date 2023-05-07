@@ -1,3 +1,5 @@
+; inherits: quote
+
 [
     (element)
     (script_element)

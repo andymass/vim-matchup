@@ -1,3 +1,5 @@
+; inherits: quote
+
 ; --------------- if/else ---------------
 (block (if_expression "if" @open.if_) @scope.if_)
 (expression_statement (if_expression "if" @open.if_) @scope.if_)

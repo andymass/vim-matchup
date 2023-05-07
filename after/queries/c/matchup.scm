@@ -1,3 +1,5 @@
+; inherits: quote
+
 (preproc_ifdef
   ["#ifdef" "#ifndef"] @open.def
   "#endif" @close.def) @scope.def
