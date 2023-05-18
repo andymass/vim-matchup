@@ -26,3 +26,7 @@
   (finally_clause "finally" @mid.try.1)?
   (except_clause "except" @mid.try.2)?
   (else_clause "else" @mid.try.3)?) @scope.try
+
+(_
+  "\"" @open.quote_all
+  "\"" @close.quote_all) @scope.quote_all

@@ -1,3 +1,5 @@
+; inherits: quote
+
 (for_statement
   "do" @open.loop
   "end" @close.loop) @scope.loop

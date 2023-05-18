@@ -1,3 +1,5 @@
+; inherits: quote
+
 (if_statement
     "if" @open.if
     "elsif"? @mid.if.1

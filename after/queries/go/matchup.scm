@@ -15,3 +15,7 @@
 (expression_switch_statement "switch" @open.switch
   (expression_case "case" @mid.switch.1)
   (default_case "default" @mid.switch.2)) @scope.switch
+
+(_
+  "\"" @open.quote_double
+  "\"" @close.quote_double) @scope.quote_double
