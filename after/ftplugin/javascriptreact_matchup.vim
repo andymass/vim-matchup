@@ -11,7 +11,7 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
-let b:match_skip = 's:\%(comment\|string\)\%(tsxCloseString\)\@<!'
+let b:match_skip = 's:\%(comment\|string\)\%(jsxCloseString\)\@<!'
 
 if matchup#util#matchpref('tagnameonly', 0)
   call matchup#util#patch_match_words('\)\%(', '\)\g{hlend}\%(')
