@@ -27,6 +27,6 @@
   (except_clause "except" @mid.try.2)?
   (else_clause "else" @mid.try.3)?) @scope.try
 
-(_
-  "\"" @open.quote_all
-  "\"" @close.quote_all) @scope.quote_all
+(string
+  (string_start) @open.quote_all
+  (string_end) @close.quote_all) @scope.quote_all
