@@ -1,5 +1,3 @@
-; inherits: javascript
-
 (jsx_element) @scope.tag
 (jsx_opening_element (identifier) @open.tag)
 (jsx_closing_element
