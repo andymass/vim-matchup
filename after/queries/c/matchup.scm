@@ -26,3 +26,14 @@
 (compound_statement
   (if_statement
     "if" @open.if) @scope.if)
+
+; Functions
+(function_definition) @scope.function
+(function_declarator declarator: (identifier) @open.function)
+(return_statement "return" @mid.function.1)
+
+; Loops
+(for_statement "for" @open.loop) @scope.loop
+(while_statement "while" @open.loop) @scope.loop
+(do_statement "do" @open.loop "while" @close.loop) @scope.loop
+(break_statement "break" @mid.loop.1)
