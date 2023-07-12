@@ -6,6 +6,4 @@
 
 (jsx_self_closing_element
   name: (identifier) @open.selftag
-  "/" @_start ">" @_end
-  (#make-range! "close.selftag" @_start @_end)
-) @scope.selftag
+  "/>" @close.selftag) @scope.selftag
