@@ -10,7 +10,7 @@
   "case" @open.case (_) 
   "of" @mid.case.1
   (alts
-    (alt (_) "->" @mid.case.2 (_))
+    (alt) @mid.case.2
   ) 
 ) @scope.case
 
@@ -19,7 +19,7 @@
 (exp_lambda_case 
   "\case" @open.case
   (alts
-    (alt (_) "->" @mid.case.1 (_))
+    (alt) @mid.case.1
   ) 
 ) @scope.case
 
@@ -43,10 +43,10 @@
 ; -------- ADT data/constructors -------------
 (adt
   "data" @open.adt (_)
-  "=" @mid.adt.1
   (constructors
-    "|" @mid.adt.2 (data_constructor)
-  )
+    (data_constructor
+      (constructor) @mid.adt.2
+    ))
 ) @scope.adt
 
 ; --------------- ADT record ------------------
@@ -83,20 +83,3 @@
     )
   )
 ) @scope.class
-
-
-; ------------- type signature ----------------
-(signature
-  (variable) @open.sig
-  (fun
-    [ (type_apply)
-      (type_name)
-    ] @mid.sig.1
-  )
-) @scope.sig
-
-; ------------- function/args -----------------
-(function
-  (variable) @open.fun
-  (_) @mid.fun.1
-) @scope.fun
