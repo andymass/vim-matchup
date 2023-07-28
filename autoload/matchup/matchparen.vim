@@ -893,6 +893,8 @@ function! s:populate_floating_win(offscreen, text_method) abort " {{{1
       call nvim_win_set_option(s:float_id, 'number', v:false)
       call nvim_win_set_option(s:float_id, 'relativenumber', v:false)
       call nvim_win_set_option(s:float_id, 'colorcolumn', '')
+      call nvim_win_set_option(s:float_id, 'foldcolumn', '0')
+      call nvim_win_set_option(s:float_id, 'signcolumn', 'no')
       if get(g:matchup_matchparen_offscreen, 'syntax_hl', 0)
         call s:set_popup_text_2(l:lnum, l:adjust, a:offscreen)
       else
