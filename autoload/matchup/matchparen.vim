@@ -900,6 +900,7 @@ function! s:populate_floating_win(offscreen, text_method) abort " {{{1
       else
         call s:set_popup_text(l:lnum, l:adjust, a:offscreen)
       endif
+      silent! call nvim_win_set_option(s:float_id, 'statuscolumn', '')
     else
       call nvim_win_set_option(s:float_id, 'number', v:true)
       call nvim_win_set_option(s:float_id, 'relativenumber', v:false)
