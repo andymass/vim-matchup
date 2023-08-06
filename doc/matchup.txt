@@ -269,6 +269,38 @@ directives.
 See |matchup-feat-exclusive| and |matchup-feat-linewise| for some examples and
 important special cases.
 
+                                                      *matchup-treesitter*
+
+Tree-sitter integration~
+Note: Currently this feature is possible in neovim only. Only the latest
+version of neovim and nvim-treesitter is supported.
+
+match-up has support for language syntax provided by tree-sitter. The list
+of supported languages is available here. This feature requires manual
+opt-in in your init.vim and requires nvim-treesitter to be installed. >
+
+  Plug 'nvim-treesitter/nvim-treesitter'
+  lua <<EOF
+  require'nvim-treesitter.configs'.setup {
+    matchup = {
+      enable = true,              -- mandatory, false will disable the whole extension
+      disable = { "c", "ruby" },  -- optional, list of language that will be disabled
+      -- [options]
+    },
+  }
+<
+Beside enable and disable, the following options are available, all
+defaulting to false:
+
+*disable_virtual_text*
+
+  If true, do not use virtual text to highlight the virtual end of a
+  block, for languages without explicit end markers (e.g., Python).
+
+*include_match_words*
+
+  If true, additionally include traditional vim regex matches for symbols.
+
 Highlighting matches~
 
 To disable match highlighting at |startup|, use >
@@ -787,6 +819,24 @@ the function |timer_pause|, version 7.4.2180 and after.
     :hi MatchBackground guibg=grey ctermbg=grey
 <
   Default: 0
+
+*g:matchup_matchparen_end_sign*
+
+  (neovim only) Configure the virtual symbol shown for closeless matches in languages like
+  C++ and python.
+
+      if (true)
+        cout << "";
+      else
+        cout << ""; ◀ if
+
+  Default ◀
+
+*MatchupVirtualText*
+
+  (neovim only) You can also configure the color and style of the virtual text.
+
+      :hi MatchupVirtualText ctermbg=blue guibg=lightblue gui=italic
 
 Module motion~
 
