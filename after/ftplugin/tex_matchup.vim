@@ -54,10 +54,31 @@ function! s:get_match_words()
   " latex equation markers
   let l:match_words .= ',\\(:\\),'.s:not_bslash.'\\\[:\\]'
 
+  " latex3 file i/o
+  let l:match_words .= ',\\ior_open\:NnT\?F\?\s*\\\([^\s]*\):\\ior_close\:N\s*\\\1'
+  let l:match_words .= ',\\ior_open\:cnT\?F\?\s*{\s*\([^\s\\}]*\)\s*}:\\ior_close\:c\s*{\s*\1\s*}'
+  let l:match_words .= ',\\iow_open\:Nn\s*\\\([^\s]*\):\\iow_close\:N\s*\\\1'
+  let l:match_words .= ',\\iow_open\:cn\s*{\s*\([^\s\\}]*\)\s*}:\\iow_close\:c\s*{\s*\1\s*}'
+
   " simple blocks
-  let l:match_words .= ',\\if\%(\w\|@\)*\>:\\else\>:\\fi\>'
+  let l:match_words .= ',\\if\%(\:w\|\%(\w\|@\)*\)\>:\\else\:*\>:\\fi\:*\>'
+  let l:match_words .= ',\\if_\%(true\|false\)\::\\else\::\\fi\:'
+  let l:match_words .= ',\\if_mode_\%(horizontal\|vertical\|math\|inner\)\::\\else\::\\fi\:'
+  let l:match_words .= ',\\if_\%(charcode\|catcode\|dim\)\:w:\\else\::\\fi\:'
+  let l:match_words .= ',\\if_cs_exist\:w:\\cs_end\::\\else\::\\fi\:'
+  let l:match_words .= ',\\if_cs_exist\:N:\\else\::\\fi\:'
+  let l:match_words .= ',\\if_[hv]box\:N:\\else\::\\fi\:'
+  let l:match_words .= ',\\if_box_empty\:N:\\else\::\\fi\:'
+  let l:match_words .= ',\\cs\:w:\\cs_end\:'
   let l:match_words .= ',\\makeatletter:\\makeatother'
+  let l:match_words .= ',\\ExplSyntaxOn:\\ExplSyntaxOff'
+  let l:match_words .= ',\\debug_suspend\::\\debug_resume\:'
   let l:match_words .= ',\\begingroup:\\endgroup,\\bgroup:\\egroup'
+  let l:match_words .= ',\\group_begin\::\\group_end\:'
+  let l:match_words .= ',\\group_align_safe_begin\::\\group_align_safe_end\:'
+  let l:match_words .= ',\\color_group_begin\::\\color_group_end\:'
+  let l:match_words .= ',\\cctab_begin\:[Nc]:\\cctab_end\:'
+  let l:match_words .= ',\\exp\:w:\\exp_end\(_continue_f\:n\?w\|\:\)'
 
   " environments
   let l:match_words .= ',\\begin{tabular}'
