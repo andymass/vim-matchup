@@ -61,7 +61,7 @@ function! s:get_match_words()
   let l:match_words .= ',\\iow_open\:cn\s*{\s*\([^\s\\}]*\)\s*}:\\iow_close\:c\s*{\s*\1\s*}'
 
   " simple blocks
-  let l:match_words .= ',\\if\%(\:w\|\%(\w\|@\)*\)\>:\\else\:*\>:\\fi\:*\>'
+  let l:match_words .= ',\\if\%(\:w\|\%(\w\|@\)*\)\>:\\else\:\?\>:\\fi\:\?\>'
   let l:match_words .= ',\\if_\%(true\|false\)\::\\else\::\\fi\:'
   let l:match_words .= ',\\if_mode_\%(horizontal\|vertical\|math\|inner\)\::\\else\::\\fi\:'
   let l:match_words .= ',\\if_\%(charcode\|catcode\|dim\)\:w:\\else\::\\fi\:'
