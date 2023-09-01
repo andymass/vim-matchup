@@ -1,5 +1,14 @@
 ; inherits: quote
 
+; --------------- types ---------------
+(type_arguments
+  "<" @open.typeargs
+  ">" @close.typeargs) @scope.typeargs
+
+(type_parameters
+  "<" @open.typeparams
+  ">" @open.typeparams) @scope.typeparams
+
 ; --------------- if/else ---------------
 (block (if_expression "if" @open.if_) @scope.if_)
 (expression_statement (if_expression "if" @open.if_) @scope.if_)
