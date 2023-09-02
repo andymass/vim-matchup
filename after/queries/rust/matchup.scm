@@ -27,9 +27,14 @@
 ; --------------- fn/return ---------------
 (function_item
   "fn" @open.function) @scope.function
-(closure_expression parameters: (closure_parameters . "|" @open.function "|" .) body: (block)) @scope.function
+(closure_expression) @scope.function
 (return_expression
   "return" @mid.function.1)
+
+; --------------- closures ---------------
+(closure_parameters
+  "|" @open.closureparams
+  "|" @close.closureparams) @scope.closureparams
 
 ; --------------- while/loop/for + break/continue ---------------
 (for_expression . "for" @open.loop) @scope.loop
