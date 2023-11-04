@@ -27,3 +27,7 @@
   "case" @open.case
   (case_item) @mid.case.1
   "esac" @close.case) @scope.case
+
+(heredoc_redirect
+	(heredoc_start) @open.rhrd
+ 	(heredoc_end  ) @close.rhrd) @scope.rhrd
