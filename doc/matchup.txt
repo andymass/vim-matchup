@@ -1,5 +1,5 @@
 *matchup.txt*    modern matching words
-*matchup* *match-up*
+*matchup* *match-up* *vim-matchup*
 
 Author: Andy Massimino <a@normed.space>
 Web: https://github.com/andymass/vim-matchup
@@ -270,7 +270,6 @@ See |matchup-feat-exclusive| and |matchup-feat-linewise| for some examples and
 important special cases.
 
                                                       *matchup-treesitter*
-
 Tree-sitter integration~
 Note: Currently this feature is possible in neovim only. Only the latest
 version of neovim and nvim-treesitter is supported.
@@ -830,7 +829,7 @@ the function |timer_pause|, version 7.4.2180 and after.
       else
         cout << ""; ◀ if
 
-  Default ◀
+  Default: ◀
 
 *MatchupVirtualText*
 

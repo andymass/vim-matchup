@@ -688,7 +688,9 @@ function! s:set_popup_text(lnum, adjust, offscreen) abort
   elseif exists('t:match_popup')
     call setbufline(winbufnr(t:match_popup), 1, l:text)
   elseif exists('s:float_id')
-    call setbufline(winbufnr(s:float_id), 1, l:text)
+    if s:float_id > 0 && winbufnr(s:float_id) != bufnr('%')
+      call setbufline(winbufnr(s:float_id), 1, l:text)
+    endif
   endif
   return strdisplaywidth(l:text)
 endfunction
