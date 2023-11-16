@@ -1,4 +1,4 @@
-name: Neovim with Tree-sitter
+name: Neovim Stable and Head
 
 on:
   push:
@@ -14,10 +14,8 @@ jobs:
       matrix:
         neovim_version:
           - 'head'
-          - 'v0.8.3'
+          - 'stable'
     runs-on: ubuntu-latest
-    env:
-      TESTS_ENABLE_TREESITTER: 1
     steps:
       - uses: 'actions/checkout@v2'
 
@@ -33,15 +31,11 @@ jobs:
       - name: Install nvim-treesitter
         run: git clone --depth=1 https://github.com/nvim-treesitter/nvim-treesitter.git test/vader/plugged/nvim-treesitter
 
-      - name: Install python treesitter module
-        run: nvim --headless -Nu test/vader/minvimrc -c 'TSInstallSync python' -c 'q'
-
       - name: 'Show version'
         run: nvim --version
 
-      - name: 'Run test'
-        run: |
-          bash -c 'VIMCMD=nvim test/vader/run'
+      - name: Install python treesitter module
+        run: nvim --headless -Nu test/vader/minvimrc -c 'TSInstallSync python' -c 'q'
 
       - name: Install ruby treesitter module
         run: nvim --headless -Nu test/vader/minvimrc -c 'TSInstallSync ruby' -c 'q'

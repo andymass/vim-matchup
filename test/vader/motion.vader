@@ -10,6 +10,7 @@ Given vim (Nesting):
 
 Before (Cursor):
   normal! 5gg
+  :sleep 10m\<cr>
 
 Do (Move [%):
   [%

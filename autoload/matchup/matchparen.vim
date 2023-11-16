@@ -1216,7 +1216,7 @@ if has('nvim-0.5.0')
   let s:ns_id = nvim_create_namespace('vim-matchup')
 endif
 
-if has('nvim-0.5.0') && matchup#loader#_treesitter_may_be_supported()
+if matchup#loader#_treesitter_may_be_supported()
   function s:synID(lnum, col, trans)
     return matchup#ts_syntax#synID(a:lnum, a:col, a:trans)
   endfunction

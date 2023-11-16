@@ -142,21 +142,9 @@ This feature requires manual opt-in in your init.vim and requires
 [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to
 be installed.
 
-```vim
-Plug 'nvim-treesitter/nvim-treesitter'
-lua <<EOF
-require'nvim-treesitter.configs'.setup {
-  matchup = {
-    enable = true,              -- mandatory, false will disable the whole extension
-    disable = { "c", "ruby" },  -- optional, list of language that will be disabled
-    -- [options]
-  },
-}
-EOF
-```
-
-Beside `enable` and `disable`, the following options are available, all
-defaulting to disabled:
+Configure tree-sitter module by defining `g:matchup_treesitter_config` table,
+with option names as keys. The following options are available, all defaulting
+to disabled:
 
   - `disable_virtual_text`: do not use virtual text to highlight the
   virtual end of a block, for languages without explicit end markers
