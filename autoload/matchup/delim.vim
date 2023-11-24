@@ -40,7 +40,7 @@ endfunction
 
 " }}}1
 
-function! s:get_delim_multi(opts) " {{{1
+function! s:get_delim_multi(opts) abort " {{{1
   let l:best = {}
   for l:e in get(get(b:, 'matchup_active_engines', {}), a:opts.type, [])
     let l:res = call(s:engines[l:e].get_delim, [a:opts])
@@ -439,11 +439,12 @@ function! s:get_delim(opts) abort " {{{1
           \               line('.'), l:to)
     if l:lnum == 0 | break | endif
 
-    " note: the skip here should not be needed
+    " note: the skip here should never be called
     " in 'current' mode, but be explicit
     if a:opts.direction !=# 'current'
           \ && (l:check_skip || g:matchup_delim_noskips == 1
-          \     && getline(l:lnum)[l:cnum-1] =~? '[^[:punct:]]')
+          \     && getline(l:lnum)[l:cnum-1] =~? '[^[:punct:]]'
+          \     || g:matchup_delim_noskips >= 2)
           \ && matchup#delim#skip(l:lnum, l:cnum)
           \ && (a:opts.direction ==# 'prev' ? (l:lnum > 1 || l:cnum > 1)
           \     : (l:lnum < line('$') || l:cnum < len(getline('$'))))

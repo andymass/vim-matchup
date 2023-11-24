@@ -14,12 +14,12 @@ jobs:
       matrix:
         vim_type: ['Vim']
         vim_version:
-          - 'head'
+          - 'nightly'
           - 'v8.0.1575'
           - 'v7.4.2273'
     runs-on: ubuntu-latest
     steps:
-      - uses: 'actions/checkout@v2'
+      - uses: 'actions/checkout@v3'
 
       - name: Install vader.vim
         run: git clone --depth=1 https://github.com/junegunn/vader.vim.git test/vader/vader.vim
