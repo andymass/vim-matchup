@@ -1,6 +1,8 @@
 (function_definition
   "function" @open.function
   "endfunction" @close.function) @scope.function
+(return_statement
+  "return" @mid.function.1)
 
 (if_statement
   "if" @open.if
@@ -11,7 +13,10 @@
   "else" @mid.if.2)
 
 (for_loop
-  "for" @open.for
-  "endfor" @close.for) @scope.for
-(continue_statement "continue" @mid.for.1)
-(break_statement "break" @mid.for.2)
+  "for" @open.loop
+  "endfor" @close.loop) @scope.loop
+(while_loop
+  "while" @open.loop
+  "endwhile" @close.loop) @scope.loop
+(continue_statement "continue" @mid.loop.1)
+(break_statement "break" @mid.loop.2)
