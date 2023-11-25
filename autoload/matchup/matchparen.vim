@@ -331,7 +331,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
   if has('vim_starting') | return | endif
 
-  if !g:matchup_matchparen_pumvisible && pumvisible() | return | endif
+  if !g:matchup_matchparen_pumvisible && s:pumvisible() | return | endif
 
   " try to avoid interfering with some auto-complete plugins
   if has('*state') && state('a') !=# '' | return | endif
@@ -501,6 +501,18 @@ function s:matchparen.transmute_reset() abort dict
     call matchup#transmute#reset()
   endif
 endfunction
+
+
+if has('nvim')
+  function s:pumvisible() abort
+    return pumvisible() || luaeval('pcall(require, "cmp")')
+          \ && luaeval('require"cmp".visible()')
+  endfunction
+else
+  function s:pumvisible() abort
+    return pumvisible()
+  endfunction
+endif
 
 " }}}1
 
