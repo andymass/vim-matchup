@@ -1,4 +1,5 @@
 (function_declaration "func" @open.func) @scope.func
+(method_declaration "func" @open.func) @scope.func
 (func_literal "func" @open.func) @scope.func
 
 (return_statement "return" @mid.func.1)
