@@ -3,7 +3,7 @@
 ; functions
 [
   (arrow_function "=>" @open.function)
-  (function "function" @open.function)
+  (function_expression "function" @open.function)
   (function_declaration "function" @open.function)
   (method_definition body: (statement_block "{" @open.function))
 ] @scope.function
