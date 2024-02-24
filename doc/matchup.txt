@@ -275,21 +275,11 @@ Note: Currently this feature is possible in neovim only. Only the latest
 version of neovim and nvim-treesitter is supported.
 
 match-up has support for language syntax provided by tree-sitter. The list
-of supported languages is available here. This feature requires manual
-opt-in in your init.vim and requires nvim-treesitter to be installed. >
+of supported languages is available here.
 
-  Plug 'nvim-treesitter/nvim-treesitter'
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    matchup = {
-      enable = true,              -- mandatory, false will disable the whole extension
-      disable = { "c", "ruby" },  -- optional, list of language that will be disabled
-      -- [options]
-    },
-  }
-<
-Beside enable and disable, the following options are available, all
-defaulting to false:
+Configure tree-sitter module by defining `g:matchup_treesitter_config` table,
+with option names as keys. The following options are available, all defaulting
+to disabled:
 
 *disable_virtual_text*
 

@@ -1,14 +1,7 @@
--- From https://github.com/nvim-treesitter/nvim-treesitter
--- Copyright 2021
--- licensed under the Apache License 2.0
--- See nvim-treesitter.LICENSE-APACHE-2.0
-
 local api = vim.api
 local ts = require 'treesitter-matchup.compat'
-local tsrange = require "nvim-treesitter.tsrange"
-local utils = require "nvim-treesitter.utils"
-local parsers = require "nvim-treesitter.parsers"
-local caching = require "nvim-treesitter.caching"
+local tsrange = require "treesitter-matchup.third-party.tsrange"
+local caching = require "treesitter-matchup.third-party.caching"
 
 local M = {}
 
@@ -18,10 +11,15 @@ do
   local query_cache = caching.create_buffer_cache()
 
   local function update_cached_matches(bufnr, changed_tick, query_group)
-    query_cache.set(query_group, bufnr, {
-      tick = changed_tick,
-      cache = M.collect_group_results(bufnr, query_group) or {},
-    })
+    local parser_loaded, parser = pcall(vim.treesitter.get_parser, bufnr)
+    if parser_loaded and parser then
+      local parser_first_root = parser:trees()[1]:root()
+
+      query_cache.set(query_group, bufnr, {
+        tick = changed_tick,
+        cache = M.collect_group_results(bufnr, query_group, parser_first_root, parser) or {},
+      })
+    end
   end
 
   function M.get_matches(bufnr, query_group)
@@ -31,7 +29,9 @@ do
       update_cached_matches(bufnr, api.nvim_buf_get_changedtick(bufnr), query_group)
     end
 
-    return query_cache.get(query_group, bufnr).cache
+    local cache_result = query_cache.get(query_group, bufnr)
+
+    return cache_result and cache_result.cache or {}
   end
 end
 
@@ -98,48 +98,12 @@ end
 
 ---@param bufnr integer
 ---@param query_name string
----@param root LanguageTree
----@param root_lang string|nil
+---@param root TSNode the root node
+---@param parser LanguageTree language tree (parser) the root originates from
 ---@return Query|nil, QueryInfo|nil
-local function prepare_query(bufnr, query_name, root, root_lang)
-  local buf_lang = parsers.get_buf_lang(bufnr)
-
-  if not buf_lang then
-    return
-  end
-
-  local parser = parsers.get_parser(bufnr, buf_lang)
-  if not parser then
-    return
-  end
-
-  if not root then
-    local first_tree = parser:trees()[1]
-
-    if first_tree then
-      root = first_tree:root()
-    end
-  end
-
-  if not root then
-    return
-  end
-
+local function prepare_query(bufnr, query_name, root, parser)
   local range = { root:range() }
-
-  if not root_lang then
-    local lang_tree = parser:language_for_range(range)
-
-    if lang_tree then
-      root_lang = lang_tree:lang()
-    end
-  end
-
-  if not root_lang then
-    return
-  end
-
-  local query = M.get_query(root_lang, query_name)
+  local query = M.get_query(parser:lang(), query_name)
   if not query then
     return
   end
@@ -154,26 +118,8 @@ local function prepare_query(bufnr, query_name, root, root_lang)
     }
 end
 
-local function get_byte_offset(buf, row, col)
-  local lines = api.nvim_buf_get_lines(buf, row, row + 1, false)
-  if #lines < 1 then
-    return
-  end
-  return api.nvim_buf_get_offset(buf, row) + vim.fn.byteidx(lines[1], col)
-end
-
 local function TSRange_from_table(buf, range)
-  return setmetatable(
-    {
-      start_pos = {range[1], range[2], get_byte_offset(buf, range[1], range[2])},
-      end_pos = {range[3], range[4], get_byte_offset(buf, range[3], range[4])},
-      buf = buf,
-      [1] = range[1],
-      [2] = range[2],
-      [3] = range[3],
-      [4] = range[4],
-    },
-    tsrange.TSRange)
+  return tsrange.TSRange.from_table(buf, range)
 end
 
 ---@param query Query
@@ -267,76 +213,13 @@ function M.iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
   return iterator
 end
 
---- Return all nodes corresponding to a specific capture path (like @definition.var, @reference.type)
----Works like M.get_references or M.get_scopes except you can choose the capture
----Can also be a nested capture like @definition.function to get all nodes defining a function.
----
----@param bufnr integer the buffer
----@param captures string|string[]
----@param query_group string the name of query group (highlights or injections for example)
----@param root LanguageTree|nil node from where to start the search
----@param lang string|nil the language from where to get the captures.
----            Root nodes can have several languages.
----@return table|nil
-function M.get_capture_matches(bufnr, captures, query_group, root, lang)
-  if type(captures) == "string" then
-    captures = { captures }
-  end
-  local strip_captures = {}
-  for i, capture in ipairs(captures) do
-    if capture:sub(1, 1) ~= "@" then
-      error 'Captures must start with "@"'
-      return
-    end
-    -- Remove leading "@".
-    strip_captures[i] = capture:sub(2)
-  end
-
-  local matches = {}
-  for match in M.iter_group_results(bufnr, query_group, root, lang) do
-    for _, capture in ipairs(strip_captures) do
-      local insert = utils.get_at_path(match, capture)
-      if insert then
-        table.insert(matches, insert)
-      end
-    end
-  end
-  return matches
-end
-
-function M.iter_captures(bufnr, query_name, root, lang)
-  local query, params = prepare_query(bufnr, query_name, root, lang)
-  if not query then
-    return EMPTY_ITER
-  end
-  assert(params)
-
-  local iter = query:iter_captures(params.root, params.source, params.start, params.stop)
-
-  local function wrapped_iter()
-    local id, node, metadata = iter()
-    if not id then
-      return
-    end
-
-    local name = query.captures[id]
-    if string.sub(name, 1, 1) == "_" then
-      return wrapped_iter()
-    end
-
-    return name, node, metadata
-  end
-
-  return wrapped_iter
-end
-
 ---Iterates matches from a query file.
 ---@param bufnr integer the buffer
 ---@param query_group string the query file to use
----@param root LanguageTree the root node
----@param root_lang string|nil the root node lang, if known
-function M.iter_group_results(bufnr, query_group, root, root_lang)
-  local query, params = prepare_query(bufnr, query_group, root, root_lang)
+---@param root TSNode the root node
+---@param parser LanguageTree language tree (parser) the root originates from
+function M.iter_group_results(bufnr, query_group, root, parser)
+  local query, params = prepare_query(bufnr, query_group, root, parser)
   if not query then
     return EMPTY_ITER
   end
@@ -345,47 +228,15 @@ function M.iter_group_results(bufnr, query_group, root, root_lang)
   return M.iter_prepared_matches(query, params.root, params.source, params.start, params.stop)
 end
 
-function M.collect_group_results(bufnr, query_group, root, lang)
+---@param bufnr integer the buffer
+---@param query_group string the query file to use
+---@param root TSNode the root node
+---@param parser LanguageTree the root node lang, if known
+function M.collect_group_results(bufnr, query_group, root, parser)
   local matches = {}
 
-  for prepared_match in M.iter_group_results(bufnr, query_group, root, lang) do
+  for prepared_match in M.iter_group_results(bufnr, query_group, root, parser) do
     table.insert(matches, prepared_match)
-  end
-
-  return matches
-end
-
----@alias CaptureResFn function(string, LanguageTree, LanguageTree): string, string
-
---- Same as get_capture_matches except this will recursively get matches for every language in the tree.
----@param bufnr integer The bufnr
----@param capture_or_fn string|CaptureResFn The capture to get. If a function is provided then that
----                     function will be used to resolve both the capture and query argument.
----                     The function can return `nil` to ignore that tree.
----@param query_type string The query to get the capture from. This is ignore if a function is provided
----                  for the captuer argument.
-function M.get_capture_matches_recursively(bufnr, capture_or_fn, query_type)
-  ---@type CaptureResFn
-  local type_fn
-  if type(capture_or_fn) == "function" then
-    type_fn = capture_or_fn
-  else
-    type_fn = function(_, _, _)
-      return capture_or_fn, query_type
-    end
-  end
-  local parser = parsers.get_parser(bufnr)
-  local matches = {}
-
-  if parser then
-    parser:for_each_tree(function(tree, lang_tree)
-      local lang = lang_tree:lang()
-      local capture, type_ = type_fn(lang, tree, lang_tree)
-
-      if capture then
-        vim.list_extend(matches, M.get_capture_matches(bufnr, capture, type_, tree:root(), lang))
-      end
-    end)
   end
 
   return matches

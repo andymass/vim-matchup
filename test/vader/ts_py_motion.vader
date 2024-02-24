@@ -1,6 +1,9 @@
 Execute (Helper):
   function! TSActive()
-    return exists(':TSInstall')
+    if !exists('*luaeval')
+      return v:false
+    endif
+    return luaeval("vim and vim.treesitter and vim.treesitter.language and vim.treesitter.language.get_filetypes and (#vim.treesitter.language.get_filetypes('python') > 0)")
   endfunction
 
   if TSActive()
@@ -31,6 +34,7 @@ Execute (Logs):
 
 Before (Cursor):
   normal! 2gg^
+  :sleep 50m\<cr>
 
 Do (Move %):
   %
@@ -56,6 +60,7 @@ Then (Verify line):
 
 Before (Cursor):
   normal! 5gg^
+  :sleep 50m\<cr>
 
 Do (Inner: Move %):
   %

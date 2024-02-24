@@ -1,4 +1,5 @@
 -- From https://github.com/nvim-treesitter/playground
+-- From https://github.com/nvim-treesitter/nvim-treesitter
 -- Copyright 2021
 -- licensed under the Apache License 2.0
 -- See nvim-treesitter.LICENSE-APACHE-2.0
@@ -136,6 +137,14 @@ function M.get_end_pos(bufnr)
   local last_line = api.nvim_buf_get_lines(bufnr, last_row, last_row + 1, true)[1]
   local last_col = last_line and #last_line or 0
   return last_row, last_col
+end
+
+---@param node TSNode
+---@return number
+function M.node_length(node)
+  local _, _, start_byte = node:start()
+  local _, _, end_byte = node:end_()
+  return end_byte - start_byte
 end
 
 return M
