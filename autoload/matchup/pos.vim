@@ -77,7 +77,7 @@ endfunction
 function! matchup#pos#prev_eol(...) abort " {{{1
   let [l:lnum, l:cnum; l:rest] = s:parse_args(a:000)
 
-  if l:cnum >= 1 && l:lnum > 1
+  if l:cnum <= 1 && l:lnum > 1
     return [0, l:lnum - 1, strlen(getline(l:lnum - 1)) + 1, 0]
   else
     return matchup#pos#prev(l:lnum, l:cnum)
