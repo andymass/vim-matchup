@@ -1,7 +1,7 @@
 ; --------------- module/where ---------------
 (_ (
   ("module" @open.module (module))
-  (where) @mid.module.1
+  ; (where) @mid.module.1
 )) @scope.module
 
 
@@ -66,7 +66,7 @@
 ; ------------- GADT data/where ---------------
 (adt
   "data" @open.gadt (_)
-  (where) @mid.gadt.1
+  ; (where) @mid.gadt.1
   (gadt_constructor
     (constructor) @mid.gadt.2
   )
@@ -77,7 +77,7 @@
 (class
   "class" @open.class (_)
   (class_body
-    (where) @mid.class.1
+    ; (where) @mid.class.1
     (signature
       (variable) @mid.class.2
     )
