@@ -1,85 +1,81 @@
 ; --------------- module/where ---------------
-(_ (
+(header (
   ("module" @open.module (module))
-  ; (where) @mid.module.1
+  ("where" @mid.module.1)
 )) @scope.module
 
-
 ; ----------------- case/of ------------------
-(exp_case 
+(expression/case 
   "case" @open.case (_) 
   "of" @mid.case.1
-  (alts
-    (alt) @mid.case.2
+  (alternatives
+    (alternative) @mid.case.2
   ) 
 ) @scope.case
-
 
 ; --------------- lambda case ----------------
-(exp_lambda_case 
+(expression/lambda_case 
   "\case" @open.case
-  (alts
-    (alt) @mid.case.1
+  (alternatives
+    (alternative) @mid.case.1
   ) 
 ) @scope.case
 
-
 ; -------------- if/then/else ----------------
-(exp_cond
+(expression/conditional
  "if" @open.if (_)
  "then" @mid.if.1 (_)
  "else" @mid.if.2 (_)
 ) @scope.if
 
-
 ;------------------ let/in -------------------
-(exp_let_in
-  (exp_let
-    "let" @open.let (_)) 
-  (exp_in
-    "in" @mid.let.1 (_)) 
+(expression/let_in
+  ("let" @open.let (local_binds)) 
+  ("in" @mid.let.1 (_)) 
 ) @scope.let
 
 ; -------- ADT data/constructors -------------
-(adt
+(data_type
   "data" @open.adt (_)
-  (constructors
+  constructors: (data_constructors
     (data_constructor
-      (constructor) @mid.adt.2
+      constructor: (_) @mid.adt.2
     ))
 ) @scope.adt
 
 ; --------------- ADT record ------------------
-(adt
+(data_type
   "data" @open.rec (_)
-  (constructors
-    (data_constructor_record
-      (record_fields
-        "{" @mid.rec.1 (_)
-        "}" @mid.rec.2
+  constructors: (data_constructors
+    constructor: (data_constructor
+      (constructor/record
+        fields: (fields
+          "{" @mid.rec.1 (_)
+          "}" @mid.rec.2
+        )
       )
     )
   )
 ) @scope.rec
 
-
 ; ------------- GADT data/where ---------------
-(adt
+(data_type
   "data" @open.gadt (_)
-  ; (where) @mid.gadt.1
-  (gadt_constructor
-    (constructor) @mid.gadt.2
+  "where" @mid.gadt.1
+  constructors: (gadt_constructors
+    constructor: (gadt_constructor
+      name: (constructor) @mid.gadt.2
+    )
   )
 ) @scope.gadt
 
-
 ; --------------- class/where -----------------
 (class
-  "class" @open.class (_)
-  (class_body
-    ; (where) @mid.class.1
-    (signature
-      (variable) @mid.class.2
+  "class" @open.class
+  "where" @mid.class.1
+  declarations: (class_declarations
+    declaration: (_
+      name: (variable) @mid.class.2
     )
   )
 ) @scope.class
