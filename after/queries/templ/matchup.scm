@@ -5,9 +5,8 @@
     (conditional_attribute_if_statement)
 ] @scope.if
 
-; 'else' and 'else if'
-(  "else" @_start (component_if_statement "if" @_end)?
-  (#make-range! "mid.if.1" @_start @_end))
+; 'else'
+("else" @mid.if.1)
 
 ; if
 ("if" @open.if)
