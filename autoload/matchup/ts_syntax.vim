@@ -29,7 +29,7 @@ function! matchup#ts_syntax#skip_expr(lnum, col) abort
 
   let l:syn = synIDattr(matchup#ts_syntax#synID(
         \ a:lnum, a:col, 1), 'name')
-  return l:syn =~? '\%(String\|Comment\)'
+  return l:syn =~? '\%(String\|Comment\|Character\)'
 endfunction
 
 let &cpo = s:save_cpo
