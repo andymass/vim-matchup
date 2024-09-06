@@ -11,12 +11,6 @@ NoMatchParen
 
 edit +161 normal.c
 
-if matchup#ts_engine#is_enabled(bufnr('.'))
-  " TODO: matchparen.vim: if empty(a:offscreen.links.close.match)
-  echo 'skipping test-where for tree_sitter'
-  call matchup#test#finished()
-endif
-
 redir! > test1.out
   sil MatchupWhereAmI?
   sleep 50m

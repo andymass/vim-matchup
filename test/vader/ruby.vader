@@ -7,6 +7,7 @@ Given ruby (Ruby for if):
   end
 
 Do (Motion %):
+  :sleep 10m\<cr>
   go
   %
 
@@ -26,6 +27,7 @@ Given ruby (Ruby do end):
   end
 
 Do (Motion %):
+  :sleep 10m\<cr>
   go2W
   %
 
@@ -33,6 +35,7 @@ Then (Verify):
   AssertEqual 'end', getline('.')
 
 Do (Motion %):
+  :sleep 10m\<cr>
   2ggee
   %
   %

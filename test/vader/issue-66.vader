@@ -73,6 +73,7 @@ Expect vim (Verify):
 
 Do (Delete inner %):
   7gg
+  :sleep 10m\<cr>
   di%
 
 Expect vim (Verify):
@@ -97,6 +98,7 @@ Expect vim (Verify):
 
 Do (Delete 1 inner %):
   7gg
+  :sleep 10m\<cr>
   d1i%
 
 Expect vim (Verify):

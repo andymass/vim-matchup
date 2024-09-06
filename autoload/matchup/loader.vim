@@ -21,21 +21,18 @@ endfunction
 function! matchup#loader#init_buffer() abort " {{{1
   call matchup#perf#tic('loader_init_buffer')
 
-  let l:has_ts = 0
+  let l:has_ts = matchup#loader#_treesitter_may_be_supported() && matchup#ts_engine#register_callbacks(bufnr('%'))
+  let l:has_ts_hl = 0
   let [l:no_words, l:filt_words] = [0, 0]
-  if s:ts_may_be_supported && matchup#ts_engine#is_enabled(bufnr('%'))
-    let l:has_ts = 1
+
+  if l:has_ts == 1
     if matchup#ts_engine#get_option(bufnr('%'), 'include_match_words')
       let l:filt_words = 1
     else
       let l:no_words = 1
     endif
-  endif
 
-  let l:has_ts_hl = 0
-  if s:ts_may_be_supported && matchup#ts_engine#is_hl_enabled(bufnr('%'))
     let l:has_ts_hl = 1
-
     if matchup#ts_engine#get_option(
           \ bufnr('%'), 'additional_vim_regex_highlighting')
       if empty(&syntax)
@@ -92,8 +89,7 @@ function! matchup#loader#_treesitter_may_be_supported() abort
   return s:ts_may_be_supported
 endfunction
 
-let s:ts_may_be_supported = has('nvim-0.5.0') && exists('*luaeval')
-      \ && luaeval('pcall(require, "treesitter-matchup")')
+let s:ts_may_be_supported = has('nvim-0.9.0')
 
 " }}}1
 function! matchup#loader#bufwinenter() abort " {{{1

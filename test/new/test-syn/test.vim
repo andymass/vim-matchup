@@ -1,53 +1,18 @@
 set nocompatible
 source ../common/bootstrap.vim
 
-if !$TESTS_ENABLE_TREESITTER && $MODE > 0
+if !has('nvim-0.9.0') && $MODE
   call matchup#test#finished()
 endif
 
-let s:expect_ts_engine = +$TESTS_ENABLE_TREESITTER
-
-if $MODE == 1
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    highlight = { enable = true },
-    matchup   = { enable = true }
-  }
-EOF
-elseif $MODE == 2
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    highlight = { enable = true },
-    matchup   = {
-      enable = true,
-      additional_vim_regex_highlighting = true
-    }
-  }
-EOF
-elseif $MODE == 3
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    highlight = { enable = true },
-    matchup   = { enable = false }
-  }
-EOF
-
-  let s:expect_ts_engine = 0
+if $MODE == 'ts-with-syntax'
+  let g:matchup_treesitter_config = { 'additional_vim_regex_highlighting': v:true }
 endif
 
 silent edit example.rb
+sleep 50m
 
-" manually reload match-up for the buffer since the tree-sitter
-" configuration may not have been initialized properly before
-call matchup#loader#init_buffer()
-
-if s:expect_ts_engine
-  call assert_equal(2, len(b:matchup_active_engines.delim_all))
-else
-  call assert_equal(1, len(b:matchup_active_engines.delim_all))
-endif
-
-if $MODE == 2
+if $MODE == 'ts-with-syntax'
   call assert_false(empty(&syntax))
 endif
 
