@@ -26,3 +26,9 @@
   (quoted_regexp "'" @open.quotelike "'" @close.quotelike)
   (_ "'" @open.quotelike (_) "'"+ @mid.quotelike.1 (replacement) "'" @close.quotelike)
 ] @scope.quotelike
+
+(try_statement
+  "try" @open.try
+  "catch"? @mid.try.1
+  "finally"? @close.try
+  ) @scope.try
