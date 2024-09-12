@@ -20,12 +20,14 @@
 
 (await_statement
   (await_start
-   "await" @open.await
-   (#offset! @open.await 0 -1 0 0))) @scope.await
+    (block_start_tag
+      "await" @open.await
+      (#offset! @open.await 0 -1 0 0)))) @scope.await
 
 (await_end
-  "await" @close.await
-  (#offset! @close.await 0 -1 0 0))
+  (block_end_tag
+    "await" @close.await
+    (#offset! @close.await 0 -1 0 0)))
 
 ("then" @mid.await.1
   (#offset! @mid.await.1 0 -1 0 0))
@@ -37,50 +39,60 @@
 
 (each_statement
   (each_start
-   "each" @open.each
-   (#offset! @open.each 0 -1 0 0))) @scope.each
+    (block_start_tag
+      "each" @open.each
+      (#offset! @open.each 0 -1 0 0)))) @scope.each
 
 (each_end
-  "each" @close.each
-  (#offset! @close.each 0 -1 0 0))
+  (block_end_tag
+    "each" @close.each
+    (#offset! @close.each 0 -1 0 0)))
 
 ; if
 
 (if_statement
   (if_start
-   "if" @open.if
-   (#offset! @open.if 0 -1 0 0))) @scope.if
+    (block_start_tag
+      "if" @open.if
+      (#offset! @open.if 0 -1 0 0)))) @scope.if
+
+(else_if_start
+  (block_tag
+    "else if" @mid.if.1
+    (#offset! @mid.if.1 0 -1 0 0)))
+
+(else_start
+  (block_tag
+    "else" @mid.if.2
+    (#offset! @mid.if.2 0 -1 0 0)))
 
 (if_end
-  "if" @close.if
-  (#offset! @close.if 0 -1 0 0))
-
-(else_block
-  "else" @mid.if.1
-  (#offset! @mid.if.1 0 -1 0 0))
-
-(else_if_block
-  "else" @mid.if.2
-  (#offset! @mid.if.2 0 -1 0 0))
+  (block_end_tag
+    "if" @close.if
+    (#offset! @close.if 0 -1 0 0)))
 
 ; key
 
 (key_statement
   (key_start
-   "key" @open.key
-   (#offset! @open.key 0 -1 0 0))) @scope.key
+    (block_start_tag
+      "key" @open.key
+      (#offset! @open.key 0 -1 0 0)))) @scope.key
 
 (key_end
-  "key" @close.key
-  (#offset! @close.key 0 -1 0 0))
+  (block_end_tag
+    "key" @close.key
+    (#offset! @close.key 0 -1 0 0)))
 
 ; snippet
 
 (snippet_statement
   (snippet_start
-   "snippet" @open.snippet
-   (#offset! @open.snippet 0 -1 0 0))) @scope.snippet
+    (block_start_tag
+      "snippet" @open.snippet
+      (#offset! @open.snippet 0 -1 0 0)))) @scope.snippet
 
 (snippet_end
-  "snippet" @close.snippet
-  (#offset! @close.snippet 0 -1 0 0))
+  (block_end_tag
+    "snippet" @close.snippet
+    (#offset! @close.snippet 0 -1 0 0)))
