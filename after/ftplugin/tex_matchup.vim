@@ -97,7 +97,11 @@ function! s:get_match_words()
   endif
 
   " dollar sign math
-  let l:match_words .= ',\$:\$\g{syn;!texMathZoneX}'
+  if exists('b:vimtex')
+    let l:match_words .= ',\$:\$\g{syn;!texMathZoneTI}'
+  else
+    let l:match_words .= ',\$:\$\g{syn;!texMathZoneX}'
+  endif
 
   return l:match_words
 endfunction
