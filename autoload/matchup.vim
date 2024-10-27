@@ -250,9 +250,9 @@ function! s:motion_init_module() " {{{1
 
   " the basic motions % and g%
   nnoremap <silent> <plug>(matchup-%)
-        \ :<c-u>call matchup#motion#find_matching_pair(0, 1)<cr>
+        \ <cmd>call matchup#motion#find_matching_pair(0, 1)<cr>
   nnoremap <silent> <plug>(matchup-g%)
-        \ :<c-u>call matchup#motion#find_matching_pair(0, 0)<cr>
+        \ <cmd>call matchup#motion#find_matching_pair(0, 0)<cr>
 
   " visual and operator-pending
   xnoremap <silent> <sid>(matchup-%)
@@ -269,9 +269,9 @@ function! s:motion_init_module() " {{{1
 
   " ]% and [%
   nnoremap <silent> <plug>(matchup-]%)
-        \ :<c-u>call matchup#motion#find_unmatched(0, 1)<cr>
+        \ <cmd>call matchup#motion#find_unmatched(0, 1)<cr>
   nnoremap <silent> <plug>(matchup-[%)
-        \ :<c-u>call matchup#motion#find_unmatched(0, 0)<cr>
+        \ <cmd>call matchup#motion#find_unmatched(0, 0)<cr>
 
   xnoremap <silent> <sid>(matchup-]%)
         \ :<c-u>call matchup#motion#find_unmatched(1, 1)<cr>
@@ -286,7 +286,7 @@ function! s:motion_init_module() " {{{1
 
   " jump inside z%
   nnoremap <silent> <plug>(matchup-z%)
-        \ :<c-u>call matchup#motion#jump_inside(0)<cr>
+        \ <cmd>call matchup#motion#jump_inside(0)<cr>
 
   xnoremap <silent> <sid>(matchup-z%)
         \ :<c-u>call matchup#motion#jump_inside(1)<cr>
@@ -296,7 +296,7 @@ function! s:motion_init_module() " {{{1
 
   " 'opposite' of z%
   nnoremap <silent> <plug>(matchup-Z%)
-        \ :<c-u>call matchup#motion#jump_inside_prev(0)<cr>
+        \ <cmd>call matchup#motion#jump_inside_prev(0)<cr>
 
   xnoremap <silent> <sid>(matchup-Z%)
         \ :<c-u>call matchup#motion#jump_inside_prev(1)<cr>
