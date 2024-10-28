@@ -188,6 +188,7 @@ the corresponding default left-hand side will not be mapped.
    [%          |<plug>(matchup-[%)|                        nx     motion
    ]%          |<plug>(matchup-]%)|                        nx     motion
    z%          |<plug>(matchup-z%)|                        nx     motion
+   (none)      |<plug>(matchup-Z%)|                        nx     motion
    a%          |<plug>(matchup-a%)|                        x      text_obj
    i%          |<plug>(matchup-i%)|                        x      text_obj
    ds%         |<plug>(matchup-ds%)|                       n      surround
