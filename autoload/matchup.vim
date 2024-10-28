@@ -249,10 +249,17 @@ function! s:motion_init_module() " {{{1
         \ empty(g:v_motion_force) ? 'v' : g:v_motion_force
 
   " the basic motions % and g%
-  nnoremap <silent> <plug>(matchup-%)
-        \ <cmd>call matchup#motion#find_matching_pair(0, 1)<cr>
-  nnoremap <silent> <plug>(matchup-g%)
-        \ <cmd>call matchup#motion#find_matching_pair(0, 0)<cr>
+  if has('patch-8.2.1978') || has('nvim')
+    nnoremap <silent> <plug>(matchup-%)
+	  \ <cmd>call matchup#motion#find_matching_pair(0, 1)<cr>
+    nnoremap <silent> <plug>(matchup-g%)
+	  \ <cmd>call matchup#motion#find_matching_pair(0, 0)<cr>
+  else
+    nnoremap <silent> <plug>(matchup-%)
+	  \ :<c-u>call matchup#motion#find_matching_pair(0, 1)<cr>
+    nnoremap <silent> <plug>(matchup-g%)
+	  \ :<c-u>call matchup#motion#find_matching_pair(0, 0)<cr>
+  endif
 
   " visual and operator-pending
   xnoremap <silent> <sid>(matchup-%)
@@ -268,10 +275,17 @@ function! s:motion_init_module() " {{{1
         \ :<c-u>call matchup#motion#op('g%')<cr>
 
   " ]% and [%
-  nnoremap <silent> <plug>(matchup-]%)
-        \ <cmd>call matchup#motion#find_unmatched(0, 1)<cr>
-  nnoremap <silent> <plug>(matchup-[%)
-        \ <cmd>call matchup#motion#find_unmatched(0, 0)<cr>
+  if has('patch-8.2.1978') || has('nvim')
+    nnoremap <silent> <plug>(matchup-]%)
+	  \ <cmd>call matchup#motion#find_unmatched(0, 1)<cr>
+    nnoremap <silent> <plug>(matchup-[%)
+	  \ <cmd>call matchup#motion#find_unmatched(0, 0)<cr>
+  else
+    nnoremap <silent> <plug>(matchup-]%)
+	  \ :<c-u>call matchup#motion#find_unmatched(0, 1)<cr>
+    nnoremap <silent> <plug>(matchup-[%)
+	  \ :<c-u>call matchup#motion#find_unmatched(0, 0)<cr>
+  endif
 
   xnoremap <silent> <sid>(matchup-]%)
         \ :<c-u>call matchup#motion#find_unmatched(1, 1)<cr>
@@ -285,8 +299,13 @@ function! s:motion_init_module() " {{{1
         \ :<c-u>call matchup#motion#op('[%')<cr>
 
   " jump inside z%
-  nnoremap <silent> <plug>(matchup-z%)
-        \ <cmd>call matchup#motion#jump_inside(0)<cr>
+  if has('patch-8.2.1978') || has('nvim')
+    nnoremap <silent> <plug>(matchup-z%)
+	  \ <cmd>call matchup#motion#jump_inside(0)<cr>
+  else
+    nnoremap <silent> <plug>(matchup-z%)
+	  \ :<c-u>call matchup#motion#jump_inside(0)<cr>
+  endif
 
   xnoremap <silent> <sid>(matchup-z%)
         \ :<c-u>call matchup#motion#jump_inside(1)<cr>
@@ -295,8 +314,13 @@ function! s:motion_init_module() " {{{1
         \ :<c-u>call matchup#motion#op('z%')<cr>
 
   " 'opposite' of z%
-  nnoremap <silent> <plug>(matchup-Z%)
-        \ <cmd>call matchup#motion#jump_inside_prev(0)<cr>
+  if has('patch-8.2.1978') || has('nvim')
+    nnoremap <silent> <plug>(matchup-Z%)
+	  \ <cmd>call matchup#motion#jump_inside_prev(0)<cr>
+  else
+    nnoremap <silent> <plug>(matchup-Z%)
+	  \ :<c-u>call matchup#motion#jump_inside_prev(0)<cr>
+  endif
 
   xnoremap <silent> <sid>(matchup-Z%)
         \ :<c-u>call matchup#motion#jump_inside_prev(1)<cr>
