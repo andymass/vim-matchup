@@ -5,7 +5,7 @@
   (arrow_function "=>" @open.function)
   (function_expression "function" @open.function)
   (function_declaration "function" @open.function)
-  (method_definition body: (statement_block "{" @open.function))
+  (method_definition body: (statement_block "{" @open.function "}" @close.function))
 ] @scope.function
 
 (return_statement "return" @mid.function.1)
