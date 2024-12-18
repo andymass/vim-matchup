@@ -33,3 +33,10 @@
 (do_clause
   "do" @open.block
   "end" @close.block) @scope.block
+
+(let_statement
+  "let" @open.let
+  "end" @close.let) @scope.let
+(module_definition
+  "module" @open.module
+  "end" @close.module) @scope.module
