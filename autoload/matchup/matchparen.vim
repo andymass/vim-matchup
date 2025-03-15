@@ -331,7 +331,15 @@ function! s:matchparen.highlight(...) abort dict " {{{1
 
   if has('vim_starting') | return | endif
 
-  if !g:matchup_matchparen_pumvisible && s:pumvisible() | return | endif
+  " Add time-based throttling during completion
+  if g:matchup_matchparen_pumvisible && s:pumvisible()
+    let l:now = reltime()[0]
+    if !exists('s:last_highlight_time') | let s:last_highlight_time = 0 | endif
+    if l:now - s:last_highlight_time < 0.2  " Only update every 200ms during completion
+      return
+    endif
+    let s:last_highlight_time = l:now
+  endif
 
   " try to avoid interfering with some auto-complete plugins
   if has('*state') && state('a') !=# '' | return | endif
@@ -504,7 +512,7 @@ endfunction
 
 
 " Cache for completion plugin visibility check results
-let s:pumvisible_cache = {'tick': 0, 'result': 0}
+let s:pumvisible_cache = {'tick': 0, 'result': 0, 'last_check_time': 0}
 
 if has('nvim')
   function s:pumvisible() abort
@@ -513,11 +521,19 @@ if has('nvim')
       return 1
     endif
     
-    " Cache the result to avoid repeated expensive calls
+    " Time-based throttling - only check completion plugins every 100ms
+    let l:current_time = reltime()[0]
+    if l:current_time - s:pumvisible_cache.last_check_time < 0.1
+      return s:pumvisible_cache.result
+    endif
+    
+    " Buffer change-based caching
     if s:pumvisible_cache.tick != b:changedtick
       let s:pumvisible_cache.tick = b:changedtick
+      let s:pumvisible_cache.last_check_time = l:current_time
       let s:pumvisible_cache.result = luaeval('(function() local ok, cmp = pcall(require, "cmp"); if ok and cmp and type(cmp.visible) == "function" and cmp:visible() then return true; end; local ok_blink, blink_cmp = pcall(require, "blink.cmp"); if ok_blink and blink_cmp and type(blink_cmp.is_visible) == "function" and blink_cmp.is_visible() then return true; end; return false; end)()')
     endif
+    
     return s:pumvisible_cache.result
   endfunction
 else
