@@ -503,10 +503,22 @@ function s:matchparen.transmute_reset() abort dict
 endfunction
 
 
+" Cache for completion plugin visibility check results
+let s:pumvisible_cache = {'tick': 0, 'result': 0}
+
 if has('nvim')
   function s:pumvisible() abort
-    return pumvisible() || luaeval('pcall(require, "cmp")')
-          \ && luaeval('require"cmp".visible()')
+    " Use built-in pumvisible first
+    if pumvisible()
+      return 1
+    endif
+    
+    " Cache the result to avoid repeated expensive calls
+    if s:pumvisible_cache.tick != b:changedtick
+      let s:pumvisible_cache.tick = b:changedtick
+      let s:pumvisible_cache.result = luaeval('(function() local ok, cmp = pcall(require, "cmp"); if ok and cmp and type(cmp.visible) == "function" and cmp:visible() then return true; end; local ok_blink, blink_cmp = pcall(require, "blink.cmp"); if ok_blink and blink_cmp and type(blink_cmp.is_visible) == "function" and blink_cmp.is_visible() then return true; end; return false; end)()')
+    endif
+    return s:pumvisible_cache.result
   endfunction
 else
   function s:pumvisible() abort
