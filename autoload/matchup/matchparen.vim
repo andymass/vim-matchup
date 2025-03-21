@@ -285,60 +285,81 @@ function! s:fade_timer_callback(win_id, timer_id) abort " {{{1
   endif
 endfunction
 
-" }}}1
+" Global completion state tracking 
+let s:in_completion_mode = 0
 
-function! s:matchparen.highlight_deferred() abort dict " {{{1
-  if !get(b:, 'matchup_matchparen_deferred',
-        \ g:matchup_matchparen_deferred)
-    return s:matchparen.highlight()
-  endif
+" Cache for completion plugin visibility check results
+let s:pumvisible_cache = {'tick': 0, 'result': 0, 'last_check_time': 0}
 
-  if !exists('w:matchup_timer')
-    let s:show_delay = g:matchup_matchparen_deferred_show_delay
-    let s:hide_delay = g:matchup_matchparen_deferred_hide_delay
-    let w:matchup_timer = timer_start(s:show_delay,
-          \ function('s:timer_callback', [ win_getid() ]),
-          \ {'repeat': -1})
-    if !exists('w:matchup_need_clear')
-      let w:matchup_need_clear = 0
+if has('nvim')
+  function s:pumvisible() abort
+    " Use built-in pumvisible first
+    if pumvisible()
+      let s:in_completion_mode = 1
+      return 1
     endif
-    let s:fade_time = g:matchup_matchparen_deferred_fade_time
-    if s:fade_time > 0
-      let w:matchup_fade_timer = timer_start(s:fade_time,
-            \ function('s:fade_timer_callback', [ win_getid() ]),
-            \ {'repeat': -1})
-      call timer_pause(w:matchup_fade_timer, 1)
+    
+    " Time-based throttling - only check completion plugins every 100ms
+    let l:current_time = reltime()[0]
+    if l:current_time - s:pumvisible_cache.last_check_time < 0.1
+      return s:pumvisible_cache.result
     endif
-  endif
-
-  " keep the timer alive with a heartbeat
-  let w:matchup_pulse_time = reltime()
-
-  " if the timer is paused, some time has passed
-  if timer_info(w:matchup_timer)[0].paused
-    " unpause the timer
-    call timer_pause(w:matchup_timer, 0)
-
-    " set the hi time to the pulse time
-    let w:matchup_hi_time = w:matchup_pulse_time
-  endif
-endfunction
-
-" }}}1
+    
+    " Buffer change-based caching
+    if s:pumvisible_cache.tick != b:changedtick
+      let s:pumvisible_cache.tick = b:changedtick
+      let s:pumvisible_cache.last_check_time = l:current_time
+      
+      " First check blink-cmp - it takes priority
+      let l:blink_visible = luaeval('(function() local ok, blink_cmp = pcall(require, "blink.cmp"); if ok and blink_cmp and type(blink_cmp.is_visible) == "function" then return blink_cmp.is_visible() else return false end end)()')
+      
+      if l:blink_visible
+        let s:in_completion_mode = 1
+        let s:pumvisible_cache.result = 1
+        return 1
+      endif
+      
+      " Then check nvim-cmp
+      let l:cmp_visible = luaeval('(function() local ok, cmp = pcall(require, "cmp"); if ok and cmp and type(cmp.visible) == "function" then return cmp:visible() else return false end end)()')
+      
+      if l:cmp_visible
+        let s:in_completion_mode = 1
+        let s:pumvisible_cache.result = 1
+        return 1
+      endif
+      
+      let s:in_completion_mode = 0
+      let s:pumvisible_cache.result = 0
+    endif
+    
+    return s:pumvisible_cache.result
+  endfunction
+else
+  function s:pumvisible() abort
+    let s:in_completion_mode = pumvisible()
+    return s:in_completion_mode
+  endfunction
+endif
 
 function! s:matchparen.highlight(...) abort dict " {{{1
   if !g:matchup_matchparen_enabled | return | endif
 
   if has('vim_starting') | return | endif
 
-  " Add time-based throttling during completion
+  " First check if we're in completion mode - ABORT EARLY if so
   if g:matchup_matchparen_pumvisible && s:pumvisible()
-    let l:now = reltime()[0]
-    if !exists('s:last_highlight_time') | let s:last_highlight_time = 0 | endif
-    if l:now - s:last_highlight_time < 0.2  " Only update every 200ms during completion
-      return
+    " Clear any existing highlights if we just entered completion mode
+    if exists('w:matchup_need_clear') && w:matchup_need_clear
+      call self.clear()
     endif
-    let s:last_highlight_time = l:now
+    return
+  endif
+  
+  " Only process if we're not in completion mode or completion mode just ended
+  if s:in_completion_mode
+    let s:in_completion_mode = 0
+    " Force update on completion exit
+    let w:last_changedtick = -1
   endif
 
   " try to avoid interfering with some auto-complete plugins
@@ -504,45 +525,59 @@ function! s:matchparen.highlight(...) abort dict " {{{1
   call matchup#perf#toc('matchparen.highlight', 'end')
 endfunction
 
-function s:matchparen.transmute_reset() abort dict
-  if g:matchup_transmute_enabled
-    call matchup#transmute#reset()
+function! s:matchparen.highlight_deferred() abort dict " {{{1
+  " First check if we're in completion mode - ABORT EARLY if so
+  if g:matchup_matchparen_pumvisible && s:pumvisible()
+    " Clear any existing highlights if we just entered completion mode
+    if exists('w:matchup_need_clear') && w:matchup_need_clear
+      call self.clear()
+    endif
+    return
+  endif
+  
+  " Only process if we're not in completion mode or completion mode just ended
+  if s:in_completion_mode
+    let s:in_completion_mode = 0
+    " Force update on completion exit
+    let w:last_changedtick = -1
+  endif
+
+  " Original function content follows
+  if !get(b:, 'matchup_matchparen_deferred',
+        \ g:matchup_matchparen_deferred)
+    return s:matchparen.highlight()
+  endif
+
+  if !exists('w:matchup_timer')
+    let s:show_delay = g:matchup_matchparen_deferred_show_delay
+    let s:hide_delay = g:matchup_matchparen_deferred_hide_delay
+    let w:matchup_timer = timer_start(s:show_delay,
+          \ function('s:timer_callback', [ win_getid() ]),
+          \ {'repeat': -1})
+    if !exists('w:matchup_need_clear')
+      let w:matchup_need_clear = 0
+    endif
+    let s:fade_time = g:matchup_matchparen_deferred_fade_time
+    if s:fade_time > 0
+      let w:matchup_fade_timer = timer_start(s:fade_time,
+            \ function('s:fade_timer_callback', [ win_getid() ]),
+            \ {'repeat': -1})
+      call timer_pause(w:matchup_fade_timer, 1)
+    endif
+  endif
+
+  " keep the timer alive with a heartbeat
+  let w:matchup_pulse_time = reltime()
+
+  " if the timer is paused, some time has passed
+  if timer_info(w:matchup_timer)[0].paused
+    " unpause the timer
+    call timer_pause(w:matchup_timer, 0)
+
+    " set the hi time to the pulse time
+    let w:matchup_hi_time = w:matchup_pulse_time
   endif
 endfunction
-
-
-" Cache for completion plugin visibility check results
-let s:pumvisible_cache = {'tick': 0, 'result': 0, 'last_check_time': 0}
-
-if has('nvim')
-  function s:pumvisible() abort
-    " Use built-in pumvisible first
-    if pumvisible()
-      return 1
-    endif
-    
-    " Time-based throttling - only check completion plugins every 100ms
-    let l:current_time = reltime()[0]
-    if l:current_time - s:pumvisible_cache.last_check_time < 0.1
-      return s:pumvisible_cache.result
-    endif
-    
-    " Buffer change-based caching
-    if s:pumvisible_cache.tick != b:changedtick
-      let s:pumvisible_cache.tick = b:changedtick
-      let s:pumvisible_cache.last_check_time = l:current_time
-      let s:pumvisible_cache.result = luaeval('(function() local ok, cmp = pcall(require, "cmp"); if ok and cmp and type(cmp.visible) == "function" and cmp:visible() then return true; end; local ok_blink, blink_cmp = pcall(require, "blink.cmp"); if ok_blink and blink_cmp and type(blink_cmp.is_visible) == "function" and blink_cmp.is_visible() then return true; end; return false; end)()')
-    endif
-    
-    return s:pumvisible_cache.result
-  endfunction
-else
-  function s:pumvisible() abort
-    return pumvisible()
-  endfunction
-endif
-
-" }}}1
 
 function! s:do_popup_autocmd_enter(win_context) abort "{{{1
   if exists('#User#MatchupOffscreenEnter') && exists('*win_execute')
