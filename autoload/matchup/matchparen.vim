@@ -132,6 +132,12 @@ endfunction
 
 let s:matchparen = {}
 
+function! s:matchparen.transmute_reset() abort dict
+  if g:matchup_transmute_enabled
+    call matchup#transmute#reset()
+  endif
+endfunction
+
 function! s:matchparen.clear() abort dict " {{{1
   if exists('w:matchup_match_id_list')
     for l:id in w:matchup_match_id_list
@@ -285,7 +291,7 @@ function! s:fade_timer_callback(win_id, timer_id) abort " {{{1
   endif
 endfunction
 
-" Global completion state tracking 
+" Global completion state tracking
 let s:in_completion_mode = 0
 
 " Cache for completion plugin visibility check results
@@ -298,40 +304,40 @@ if has('nvim')
       let s:in_completion_mode = 1
       return 1
     endif
-    
+
     " Time-based throttling - only check completion plugins every 100ms
     let l:current_time = reltime()[0]
     if l:current_time - s:pumvisible_cache.last_check_time < 0.1
       return s:pumvisible_cache.result
     endif
-    
+
     " Buffer change-based caching
     if s:pumvisible_cache.tick != b:changedtick
       let s:pumvisible_cache.tick = b:changedtick
       let s:pumvisible_cache.last_check_time = l:current_time
-      
+
       " First check blink-cmp - it takes priority
       let l:blink_visible = luaeval('(function() local ok, blink_cmp = pcall(require, "blink.cmp"); if ok and blink_cmp and type(blink_cmp.is_visible) == "function" then return blink_cmp.is_visible() else return false end end)()')
-      
+
       if l:blink_visible
         let s:in_completion_mode = 1
         let s:pumvisible_cache.result = 1
         return 1
       endif
-      
+
       " Then check nvim-cmp
       let l:cmp_visible = luaeval('(function() local ok, cmp = pcall(require, "cmp"); if ok and cmp and type(cmp.visible) == "function" then return cmp:visible() else return false end end)()')
-      
+
       if l:cmp_visible
         let s:in_completion_mode = 1
         let s:pumvisible_cache.result = 1
         return 1
       endif
-      
+
       let s:in_completion_mode = 0
       let s:pumvisible_cache.result = 0
     endif
-    
+
     return s:pumvisible_cache.result
   endfunction
 else
@@ -354,7 +360,7 @@ function! s:matchparen.highlight(...) abort dict " {{{1
     endif
     return
   endif
-  
+
   " Only process if we're not in completion mode or completion mode just ended
   if s:in_completion_mode
     let s:in_completion_mode = 0
@@ -534,7 +540,7 @@ function! s:matchparen.highlight_deferred() abort dict " {{{1
     endif
     return
   endif
-  
+
   " Only process if we're not in completion mode or completion mode just ended
   if s:in_completion_mode
     let s:in_completion_mode = 0
