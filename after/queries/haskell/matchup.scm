@@ -48,7 +48,7 @@
   "data" @open.rec (_)
   constructors: (data_constructors
     constructor: (data_constructor
-      (constructor/record
+      (record
         fields: (fields
           "{" @mid.rec.1 (_)
           "}" @mid.rec.2
