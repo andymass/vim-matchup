@@ -25,7 +25,7 @@ jobs:
         run: git clone --depth=1 https://github.com/junegunn/vader.vim.git test/vader/vader.vim
 
       - name: 'setup Neovim'
-        uses: 'thinca/action-setup-vim@v1'
+        uses: 'thinca/action-setup-vim@v2'
         with:
           vim_version: '${{ matrix.neovim_version }}'
           vim_type: 'Neovim'
