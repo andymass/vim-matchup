@@ -809,7 +809,7 @@ function! s:do_offscreen_popup_nvim(offscreen) abort " {{{1
     let l:border = get(g:matchup_matchparen_offscreen, 'border', 0)
     if !empty(l:border)
       let l:win_cfg.border = has('nvim-0.5')
-            \ && type(l:border) == v:t_string
+            \ && (type(l:border) == v:t_string || type(l:border) == v:t_list)
             \ ? l:border : ['', '═' ,'╗', '║', '╝', '═', '', '']
       if !has('nvim-0.6') && l:lnum >= line('.')
         let l:win_cfg.row -= min([2, l:row - winline() - 1])
