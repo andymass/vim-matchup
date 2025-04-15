@@ -1,12 +1,12 @@
 Execute (Helper):
   function! TSActive()
-    return exists(':TSInstall')
+    return has('nvim')
   endfunction
 
   if TSActive()
-    Log 'nvim-treesitter active'
+    Log 'treesitter active'
   else
-    Log 'nvim-treesitter not active'
+    Log 'treesitter not active'
   endif
 
 Given python (A python script):

@@ -12,22 +12,6 @@ let &rtp  = s:path.'/test/rtp,' . &rtp
 " load other plugins, if necessary
 " let &rtp = '~/path/to/other/plugin,' . &rtp
 
-if $TESTS_ENABLE_TREESITTER
-  let &rtp = s:path.'/test/vader/plugged/nvim-treesitter,' . &rtp
-  let &rtp .= ','.s:path.'/test/vader/plugged/nvim-treesitter/after'
-
-  runtime! plugin/nvim-treesitter.vim
-  runtime! plugin/nvim-treesitter.lua
-
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    matchup = {
-      enable = true
-    }
-  }
-EOF
-endif
-
 if empty(globpath(&rtp, 'plugin/vader.vim'))
   echoerr 'vader not found'
   exit!

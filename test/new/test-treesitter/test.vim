@@ -1,7 +1,7 @@
 set nocompatible
 source ../common/bootstrap.vim
 
-if !$TESTS_ENABLE_TREESITTER
+if !has("nvim")
   call matchup#test#finished()
 endif
 

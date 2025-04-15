@@ -92,8 +92,7 @@ function! matchup#loader#_treesitter_may_be_supported() abort
   return s:ts_may_be_supported
 endfunction
 
-let s:ts_may_be_supported = has('nvim-0.5.0') && exists('*luaeval')
-      \ && luaeval('pcall(require, "treesitter-matchup")')
+let s:ts_may_be_supported = has('nvim-0.9.0')
 
 " }}}1
 function! matchup#loader#bufwinenter() abort " {{{1

@@ -1,17 +1,6 @@
-if not pcall(require, 'nvim-treesitter') then
-  return {
-    is_active = function() return false end,
-    synID = function(lnum, col, transparent)
-      return vim.fn.synID(lnum, col, transparent)
-    end
-  }
-end
-
 local api = vim.api
-local hl_info = require'treesitter-matchup.third-party.hl-info'
-local queries = require'treesitter-matchup.third-party.query'
-local ts_utils = require'nvim-treesitter.ts_utils'
-local parsers = require'nvim-treesitter.parsers'
+local hl_info = require 'treesitter-matchup.third-party.hl-info'
+local get_parser = require 'treesitter-matchup.get_parser'
 
 local M = {}
 
@@ -22,48 +11,52 @@ function M.is_active(bufnr)
 end
 
 --- Get all nodes that are marked as skip
-function M.get_skips(bufnr)
-  local matches = queries.get_matches(bufnr, 'matchup')
+function M.get_skips(bufnr, lnum_0, col_0)
+  assert(bufnr)
 
   local skips = {}
 
-  for _, match in ipairs(matches) do
-    if match.skip then
-      skips[match.skip.node:id()] = 1
+  local parser, _ = get_parser(bufnr, nil, { error = false })
+  -- Parser unknown (either unknown language or no such parser)
+  if not parser then return skips end
+
+  local position_range = { lnum_0, col_0, lnum_0, col_0 } ---@type Range4
+  parser:parse(position_range)
+  local position_ltree = parser:language_for_range(position_range)
+  local query = vim.treesitter.query.get(
+    position_ltree:lang(),
+    "matchup"
+  )
+
+  -- No query found
+  if not query then return skips end
+
+  local position_tsroot = position_ltree:named_node_for_range(position_range):tree():root()
+  for _, match, _ in query:iter_matches(position_tsroot, bufnr) do
+    for id, nodes in pairs(match) do
+      local name = query.captures[id]
+      if name == "skip" then
+        for _, node in ipairs(nodes) do
+          -- `node` was captured by the `name` (skip) capture in the match
+          skips[node:id()] = 1
+          -- ... use the info here ...
+        end
+      end
     end
   end
 
   return skips
 end
 
-local function get_node_at_pos(cursor)
-  local cursor_range = { cursor[1] - 1, cursor[2] }
-
-  local buf = vim.api.nvim_win_get_buf(0)
-  local root_lang_tree = parsers.get_parser(buf)
-  if not root_lang_tree then
-    return
-  end
-  local root = ts_utils.get_root_for_position(
-    cursor_range[1], cursor_range[2], root_lang_tree)
-
-  if not root then
-    return
-  end
-
-  return root:named_descendant_for_range(
-    cursor_range[1], cursor_range[2], cursor_range[1], cursor_range[2])
-end
-
 function M.lang_skip(lnum, col)
   local bufnr = api.nvim_get_current_buf()
-  local skips = M.get_skips(bufnr)
+  local skips = M.get_skips(bufnr, lnum - 1, col - 1)
 
   if vim.tbl_isempty(skips) then
     return false
   end
 
-  local node = get_node_at_pos({lnum, col - 1})
+  local node = vim.treesitter.get_node({ pos = { lnum - 1, col - 1 } })
   if not node then
     return false
   end
