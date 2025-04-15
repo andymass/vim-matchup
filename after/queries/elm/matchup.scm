@@ -2,9 +2,8 @@
    . "if" @open.if) @scope.if
 
 (if_else_expr
-   "else" @_else
-   "if"? @_if
-   (#make-range! "mid.if.1" @_else @_if))
+   "else"
+   "if"? @mid.if.1)
 
 (let_in_expr
   "let" @open.let

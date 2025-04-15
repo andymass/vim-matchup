@@ -105,9 +105,6 @@ local function _node_id(node)
   if not node then
     return nil
   end
-  if node:type() == 'nvim-treesitter-range' then
-    return string.format('range_%d_%d_%d_%d', node:range())
-  end
   return node:id()
 end
 

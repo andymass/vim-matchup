@@ -18,9 +18,11 @@
     (case_statement "default" @mid.switch.2)?)) @scope.switch
 
 ; 'else' and 'else if'
-(else_clause
-  "else" @_start (if_statement "if" @_end)?
-  (#make-range! "mid.if.1" @_start @_end))
+(
+  [
+  (else_clause "else" (if_statement "if" @mid.if.1)?)
+  (else_clause "else" @mid.if.2 (expression_statement))
+  ])
 
 ; if
 ((if_statement

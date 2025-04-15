@@ -16,8 +16,7 @@
 
 (else_clause "else" @mid.if_.1 (block))
 (else_clause
-  "else" @_start (if_expression "if" @_end)
-  (#make-range! "mid.if_.2" @_start @_end))
+  "else" (if_expression "if" @mid.if_.2))
 
 ; --------------- async/await ---------------
 (function_item (function_modifiers "async" @open.async)) @scope.async
