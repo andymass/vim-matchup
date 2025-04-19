@@ -163,7 +163,7 @@ end
 
 local function _node_text(node, bufnr)
   local text = ts.get_node_text(node, bufnr)
-  return text:match("(%S+).*")
+  return text:match("([^\n]+).*")
 end
 
 --- Fill in a match result based on a seed node
