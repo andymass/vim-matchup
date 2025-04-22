@@ -408,6 +408,32 @@ function! s:treesitter_init_module() " {{{1
   if !matchup#loader#_treesitter_may_be_supported()
     return
   endif
+
+  lua <<LUA
+  vim.api.nvim_create_autocmd({'FileType'}, {
+    pattern = {'query'},
+    group = vim.api.nvim_create_augroup('matchup_filetype_query', {
+      clear = true
+    }),
+    callback = function(ftevent)
+      vim.api.nvim_create_autocmd({'BufWritePost'}, {
+        buffer = ftevent.buf,
+        group = vim.api.nvim_create_augroup('MatchupTreesitter', {
+          clear = true
+        }),
+        callback = function(bwpevent)
+          local _, _, query_lang = string.find(bwpevent.file, "([^/]*)/matchup.scm$")
+          if query_lang then
+            vim.treesitter.query.get:clear(
+              query_lang,
+              "matchup"
+            )
+          end
+        end
+      })
+    end
+  })
+LUA
 endfunction
 
 "}}}1
