@@ -1,0 +1,8 @@
+.github
+.gitignore
+.gitlab-ci-yml
+.luacheckrc
+.projections.json
+.vintrc
+*Dockerfile
+test/new/env

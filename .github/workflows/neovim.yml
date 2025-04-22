@@ -18,6 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: 'actions/checkout@v2'
+      - uses: tree-sitter/setup-action@v2
+        with:
+          install-lib: false
 
       - name: Install vader.vim
         run: git clone --depth=1 https://github.com/junegunn/vader.vim.git test/vader/vader.vim
@@ -30,6 +33,25 @@ jobs:
 
       - name: 'Show version'
         run: nvim --version
+
+      - name: Clone tree-sitter-python
+        run: git clone --depth=1 https://github.com/tree-sitter/tree-sitter-python.git
+        working-directory: /tmp
+
+      - name: Clone tree-sitter-ruby
+        run: git clone --depth=1 https://github.com/tree-sitter/tree-sitter-ruby.git
+        working-directory: /tmp
+
+      - name: Create default nvim runtime parser directory
+        run: mkdir -p $HOME/.local/share/nvim/site/parser
+
+      - name: Build tree-sitter-python
+        run: tree-sitter build -o $HOME/.local/share/nvim/site/parser/python.so
+        working-directory: /tmp/tree-sitter-python
+
+      - name: Build tree-sitter-ruby
+        run: tree-sitter build -o $HOME/.local/share/nvim/site/parser/ruby.so
+        working-directory: /tmp/tree-sitter-ruby
 
       - name: 'Run test'
         run: |
