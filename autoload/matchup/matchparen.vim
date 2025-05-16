@@ -844,6 +844,10 @@ function! s:do_offscreen_popup_nvim(offscreen) abort " {{{1
     if &cursorline
       call nvim_win_set_option(s:float_id, 'cursorline', v:false)
     endif
+    " winbar was added in nvim 0.8.0
+    if has('nvim-0.8.0')
+      call nvim_win_set_option(s:float_id, 'winbar', '')
+    endif
 
     call s:populate_floating_win(a:offscreen, l:text_method)
 
