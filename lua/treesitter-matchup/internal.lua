@@ -1,18 +1,11 @@
-if not pcall(require, 'nvim-treesitter') then
-  return {is_enabled = function(bufnr) return 0 end,
-          is_hl_enabled = function(bufnr) return 0 end}
-end
-
 local vim = vim
 local api = vim.api
-local ts = require'treesitter-matchup.compat'
-local configs = require'nvim-treesitter.configs'
-local parsers = require'nvim-treesitter.parsers'
-local queries = require'treesitter-matchup.third-party.query'
-local ts_utils = require'nvim-treesitter.ts_utils'
-local lru = require'treesitter-matchup.third-party.lru'
-local util = require'treesitter-matchup.util'
-local utils2 = require'treesitter-matchup.third-party.utils'
+local ts = require 'treesitter-matchup.compat'
+local ts_utils = require 'treesitter-matchup.third-party.ts-utils'
+local lru = require 'treesitter-matchup.third-party.lru'
+local util = require 'treesitter-matchup.util'
+local utils2 = require 'treesitter-matchup.third-party.utils'
+local get_parser = require 'treesitter-matchup.get_parser'
 
 local unpack = unpack or table.unpack
 
@@ -20,32 +13,81 @@ local M = {}
 
 local cache = lru.new(150)
 
+-- Given a path (i.e. a List(String)) this functions inserts value at path
+local function insert_to_path(object, path, value)
+  local curr_obj = object
+
+  for index = 1, (#path - 1) do
+    if curr_obj[path[index]] == nil then
+      curr_obj[path[index]] = {}
+    end
+
+    curr_obj = curr_obj[path[index]]
+  end
+
+  curr_obj[path[#path]] = value
+end
+
+-- A function that splits  a string on '.'
+local function split(string)
+  local t = {}
+  for str in string.gmatch(string, "([^.]+)") do
+    table.insert(t, str)
+  end
+
+  return t
+end
+
 function M.is_enabled(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
-  local lang = parsers.get_buf_lang(bufnr)
-  return configs.is_enabled('matchup', lang, bufnr)
+  local config = vim.g.matchup_treesitter_config or {}
+  local disabled = vim.tbl_get(config, "matchup", "disable")
+  return (not disabled) and (not not get_parser(bufnr, nil, { error = false }))
 end
 
 function M.is_hl_enabled(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
-  local lang = parsers.get_buf_lang(bufnr)
-  return configs.is_enabled('highlight', lang, bufnr)
+  local config = vim.g.matchup_treesitter_config or {}
+  local disabled = vim.tbl_get(config, "highlight", "disable")
+  return (not disabled) and (not not get_parser(bufnr, nil, { error = false }))
 end
 
 M.get_matches = ts_utils.memoize_by_buf_tick(function(bufnr)
-  local parser = parsers.get_parser(bufnr)
+  local parser = get_parser(bufnr, nil, { error = false })
   local matches = {}
 
   if parser then
-    parser:for_each_tree(function(tree, lang_tree)
-      if not tree or lang_tree:lang() == 'comment' then
+    parser:for_each_tree(function(tstree, lang_tree)
+      if not tstree or lang_tree:lang() == 'comment' then
         return
       end
 
-      local lang = lang_tree:lang()
-      local group_results = queries.collect_group_results(
-        bufnr, 'matchup', tree:root(), lang) or {}
-      vim.list_extend(matches, group_results)
+      -- local group_results = queries.collect_group_results(
+      --   bufnr, 'matchup', tstree:root(), lang) or {}
+      -- vim.list_extend(matches, group_results)
+      local query = vim.treesitter.query.get(
+        lang_tree:lang(),
+        "matchup"
+      )
+      if query then
+        --- @note This is specifically targetting 0.10 compatibility
+        ---       Remove all but the first two arguments when targetting 0.11+
+        for _, match, metadata in query:iter_matches(tstree:root(), bufnr, 0, -1, { all = true }) do
+          local group_results = {}
+          for id, nodes in pairs(match) do
+            local name = query.captures[id]
+            for _, node in ipairs(nodes) do
+              if name ~= nil then
+                local path = split(name .. ".node")
+                insert_to_path(group_results, path, node)
+                local metadata_path = split(name .. ".metadata")
+                insert_to_path(group_results, metadata_path, metadata[id])
+              end
+            end
+          end
+          table.insert(matches, group_results)
+        end
+      end
     end)
   end
 
@@ -62,9 +104,6 @@ end
 local function _node_id(node)
   if not node then
     return nil
-  end
-  if node:type() == 'nvim-treesitter-range' then
-    return string.format('range_%d_%d_%d_%d', node:range())
   end
   return node:id()
 end
@@ -93,10 +132,10 @@ M.get_scopes = ts_utils.memoize_by_buf_tick(function(bufnr)
 end)
 
 M.get_active_nodes = ts_utils.memoize_by_buf_tick(function(bufnr)
-  -- TODO: why do we need to force a parse?
-  if not pcall(function() parsers.get_parser():parse() end) then
+  -- NOTE parse() call short-circuits if the parser is valid
+  if not pcall(function() get_parser(bufnr):parse() end) then
     -- TODO workaround a crash due to tree-sitter parsing
-    return {{ open={}, mid={}, close={} }, {}}
+    return { { open = {}, mid = {}, close = {} }, {} }
   end
 
   local matches = M.get_matches(bufnr)
@@ -108,7 +147,7 @@ M.get_active_nodes = ts_utils.memoize_by_buf_tick(function(bufnr)
     if match.open then
       for key, open in pairs(match.open) do
         local reject = key:find('quote')
-          and not M.get_option(bufnr, 'enable_quotes')
+            and not M.get_option(bufnr, 'enable_quotes')
         local id = _node_id(open.node)
         if not reject and open.node and symbols[id] == nil then
           table.insert(nodes.open, open.node)
@@ -119,7 +158,7 @@ M.get_active_nodes = ts_utils.memoize_by_buf_tick(function(bufnr)
     if match.close then
       for key, close in pairs(match.close) do
         local reject = key:find('quote')
-          and not M.get_option(bufnr, 'enable_quotes')
+            and not M.get_option(bufnr, 'enable_quotes')
         local id = _node_id(close.node)
         if not reject and close.node and symbols[id] == nil then
           table.insert(nodes.close, close.node)
@@ -140,7 +179,7 @@ M.get_active_nodes = ts_utils.memoize_by_buf_tick(function(bufnr)
     end
   end
 
-  return {nodes, symbols}
+  return { nodes, symbols }
 end)
 
 function M.containing_scope(node, bufnr, key)
@@ -186,7 +225,7 @@ function M.do_node_result(initial_node, bufnr, opts, side, key)
     lnum = row + 1,
     cnum = col + 1,
     skip = 0,
-    class = {key, 0},
+    class = { key, 0 },
     highlighting = opts['highlighting'],
     _id = util.uuid4(),
   }
@@ -198,7 +237,7 @@ function M.do_node_result(initial_node, bufnr, opts, side, key)
     col = col,
     key = key,
     scope = scope,
-    search_range = {scope:range()},
+    search_range = { scope:range() },
   }
 
   cache:set(result._id, info)
@@ -207,12 +246,12 @@ function M.do_node_result(initial_node, bufnr, opts, side, key)
 end
 
 local side_table = {
-  open     = {'open'},
-  mid      = {'mid'},
-  close    = {'close'},
-  both     = {'close', 'open'},
-  both_all = {'close', 'mid', 'open'},
-  open_mid = {'mid', 'open'},
+  open     = { 'open' },
+  mid      = { 'mid' },
+  close    = { 'close' },
+  both     = { 'close', 'open' },
+  both_all = { 'close', 'mid', 'open' },
+  open_mid = { 'mid', 'open' },
 }
 
 function M.get_delim(bufnr, opts)
@@ -224,10 +263,10 @@ function M.get_delim(bufnr, opts)
     local smallest_len = 1e31
     local result_info = nil
     for _, side in ipairs(side_table[opts.side]) do
-      if not(side == 'mid' and vim.g.matchup_delim_nomids > 0) then
+      if not (side == 'mid' and vim.g.matchup_delim_nomids > 0) then
         for _, node in ipairs(active_nodes[side]) do
-          if utils2.is_in_node_range(node, cursor[1]-1, cursor[2]) then
-            local len = ts_utils.node_length(node)
+          if utils2.is_in_node_range(node, cursor[1] - 1, cursor[2]) then
+            local len = node:byte_length()
             if len < smallest_len then
               smallest_len = len
               result_info = {
@@ -256,7 +295,7 @@ function M.get_delim(bufnr, opts)
   local active_nodes, symbols = unpack(M.get_active_nodes(bufnr))
 
   local cursor = api.nvim_win_get_cursor(0)
-  local cur_pos = max_col * (cursor[1]-1) + cursor[2]
+  local cur_pos = max_col * (cursor[1] - 1) + cursor[2]
   local closest_node, closest_dist = nil, 1e31
   local result_info = {}
 
@@ -266,13 +305,12 @@ function M.get_delim(bufnr, opts)
       local pos = max_col * row + col
 
       if opts.direction == 'next' and pos >= cur_pos
-        or opts.direction == 'prev' and pos <= cur_pos then
-
+          or opts.direction == 'prev' and pos <= cur_pos then
         local dist = math.abs(pos - cur_pos)
         if dist < closest_dist then
           closest_dist = dist
           closest_node = node
-          result_info = { side=side, key=symbols[_node_id(node)] }
+          result_info = { side = side, key = symbols[_node_id(node)] }
         end
       end
     end
@@ -298,9 +336,9 @@ function M.get_matching(delim, down, bufnr)
 
   local sides
   if vim.g.matchup_delim_nomids > 0 then
-    sides = down and {'close'} or {'open'}
+    sides = down and { 'close' } or { 'open' }
   else
-    sides = down and {'mid', 'close'} or {'mid', 'open'}
+    sides = down and { 'mid', 'close' } or { 'mid', 'open' }
   end
 
   local active_nodes, symbols = unpack(M.get_active_nodes(bufnr))
@@ -322,11 +360,10 @@ function M.get_matching(delim, down, bufnr)
             or not down and (row < info.row or row == info.row and col < info.col))
           and (row >= info.search_range[1]
             and row <= info.search_range[3]) then
-
         local target_scope = M.containing_scope(node, bufnr, info.key)
         if info.scope == target_scope then
           local text = _node_text(node, bufnr) or ''
-          table.insert(matches, {text, row + 1, col + 1})
+          table.insert(matches, { text, row + 1, col + 1 })
 
           if side == 'close' then
             got_close = true
@@ -337,14 +374,14 @@ function M.get_matching(delim, down, bufnr)
   end
 
   -- sort by position
-  table.sort(matches, function (a, b)
+  table.sort(matches, function(a, b)
     return a[2] < b[2] or a[2] == b[2] and a[3] < b[3]
   end)
 
   -- no stop marker is found, use enclosing scope
   if down and not got_close then
     local row, col, _ = info.scope:end_()
-    table.insert(matches, {'', row + 1, col + 1})
+    table.insert(matches, { '', row + 1, col + 1 })
   end
 
   return matches
@@ -359,12 +396,13 @@ local function opt_tbl_for_lang(opt, lang)
 end
 
 function M.get_option(bufnr, opt_name)
-  local config = configs.get_module('matchup') or {}
-  local lang = parsers.get_buf_lang(bufnr)
+  local config = vim.g.matchup_treesitter_config or {}
   if (opt_name == 'include_match_words'
-      or opt_name == 'additional_vim_regex_highlighting'
-      or opt_name == 'disable_virtual_text'
-      or opt_name == 'enable_quotes') then
+        or opt_name == 'additional_vim_regex_highlighting'
+        or opt_name == 'disable_virtual_text'
+        or opt_name == 'enable_quotes') then
+    local parser, _ = get_parser(bufnr, nil, { error = false })
+    local lang = parser and parser:lang() or nil
     return opt_tbl_for_lang(config[opt_name], lang)
   end
   error('invalid option ' .. opt_name)
@@ -376,11 +414,11 @@ function M.attach(bufnr, lang)
     api.nvim_buf_set_option(bufnr, 'syntax', 'ON')
   end
 
-  api.nvim_call_function('matchup#ts_engine#attach', {bufnr, lang})
+  api.nvim_call_function('matchup#ts_engine#attach', { bufnr, lang })
 end
 
 function M.detach(bufnr)
-  api.nvim_call_function('matchup#ts_engine#detach', {bufnr})
+  api.nvim_call_function('matchup#ts_engine#detach', { bufnr })
 end
 
 return M

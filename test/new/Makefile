@@ -5,6 +5,7 @@ COVER = covimerage -q run --append --no-report \
        --source $(CURDIR)/../../plugin
 MYVIM ?= nvim --headless
 MAKEFLAGS += --no-print-directory
+VENV = . env/bin/activate; 
 
 TESTS := $(wildcard test-*)
 
@@ -19,27 +20,24 @@ sysinfo:
 	@echo "**** SYSTEM INFORMATION ****"
 
 $(TESTS): env
-	@. env/bin/activate
-	mkdir -p cov.tmp
-	MYVIM="$(COVER) $(MYVIM)" $(MAKE) -C $@
+	$(VENV) mkdir -p cov.tmp
+	$(VENV) MYVIM="$(COVER) $(MYVIM)" $(MAKE) -C $@
 
 coverage: coverage.xml
 
 cov.tmp/coverage_covimerage: $(wildcard cov.tmp/_*)
-	coverage combine $^
+	$(VENV) coverage combine $^
 
 coverage.xml: env cov.tmp/coverage_covimerage
-	. env/bin/activate
-	coverage report -m
-	coverage html
-	coverage xml
+	$(VENV) coverage report -m
+	$(VENV) coverage html
+	$(VENV) coverage xml
 
 env: env/pyvenv.cfg
 
 env/pyvenv.cfg:
 	python3 -m venv env
-	. env/bin/activate
-	pip install -r requirements.txt
+	$(VENV) pip install -r requirements.txt
 
 ifndef MAKECMDGOALS
 test: sysinfo
