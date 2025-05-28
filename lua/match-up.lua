@@ -8,10 +8,10 @@ local M = {}
 ---@field stopline integer
 
 ---@class matchup.HotfixConfig
----@field enabled boolean
+---@field enabled 0|1
 
 ---@class matchup.MappingsConfig
----@field enabled boolean
+---@field enabled 0|1
 
 ---@class matchup.OffscreenConfig
 ---@field method 'status'|'status_manual'|'popup'
@@ -26,7 +26,7 @@ local M = {}
 ---@field deferred_fade_time integer
 ---@field deferred_hide_delay integer
 ---@field deferred_show_delay integer
----@field enabled boolean
+---@field enabled 0|1
 ---@field end_sign string
 ---@field hi_background 0|1
 ---@field hi_surround_always 0|1
@@ -51,28 +51,30 @@ local M = {}
 ---@field override_Npercent integer
 
 ---@class matchup.MouseConfig
----@field enabled boolean
+---@field enabled 0|1
 
 ---@class matchup.OverrideConfig
 ---@field vimtex 1|0
 
 ---@class matchup.SurroundConfig
----@field enabled boolean
+---@field enabled 0|1
 
 ---@class matchup.TextObjConfig
----@field enabled boolean
+---@field enabled 0|1
 ---@field linewise_operators string[]
 
 ---@class matchup.TransmuteConfig
----@field enabled boolean
+---@field enabled 0|1
 
 -- TODO: add documentation for g: vars
+-- TODO: add defautls for this g: vars?
 ---@class matchup.TreesitterConfig
 ---@field enabled boolean
+---@field disabled string[]
 
 ---@class matchup.Config
 ---@field delim matchup.DelimConfig
----@field enabled boolean
+---@field enabled 0|1
 ---@field hotfix matchup.HotfixConfig
 ---@field mappings matchup.MappingsConfig
 ---@field matchparen matchup.MatchparenConfig
