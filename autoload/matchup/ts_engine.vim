@@ -21,13 +21,6 @@ function! matchup#ts_engine#is_enabled(bufnr) abort
   return +s:forward('is_enabled', a:bufnr)
 endfunction
 
-function! matchup#ts_engine#is_hl_enabled(bufnr) abort
-  if !has('nvim-0.5.0')
-    return 0
-  endif
-  return +s:forward('is_hl_enabled', a:bufnr)
-endfunction
-
 function! matchup#ts_engine#get_option(bufnr, opt_name) abort
   return s:forward('get_option', a:bufnr, a:opt_name)
 endfunction
