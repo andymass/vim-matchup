@@ -1,9 +1,4 @@
-if not pcall(require, 'nvim-treesitter') then
-  return {init = function() end}
-end
-
-local treesitter = require 'nvim-treesitter'
-local queries = require 'nvim-treesitter.query'
+-- TODO: remove module structure
 
 local M = {}
 
@@ -12,7 +7,7 @@ function M.init()
     matchup = {
       module_path = 'treesitter-matchup.internal',
       is_supported = function(lang)
-        return queries.has_query_files(lang, 'matchup')
+        return vim.treesitter.query.get(lang, 'matchup') ~= nil
       end
     }
   }

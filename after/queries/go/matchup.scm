@@ -6,8 +6,7 @@
 
 ; 'else' and 'else if'
 (if_statement
-  "else" @_start (if_statement "if" @_end)?
-  (#make-range! "mid.if.1" @_start @_end))
+  "else" @mid.if.1 (if_statement "if" @mid.if.1)?)
 
 ; if
 (block (if_statement "if" @open.if) @scope.if)
