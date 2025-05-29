@@ -13,12 +13,17 @@
 (if_statement
   "if" @open.if
   "end" @close.if) @scope.if
-(else_statement "else" @mid.if.1)
-(elseif_statement "elseif" @mid.if.2)
+
+(else_statement
+  "else" @mid.if.1)
+
+(elseif_statement
+  "elseif" @mid.if.2)
 
 (function_declaration
   "function" @open.function
   "end" @close.function) @scope.function
+
 (function_definition
   "function" @open.function
   "end" @close.function) @scope.function
