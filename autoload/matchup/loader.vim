@@ -25,7 +25,7 @@ function! matchup#loader#init_buffer() abort " {{{1
   let [l:no_words, l:filt_words] = [0, 0]
   if s:ts_may_be_supported && matchup#ts_engine#is_enabled(bufnr('%'))
     let l:has_ts = 1
-    if matchup#ts_engine#get_option(bufnr('%'), 'include_match_words')
+    if g:matchup_treesitter_include_match_words
       let l:filt_words = 1
     else
       let l:no_words = 1
@@ -78,7 +78,7 @@ function! matchup#loader#_treesitter_may_be_supported() abort
 endfunction
 
 let s:ts_may_be_supported = has('nvim-0.5.0') && exists('*luaeval')
-      \ && luaeval('pcall(require, "treesitter-matchup")')
+      \ && luaeval('pcall(require, "treesitter-matchup.internal")')
 
 " }}}1
 function! matchup#loader#bufwinenter() abort " {{{1
