@@ -40,7 +40,6 @@ function M.lang_skip(lnum, col)
     return false
   end
 
-  -- TODO: is lnum - 1 ok?
   local node = vts.get_node({pos = {lnum - 1, col - 1}})
   if not node then
     return false

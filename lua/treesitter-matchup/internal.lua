@@ -42,16 +42,6 @@ function M.is_enabled(bufnr)
   return is_enabled(lang, bufnr)
 end
 
--- TODO: I had to remove the `is_hl_enabled` function and the related logic. On
--- the `main` branch of nvim-treesitter it's not possible to tell wether or not
--- the hl is enabled for a given buffer and there is no
--- `additional_vim_regex_highlighting` option anymore. Now, users will have to
--- enable syntax themselves after doing `vim.treesitter.start()`. Mention this
--- as a possible workaround and possible regression in the PR.
---
--- Technically, the undocumented `vim.treesitter.highlighter` table can be
--- accessed. But, should we rely in undocumented features?
-
 ---@param bufnr integer
 ---@param root TSNode
 ---@param lang string
@@ -171,12 +161,6 @@ function M.range_id(range)
   return ('range_%d_%d_%d_%d'):format(unpack(range))
 end
 
--- TODO: mention this in the PR. this is not memoized because:
--- - get_matches is already memoized
--- - this function does not have access to the treesitter root and memoizing by
--- buf_tick is unreliable (buf_tick may be out-of-sync with treesitter changes
--- because of undo, for example)
---
 --- Get all nodes belonging to defined scopes (organized by key)
 ---@param bufnr integer
 ---@return table<string, table<string, boolean>>
@@ -239,7 +223,6 @@ M.get_active_matches = function(bufnr)
     end
     if match.mid then
       for key, mid_group in pairs(match.mid) do
-        -- TODO: mid type is wrong, fix everywhere
         for _, mid in pairs(mid_group) do
           local id = M.range_id(mid.info.range)
           if mid.info and symbols[id] == nil then

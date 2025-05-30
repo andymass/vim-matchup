@@ -34,3 +34,7 @@
 (do_statement
   "do" @open.block
   "end" @close.block) @scope.block
+
+(table_constructor
+  "{" @open.table
+  "}" @close.table) @scope.table
