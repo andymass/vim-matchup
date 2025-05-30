@@ -1,12 +1,13 @@
 ; inherits: quote
 
 [
-    (element)
-    (script_element)
-    (style_element)
+  (element)
+  (script_element)
+  (style_element)
 ] @scope.tag
 
-(start_tag (tag_name) @open.tag)
+(start_tag
+  (tag_name) @open.tag)
 
 (end_tag
   (tag_name) @close.tag
@@ -17,7 +18,6 @@
   "/>" @close.selftag) @scope.selftag
 
 ; await
-
 (await_statement
   (await_start
     (block_start_tag
@@ -36,7 +36,6 @@
   (#offset! @mid.await.2 0 -1 0 0))
 
 ; each
-
 (each_statement
   (each_start
     (block_start_tag
@@ -49,7 +48,6 @@
     (#offset! @close.each 0 -1 0 0)))
 
 ; if
-
 (if_statement
   (if_start
     (block_start_tag
@@ -72,7 +70,6 @@
     (#offset! @close.if 0 -1 0 0)))
 
 ; key
-
 (key_statement
   (key_start
     (block_start_tag
@@ -85,7 +82,6 @@
     (#offset! @close.key 0 -1 0 0)))
 
 ; snippet
-
 (snippet_statement
   (snippet_start
     (block_start_tag

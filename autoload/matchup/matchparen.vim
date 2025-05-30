@@ -1201,8 +1201,7 @@ function! s:add_matches(corrlist, ...) " {{{1
     if exists('s:ns_id')
       if strlen(l:corr.match) == 0
             \ && matchup#loader#_treesitter_may_be_supported()
-            \ && !matchup#ts_engine#get_option(
-            \   bufnr('%'), 'disable_virtual_text')
+            \ && !g:matchup_treesitter_disable_virtual_text
         if hlexists('MatchupVirtualText')
           let l:group = 'MatchupVirtualText'
         endif

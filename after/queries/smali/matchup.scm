@@ -1,6 +1,6 @@
 ; inherits: quote
 
-(method_definition 
+(method_definition
   ".method" @open.function
   ".end method" @close.function) @scope.function
 
