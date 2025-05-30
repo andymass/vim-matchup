@@ -3,12 +3,6 @@ local api = vim.api
 local ts = vim.treesitter
 local memoize = require'treesitter-matchup.third-party.ts-utils'.memoize
 
-vim.g.matchup_treesitter_enabled = false
-vim.g.matchup_treesitter_disabled = {}
-vim.g.matchup_treesitter_include_match_words = false
-vim.g.matchup_treesitter_enable_quotes = true
-
--- TODO: update this dependencies
 local lru = require'treesitter-matchup.third-party.lru'
 local util = require'treesitter-matchup.util'
 
@@ -22,13 +16,16 @@ local cache = lru.new(150)
 ---@param lang string
 ---@param bufnr integer
 local function is_enabled(lang, bufnr)
-  local enabled = vim.g.matchup_treesitter_enabled == 1
-  local buf_enabled = vim.b[bufnr].matchup_treesitter_enabled == 1
+  local enabled = vim.g.matchup_treesitter_enabled
+  local buf_enabled = vim.b[bufnr].matchup_treesitter_enabled
   local lang_disabled = vim.list_contains(vim.g.matchup_treesitter_disabled, lang)
 
-  return enabled and buf_enabled and not lang_disabled
+  if buf_enabled == false then
+    return false
+  end
+
+  return enabled and not lang_disabled
 end
--- TODO: this is following the old module structure of nvim-treesitter. Change it
 
 ---@param bufnr integer?
 ---@return boolean
@@ -38,7 +35,10 @@ function M.is_enabled(bufnr)
   if not lang then
     return false
   end
-  assert(lang)
+  local _, err = ts.get_parser(bufnr, nil, {error = false})
+  if err then
+    return false
+  end
   return is_enabled(lang, bufnr)
 end
 
@@ -110,7 +110,7 @@ local get_memoized_matches = memoize(function(bufnr, root, lang)
         end_col = -1
         end_row = end_row - 1
       end
-      local lines = api.nvim_buf_get_text(bufnr, start_row, end_row, start_col, end_col, {})
+      local lines = api.nvim_buf_get_text(bufnr, start_row, start_col, end_row, end_col, {})
       local text = table.concat(lines, '\n')
 
       local name = query.captures[id]
@@ -304,6 +304,7 @@ function M.do_match_result(info, bufnr, opts, side, key)
   ---@type integer, integer
   local row, col = unpack(info.range)
 
+  ---@class matchup.Delim
   local result = {
     type = 'delim_py',
     match = text_until_newline(info),
@@ -444,8 +445,12 @@ function M.get_delim(bufnr, opts)
     result_info.side, result_info.key)
 end
 
-function M.get_matching(delim, down, bufnr)
-  down = down > 0
+---@param delim matchup.Delim
+---@param _down 1|0
+---@param bufnr integer
+---@return [string, integer, integer][]
+function M.get_matching(delim, _down, bufnr)
+  local down = _down > 0
 
   local cached_info = cache:get(delim._id) or {}
   if cached_info.bufnr ~= bufnr then
@@ -507,14 +512,6 @@ function M.get_matching(delim, down, bufnr)
   end
 
   return matches
-end
-
-function M.attach(bufnr, lang)
-  api.nvim_call_function('matchup#ts_engine#attach', {bufnr, lang})
-end
-
-function M.detach(bufnr)
-  api.nvim_call_function('matchup#ts_engine#detach', {bufnr})
 end
 
 return M
