@@ -66,8 +66,6 @@ local M = {}
 ---@class matchup.TransmuteConfig
 ---@field enabled 0|1
 
--- TODO: remove vim syntax related g: vars
--- TODO: modify vimscript to work without nvim-treesitter
 -- TODO: add documentation for g: vars
 ---@class matchup.TreesitterConfig
 ---@field enabled boolean
