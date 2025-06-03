@@ -933,7 +933,8 @@ function! s:close_floating_win() " {{{1
   if !exists('s:float_id')
     return
   endif
-  if win_id2win(s:float_id) > 0
+  if (has('nvim-0.12') && s:float_id > 0) || (!has('nvim-0.12') && win_id2win(s:float_id) > 0)
+    echo "hello"
     call s:do_popup_autocmd_leave(s:float_id)
     call nvim_win_close(s:float_id, 0)
   endif
