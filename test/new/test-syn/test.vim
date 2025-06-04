@@ -1,34 +1,24 @@
 set nocompatible
 source ../common/bootstrap.vim
 
-if !$TESTS_ENABLE_TREESITTER && $MODE > 0
+if has("nvim")
+  let s:expect_ts_engine = 1
+elseif $MODE > 0
   call matchup#test#finished()
 endif
 
-let s:expect_ts_engine = +$TESTS_ENABLE_TREESITTER
-
 if $MODE == 1
   lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    highlight = { enable = true },
-    matchup   = { enable = true }
-  }
-EOF
-elseif $MODE == 2
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    highlight = { enable = true },
+  vim.g.matchup_treesitter_config = {
     matchup   = {
-      enable = true,
       additional_vim_regex_highlighting = true
     }
   }
 EOF
-elseif $MODE == 3
+elseif $MODE == 2
   lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    highlight = { enable = true },
-    matchup   = { enable = false }
+  vim.g.matchup_treesitter_config = {
+    matchup   = { disable = true }
   }
 EOF
 

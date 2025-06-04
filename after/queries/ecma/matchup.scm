@@ -16,9 +16,12 @@
 (switch_default "default" @mid.switch.2)
 
 ; 'else' and 'else if'
-(else_clause
-  "else" @_start (if_statement "if" @_end)?
-  (#make-range! "mid.if.1" @_start @_end))
+[
+ (else_clause
+   "else" (if_statement "if" @mid.if.1)?)
+ (else_clause
+   "else" @mid.if.2 [(return_statement) (expression_statement)])
+ ]
 
 ; if
 ((if_statement

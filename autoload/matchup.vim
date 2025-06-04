@@ -409,16 +409,31 @@ function! s:treesitter_init_module() " {{{1
     return
   endif
 
-  lua require'treesitter-matchup'.init()
-
-  augroup matchup_filetype_query
-    au!
-    autocmd FileType query
-          \ augroup MatchupTreesitter|augroup END
-          \|autocmd! MatchupTreesitter BufWritePost <buffer>
-          \ call v:lua.require('treesitter-matchup.third-party.query')
-          \.invalidate_query_file(expand('%:p'))
-  augroup END
+  lua <<LUA
+  vim.api.nvim_create_autocmd({'FileType'}, {
+    pattern = {'query'},
+    group = vim.api.nvim_create_augroup('matchup_filetype_query', {
+      clear = true
+    }),
+    callback = function(ftevent)
+      vim.api.nvim_create_autocmd({'BufWritePost'}, {
+        buffer = ftevent.buf,
+        group = vim.api.nvim_create_augroup('MatchupTreesitter', {
+          clear = true
+        }),
+        callback = function(bwpevent)
+          local _, _, query_lang = string.find(bwpevent.file, "([^/]*)/matchup.scm$")
+          if query_lang then
+            vim.treesitter.query.get:clear(
+              query_lang,
+              "matchup"
+            )
+          end
+        end
+      })
+    end
+  })
+LUA
 endfunction
 
 "}}}1
