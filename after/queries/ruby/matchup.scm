@@ -1,49 +1,65 @@
 (method
   "def" @open.def
   "end" @close.def) @scope.def
+
 (singleton_method
   "def" @open.def
   "end" @close.def) @scope.def
+
 (return
   "return" @mid.def.1)
+
 (yield
   "yield" @mid.def.2)
+
 (body_statement
-  (rescue "rescue" @mid.def.1))
+  (rescue
+    "rescue" @mid.def.1))
+
 (body_statement
-  (ensure "ensure" @mid.def.2))
+  (ensure
+    "ensure" @mid.def.2))
 
 (class
   "class" @open.class
   "end" @close.class) @scope.class
+
 (singleton_class
   "class" @open.class
   "end" @close.class) @scope.class
 
 (if
   "if" @open.if
-  (else "else" @mid.if.2)?
+  (else
+    "else" @mid.if.2)?
   "end" @close.if) @scope.if
-(elsif (else "else" @mid.if.2))
-(elsif "elsif" @mid.if.1)
+
+(elsif
+  (else
+    "else" @mid.if.2))
+
+(elsif
+  "elsif" @mid.if.1)
 
 (unless
   "unless" @open.unless
-  (else "else" @mid.unless.2)?
+  (else
+    "else" @mid.unless.2)?
   "end" @close.unless) @scope.unless
 
 (while
-    "while" @open.loop
+  "while" @open.loop
   body: (do
     "end" @close.loop)) @scope.loop
 
 (for
-    "for" @open.loop
+  "for" @open.loop
   body: (do
     "end" @close.loop)) @scope.loop
 
 (next
   "next" @mid.loop.1)?
+
 (break
   "break" @mid.loop.2)?
 
@@ -72,12 +88,14 @@
   "end" @close.do) @scope.do
 
 (if_modifier) @skip
+
 (unless_modifier) @skip
+
 (while_modifier) @skip
+
 (until_modifier) @skip
 
 (block_parameters
-  ("|") @open.block_param
+  "|" @open.block_param
   (_)
-  ("|") @close.block_param
-) @scope.block_param
+  "|" @close.block_param) @scope.block_param
