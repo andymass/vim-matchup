@@ -81,6 +81,7 @@ function! s:init_options()
   call s:init_option('matchup_treesitter_disabled', {})
   call s:init_option('matchup_treesitter_include_match_words', v:false)
   call s:init_option('matchup_treesitter_enable_quotes', v:true)
+  call s:init_option('matchup_treesitter_disable_virtual_text', v:true)
 endfunction
 
 function! s:init_option(option, default)
