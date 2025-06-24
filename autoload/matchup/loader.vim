@@ -32,8 +32,6 @@ function! matchup#loader#init_buffer() abort " {{{1
     endif
   endif
 
-  let l:has_ts_hl = 0
-
   " initialize lists of delimiter pairs and regular expressions
   " this is the data obtained from parsing b:match_words
   let b:matchup_delim_lists = s:init_delim_lists(l:no_words, l:filt_words)
@@ -43,7 +41,7 @@ function! matchup#loader#init_buffer() abort " {{{1
   let b:matchup_delim_re = s:init_delim_regexes()
 
   " process b:match_skip
-  if l:has_ts_hl
+  if l:has_ts
     let b:matchup_delim_skip
           \ = "matchup#ts_syntax#skip_expr(s:effline('.'),s:effcol('.'))"
   else
