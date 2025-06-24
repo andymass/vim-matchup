@@ -38,3 +38,8 @@
 (table_constructor
   "{" @open.table
   "}" @close.table) @scope.table
+
+(function_call
+  (arguments
+    "(" @open.call
+    ")" @close.call)) @scope.call
