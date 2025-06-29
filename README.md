@@ -153,32 +153,11 @@ match-up has support for language syntax provided by tree-sitter. The
 list of supported languages is available
 [here](https://github.com/andymass/vim-matchup/tree/master/after/queries).
 
-This feature requires manual opt-in in your init.vim and requires
-[nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) to
-be installed.
+This feature is automatically enabled if you are using Neovim. And does not
+require other plugins to work.
 
-```vim
-Plug 'nvim-treesitter/nvim-treesitter'
-lua <<EOF
-require'nvim-treesitter.configs'.setup {
-  matchup = {
-    enable = true,              -- mandatory, false will disable the whole extension
-    disable = { "c", "ruby" },  -- optional, list of language that will be disabled
-    -- [options]
-  },
-}
-EOF
-```
-
-Beside `enable` and `disable`, the following options are available, all
-defaulting to disabled:
-
-- `disable_virtual_text`: do not use virtual text to highlight the
-  virtual end of a block, for languages without explicit end markers
-  (e.g., Python).
-- `include_match_words`: additionally include traditional vim regex
-  matches for symbols. For example, highlights `/* */` comments in C++
-  which are not supported in tree-sitter matching.
+The treesitter related configuration options share the prefix
+`g:matchup_treesitter`. You can check them on `:h g:matchup_treesitter_enabled`
 
 Screenshot:
 
