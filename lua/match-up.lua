@@ -66,7 +66,6 @@ local M = {}
 ---@class matchup.TransmuteConfig
 ---@field enabled 0|1
 
--- TODO: add documentation for g: vars
 ---@class matchup.TreesitterConfig
 ---@field enabled boolean
 ---@field disabled string[]

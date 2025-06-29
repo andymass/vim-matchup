@@ -542,7 +542,7 @@ Options~
 *g:matchup_delim_nomids*
 
   If set to 1, middle words (like `return`) are not matched to start and
-  end words for higlighting and motions.
+  end words for higlighting and motions. >
 
   let g:matchup_delim_noskips = 0
 <
@@ -552,9 +552,81 @@ Options~
 
   When enabled (the default), the plugin will be loaded for all buffers,
   including ones without a file type set.  This allows matching to be done in
-  new buffers and plain text files but adds a small start-up cost to vim.
+  new buffers and plain text files but adds a small start-up cost to vim. >
+
+  let g:matchup_delim_start_plaintext = 0
+<
 
   Default: 1
+
+*g:matchup_treesitter_enabled*
+
+  When enabled (the default on Neovim), the plugin will use the builtin
+  |treesitter| interface to compute matches. >
+
+  let g:matchup_treesitter_enabled = v:true
+<
+
+  Default: v:true
+
+  Note: expects either |v:true| or |v:false|.
+
+*g:matchup_treesitter_disabled*
+
+  List of treesitter languages (not filetypes, see |treesitter-language|) for
+  which the treesitter engine will be disabled >
+
+  let g:matchup_treesitter_disabled = []
+<
+
+  Default: []
+
+*g:matchup_treesitter_include_match_words*
+
+  Additionally include traditional vim regex matches for symbols. For example,
+  highlights `/* */` comments in C++ which are not supported in tree-sitter
+  matching. >
+
+  let g:matchup_treesitter_include_match_words = v:false
+<
+
+  Default: v:false
+
+  Note: expects either |v:true| or |v:false|.
+
+*g:matchup_treesitter_disable_virtual_text*
+
+  Do not use virtual text to highlight the virtual end of a block, for
+  languages without explicit end markers (e.g., Python). >
+
+  let g:matchup_treesitter_disable_virtual_text = v:true
+<
+
+  Default: v:true
+
+  Note: expects either |v:true| or |v:false|.
+
+*g:matchup_treesitter_enable_quotes*
+
+  Include quotes as possible matches. >
+
+  let g:matchup_treesitter_enable_quotes = v:true
+<
+
+  Default: v:true
+
+  Note: expects either |v:true| or |v:false|.
+
+*g:matchup_treesitter_stopline*
+
+  The number of lines to parse using treesitter in either direction while
+  highlighting matches, using motions and textobjects. Set this
+  conservatively since high values may cause performance issues. >
+
+  let g:matchup_treesitter_stopline = 400
+<
+
+  Default: 400
 
 Variables~
 
