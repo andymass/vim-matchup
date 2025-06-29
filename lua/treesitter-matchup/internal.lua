@@ -31,6 +31,9 @@ end
 ---@return boolean
 function M.is_enabled(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
+  if not api.nvim_buf_is_loaded(bufnr) then
+    return false
+  end
   local lang = ts.language.get_lang(vim.bo[bufnr].filetype)
   if not lang then
     return false
