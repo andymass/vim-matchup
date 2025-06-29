@@ -134,10 +134,15 @@ M.get_matches = function(bufnr)
   local matches = {} ---@type matchup.treesitter.Match[]
 
   if parser then
-    -- TODO: g:matchup_delim_stopline could be used, but this functions needs to
-    -- know on which window it should look for in order to get the current
-    -- cursor position of that window
-    parser:parse(nil)
+    -- NOTE: assummes that we are always parsing the current window. May cause
+    -- issues if that's not always the case
+    local win = api.nvim_get_current_win()
+    local cur_row = unpack(api.nvim_win_get_cursor(win))
+    local stopline = vim.g.matchup_treesitter_stopline ---@type integer
+    local start_row = math.max(cur_row - stopline, 0)
+    local end_row = math.min(cur_row + stopline, api.nvim_buf_line_count(bufnr))
+
+    parser:parse({start_row, end_row})
     parser:for_each_tree(function(tree, lang_tree)
       if not tree or lang_tree:lang() == 'comment' then
         return

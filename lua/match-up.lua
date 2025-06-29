@@ -73,6 +73,7 @@ local M = {}
 ---@field include_match_words boolean
 ---@field disable_virtual_text boolean
 ---@field enable_quotes boolean
+---@field stopline integer
 
 ---@class matchup.Config
 ---@field delim matchup.DelimConfig
