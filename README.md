@@ -128,20 +128,6 @@ Note: I do not recommend using alternative loading strategies such as
 loads a minimal amount of code on start-up. It may work, but if you run
 into issues, remove the event key as a first debugging step.
 
-With [LunarVim](https://www.lunarvim.org/), tree-sitter integration can be
-enabled as follows:
-
-```lua
-{
-  "andymass/vim-matchup",
-  setup = function()
-    vim.g.matchup_matchparen_offscreen = { method = "popup" }
-  end,
-},
-
-lvim.builtin.treesitter.matchup.enable = true
-```
-
 You can use any other plugin manager such as
 [vundle](https://github.com/gmarik/vundle),
 [dein](https://github.com/Shougo/dein.vim),
