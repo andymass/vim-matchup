@@ -14,6 +14,10 @@
       "}" @close.function))
 ] @scope.function
 
+(statement_block
+  "{" @open.block
+  "}" @close.block) @scope.block
+
 (return_statement
   "return" @mid.function.1)
 
