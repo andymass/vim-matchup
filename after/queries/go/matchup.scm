@@ -32,3 +32,11 @@
 (_
   "\"" @open.quote_double
   "\"" @close.quote_double) @scope.quote_double
+
+(block
+  "{" @open.block
+  "}" @close.block) @scope.block
+
+(argument_list
+  "(" @open.call
+  ")" @close.call) @scope.call

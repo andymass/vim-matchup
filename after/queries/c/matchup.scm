@@ -63,3 +63,11 @@
 
 (break_statement
   "break" @mid.loop.1)
+
+(compound_statement
+  "{" @open.block
+  "}" @close.block) @scope.block
+
+(argument_list
+  "(" @open.call
+  ")" @close.call) @scope.call

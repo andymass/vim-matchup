@@ -34,3 +34,7 @@
 (heredoc_redirect
   (heredoc_start) @open.rhrd
   (heredoc_end) @close.rhrd) @scope.rhrd
+
+(compound_statement
+  "{" @open.block
+  "}" @close.block) @scope.block
