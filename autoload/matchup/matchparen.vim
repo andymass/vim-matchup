@@ -140,7 +140,10 @@ function! s:matchparen.clear() abort dict " {{{1
     unlet! w:matchup_match_id_list
   endif
   if exists('s:ns_id')
-    call nvim_buf_clear_namespace(0, s:ns_id, 0, -1)
+    try
+      call nvim_buf_clear_namespace(0, s:ns_id, 0, -1)
+    catch /\<E12\>/
+    endtry
   endif
 
   if !has('nvim') && exists('t:match_popup') && (exists('*win_gettype')
