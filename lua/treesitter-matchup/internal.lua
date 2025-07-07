@@ -437,11 +437,11 @@ function M.get_delim(bufnr, opts)
 end
 
 ---@param delim matchup.Delim
----@param _down 1|0
+---@param down 1|0
 ---@param bufnr integer
 ---@return [string, integer, integer][]
-function M.get_matching(delim, _down, bufnr)
-  local down = _down > 0
+function M.get_matching(delim, down, bufnr)
+  local is_down = down > 0
 
   local cached_info = cache:get(delim._id) or {}
   if cached_info.bufnr ~= bufnr then
@@ -452,9 +452,9 @@ function M.get_matching(delim, _down, bufnr)
 
   local sides ---@type ('open'|'mid'|'close')[]
   if vim.g.matchup_delim_nomids > 0 then
-    sides = down and {'close'} or {'open'}
+    sides = is_down and {'close'} or {'open'}
   else
-    sides = down and {'mid', 'close'} or {'mid', 'open'}
+    sides = is_down and {'mid', 'close'} or {'mid', 'open'}
   end
 
   local active_matches, symbols = unpack(M.get_active_matches(bufnr))
@@ -473,8 +473,8 @@ function M.get_matching(delim, _down, bufnr)
       end
 
       if cached_info.info ~= info and symbols[M.range_id(info.range)] == cached_info.key
-          and (down and (row > cached_info.row or row == cached_info.row and col > cached_info.col)
-            or not down and (row < cached_info.row or row == cached_info.row and col < cached_info.col))
+          and (is_down and (row > cached_info.row or row == cached_info.row and col > cached_info.col)
+            or not is_down and (row < cached_info.row or row == cached_info.row and col < cached_info.col))
           and (row >= cached_info.search_range[1]
             and row <= cached_info.search_range[3]) then
 
@@ -497,7 +497,7 @@ function M.get_matching(delim, _down, bufnr)
   end)
 
   -- no stop marker is found, use enclosing scope
-  if down and not got_close then
+  if is_down and not got_close then
     local row, col, _ = cached_info.scope:end_()
     table.insert(matches, {'', row + 1, col + 1})
   end
