@@ -16,6 +16,8 @@ jobs:
           - "head"
           - "v0.10.1"
     runs-on: ubuntu-latest
+    env:
+      TESTS_ENABLE_TREESITTER: 1
     steps:
       - uses: "actions/checkout@v2"
       - uses: tree-sitter/setup-action@v2
