@@ -3,7 +3,7 @@ name: Neovim
 on:
   push:
     branches:
-      - '*'
+      - "*"
   pull_request:
     branches:
       - master
@@ -13,28 +13,50 @@ jobs:
     strategy:
       matrix:
         neovim_version:
-          - 'head'
-          - 'v0.10.1'
+          - "head"
+          - "v0.10.1"
     runs-on: ubuntu-latest
     steps:
-      - uses: 'actions/checkout@v2'
+      - uses: "actions/checkout@v2"
+      - uses: tree-sitter/setup-action@v2
+        with:
+          install-lib: false
 
       - name: Install vader.vim
         run: git clone --depth=1 https://github.com/junegunn/vader.vim.git test/vader/vader.vim
 
-      - name: 'setup Neovim'
-        uses: 'thinca/action-setup-vim@v2'
+      - name: "setup Neovim"
+        uses: "thinca/action-setup-vim@v2"
         with:
-          vim_version: '${{ matrix.neovim_version }}'
-          vim_type: 'Neovim'
+          vim_version: "${{ matrix.neovim_version }}"
+          vim_type: "Neovim"
 
-      - name: 'Show version'
+      - name: "Show version"
         run: nvim --version
 
-      - name: 'Run test'
+      - name: Clone tree-sitter-python
+        run: git clone --depth=1 https://github.com/tree-sitter/tree-sitter-python.git
+        working-directory: /tmp
+
+      - name: Clone tree-sitter-ruby
+        run: git clone --depth=1 https://github.com/tree-sitter/tree-sitter-ruby.git
+        working-directory: /tmp
+
+      - name: Create default nvim runtime parser directory
+        run: mkdir -p $HOME/.local/share/nvim/site/parser
+
+      - name: Build tree-sitter-python
+        run: tree-sitter build -o $HOME/.local/share/nvim/site/parser/python.so
+        working-directory: /tmp/tree-sitter-python
+
+      - name: Build tree-sitter-ruby
+        run: tree-sitter build -o $HOME/.local/share/nvim/site/parser/ruby.so
+        working-directory: /tmp/tree-sitter-ruby
+
+      - name: "Run test"
         run: |
           bash -c 'VIMCMD=nvim test/vader/run'
 
-      - name: 'Run new tests'
+      - name: "Run new tests"
         run: |
           cd ./test/new && make -j1 && make -j1 coverage
