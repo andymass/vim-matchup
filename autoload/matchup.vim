@@ -79,10 +79,10 @@ function! s:init_options()
 
   if has('nvim')
     call s:init_option('matchup_treesitter_enabled', has('nvim-0.11.2') ? v:true : v:false)
-    call s:init_option('matchup_treesitter_disabled', {})
+    call s:init_option('matchup_treesitter_disabled', [])
     call s:init_option('matchup_treesitter_include_match_words', v:false)
     call s:init_option('matchup_treesitter_enable_quotes', v:true)
-    call s:init_option('matchup_treesitter_disable_virtual_text', v:true)
+    call s:init_option('matchup_treesitter_disable_virtual_text', v:false)
     call s:init_option('matchup_treesitter_stopline', 400)
   endif
 endfunction
