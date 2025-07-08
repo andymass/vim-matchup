@@ -5,33 +5,16 @@ if !$TESTS_ENABLE_TREESITTER && $MODE > 0
   call matchup#test#finished()
 endif
 
-let s:expect_ts_engine = +$TESTS_ENABLE_TREESITTER
+let g:matchup_treesitter_enabled = v:false
+let s:expect_ts_engine = $MODE == 0 ? 0 : +$TESTS_ENABLE_TREESITTER
 
 if $MODE == 1
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    highlight = { enable = true },
-    matchup   = { enable = true }
-  }
-EOF
+  let g:matchup_treesitter_enabled = v:true
+  autocmd FileType *.rb lua vim.treesitter.start()
 elseif $MODE == 2
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    highlight = { enable = true },
-    matchup   = {
-      enable = true,
-      additional_vim_regex_highlighting = true
-    }
-  }
-EOF
+  let g:matchup_treesitter_enabled = v:true
 elseif $MODE == 3
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    highlight = { enable = true },
-    matchup   = { enable = false }
-  }
-EOF
-
+  let g:matchup_treesitter_enabled = v:false
   let s:expect_ts_engine = 0
 endif
 

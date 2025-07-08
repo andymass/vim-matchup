@@ -76,6 +76,13 @@ function! s:init_options()
   call s:init_option('matchup_where_separator', '')
 
   call s:init_option('matchup_matchpref', {})
+
+  call s:init_option('matchup_treesitter_enabled', has('nvim') ? v:true : v:false)
+  call s:init_option('matchup_treesitter_disabled', {})
+  call s:init_option('matchup_treesitter_include_match_words', v:false)
+  call s:init_option('matchup_treesitter_enable_quotes', v:true)
+  call s:init_option('matchup_treesitter_disable_virtual_text', v:true)
+  call s:init_option('matchup_treesitter_stopline', 400)
 endfunction
 
 function! s:init_option(option, default)
@@ -408,17 +415,7 @@ function! s:treesitter_init_module() " {{{1
   if !matchup#loader#_treesitter_may_be_supported()
     return
   endif
-
-  lua require'treesitter-matchup'.init()
-
-  augroup matchup_filetype_query
-    au!
-    autocmd FileType query
-          \ augroup MatchupTreesitter|augroup END
-          \|autocmd! MatchupTreesitter BufWritePost <buffer>
-          \ call v:lua.require('treesitter-matchup.third-party.query')
-          \.invalidate_query_file(expand('%:p'))
-  augroup END
+  " TODO: do something?
 endfunction
 
 "}}}1

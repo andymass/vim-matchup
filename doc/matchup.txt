@@ -272,35 +272,21 @@ important special cases.
 
                                                       *matchup-treesitter*
 Tree-sitter integration~
-Note: Currently this feature is possible in neovim only. Only the latest
-version of neovim and nvim-treesitter is supported.
+Note: Currently this feature is possible in Neovim only. Only the latest
+stable version of Neovim is supported.
 
 match-up has support for language syntax provided by tree-sitter. The list
-of supported languages is available here. This feature requires manual
-opt-in in your init.vim and requires nvim-treesitter to be installed. >
+of supported languages is available here.
 
-  Plug 'nvim-treesitter/nvim-treesitter'
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    matchup = {
-      enable = true,              -- mandatory, false will disable the whole extension
-      disable = { "c", "ruby" },  -- optional, list of language that will be disabled
-      -- [options]
-    },
-  }
-<
-Beside enable and disable, the following options are available, all
-defaulting to false:
 
-*disable_virtual_text*
+This feature is automatically enabled if you are using Neovim. And does not
+require other plugins to work.
 
-  If true, do not use virtual text to highlight the virtual end of a
-  block, for languages without explicit end markers (e.g., Python).
 
-*include_match_words*
+The treesitter related configuration options share the prefix
+`g:matchup_treesitter`. You can check them on `:h g:matchup_treesitter_enabled`
 
-  If true, additionally include traditional vim regex matches for symbols.
-
+------------------------------------------------------------------------------
 Highlighting matches~
 
 To disable match highlighting at |startup|, use >
@@ -542,7 +528,7 @@ Options~
 *g:matchup_delim_nomids*
 
   If set to 1, middle words (like `return`) are not matched to start and
-  end words for higlighting and motions.
+  end words for higlighting and motions. >
 
   let g:matchup_delim_noskips = 0
 <
@@ -552,9 +538,81 @@ Options~
 
   When enabled (the default), the plugin will be loaded for all buffers,
   including ones without a file type set.  This allows matching to be done in
-  new buffers and plain text files but adds a small start-up cost to vim.
+  new buffers and plain text files but adds a small start-up cost to vim. >
+
+  let g:matchup_delim_start_plaintext = 0
+<
 
   Default: 1
+
+*g:matchup_treesitter_enabled*
+
+  When enabled (the default on Neovim), the plugin will use the builtin
+  |treesitter| interface to compute matches. >
+
+  let g:matchup_treesitter_enabled = v:true
+<
+
+  Default: v:true
+
+  Note: expects either |v:true| or |v:false|.
+
+*g:matchup_treesitter_disabled*
+
+  List of treesitter languages (not filetypes, see |treesitter-language|) for
+  which the treesitter engine will be disabled >
+
+  let g:matchup_treesitter_disabled = []
+<
+
+  Default: []
+
+*g:matchup_treesitter_include_match_words*
+
+  Additionally include traditional vim regex matches for symbols. For example,
+  highlights `/* */` comments in C++ which are not supported in tree-sitter
+  matching. >
+
+  let g:matchup_treesitter_include_match_words = v:false
+<
+
+  Default: v:false
+
+  Note: expects either |v:true| or |v:false|.
+
+*g:matchup_treesitter_disable_virtual_text*
+
+  Do not use virtual text to highlight the virtual end of a block, for
+  languages without explicit end markers (e.g., Python). >
+
+  let g:matchup_treesitter_disable_virtual_text = v:true
+<
+
+  Default: v:true
+
+  Note: expects either |v:true| or |v:false|.
+
+*g:matchup_treesitter_enable_quotes*
+
+  Include quotes as possible matches. >
+
+  let g:matchup_treesitter_enable_quotes = v:true
+<
+
+  Default: v:true
+
+  Note: expects either |v:true| or |v:false|.
+
+*g:matchup_treesitter_stopline*
+
+  The number of lines to parse using treesitter in either direction while
+  highlighting matches, using motions and textobjects. Set this
+  conservatively since high values may cause performance issues. >
+
+  let g:matchup_treesitter_stopline = 400
+<
+
+  Default: 400
 
 Variables~
 
@@ -666,7 +724,7 @@ Module matchparen~
     `MatchupStatusOffscreen()` can be used to get the text.
 
     `'popup'`: Use a popup window (requires at least vim 8.1.1406) or
-    a floating window (in neovim) to show the off-screen match.
+    a floating window (in Neovim) to show the off-screen match.
 
   scrolloff~
     When enabled, off-screen matches will not be shown in the statusline while
@@ -696,7 +754,7 @@ Module matchparen~
     Default: 0
 
   border~
-    For floating window on neovim only: set to add a border.  If the value
+    For floating window on Neovim only: set to add a border.  If the value
     is the integer 1, default borders are enabled.  A list or string can
     be specified as described in |nvim_open_win()|.
 
@@ -822,7 +880,7 @@ the function |timer_pause|, version 7.4.2180 and after.
 
 *g:matchup_matchparen_end_sign*
 
-  (neovim only) Configure the virtual symbol shown for closeless matches in languages like
+  (Neovim only) Configure the virtual symbol shown for closeless matches in languages like
   C++ and python.
 
       if (true)
@@ -834,7 +892,7 @@ the function |timer_pause|, version 7.4.2180 and after.
 
 *MatchupVirtualText*
 
-  (neovim only) You can also configure the color and style of the virtual text.
+  (Neovim only) You can also configure the color and style of the virtual text.
 
       :hi MatchupVirtualText ctermbg=blue guibg=lightblue gui=italic
 
