@@ -14,7 +14,8 @@
 
 ; --------------- lambda case ----------------
 (expression/lambda_case
-  "\\case" @open.case
+  "\\"
+  "case" @open.case
   (alternatives
     (alternative) @mid.case.1)) @scope.case
 
