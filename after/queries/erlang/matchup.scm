@@ -56,18 +56,18 @@
 (list_comprehension
   "[" @open.lc
   (lc_exprs "||" @mid.lc.1
-            (generator "<-" @mid.lc.2))
+            exprs: (_ (generator "<-" @mid.lc.2)))
   "]" @close.lc
   ) @scope.lc
 
 (map_comprehension .
   "#". "{" @open.mc
   (lc_exprs "||" @mid.mc.1
-            (generator "<-" @mid.mc.2))
+            (_ (generator "<-" @mid.mc.2)))
   "}" @close.mc .) @scope.mc
 
 (binary_comprehension
   "<<" @open.bc
   (lc_exprs "||" @mid.bc.1
-            (generator "<-" @mid.bc.2))
+            (_ (generator "<-" @mid.bc.2)))
   ">>" @close.bc) @scope.bc
