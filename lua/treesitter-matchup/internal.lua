@@ -42,6 +42,10 @@ function M.is_enabled(bufnr)
   if err then
     return false
   end
+  local queries = ts.query.get_files(lang, "matchup")
+  if vim.tbl_isempty(queries) then
+    return false
+  end
   return is_enabled(lang, bufnr)
 end
 
