@@ -111,7 +111,10 @@ local get_memoized_matches = memoize(function(bufnr, root, lang)
       local text = table.concat(lines, '\n')
 
       local name = query.captures[id]
-      local path = vim.split(name, '.', { plain = true })
+      local path = {} ---@type string[]
+      for part in name:gmatch('[^.]+') do
+        table.insert(path, part)
+      end
 
       local current = match_info ---@type table<string, table<string, matchup.treesitter.MatchInfo>>
       for _, segment in ipairs(path) do
