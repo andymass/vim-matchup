@@ -10,16 +10,12 @@
 (return_statement
   "return" @mid.func.1)
 
-; 'else' and 'else if'
+; 'if', 'else' and 'else if'
 (if_statement
+  "if" @open.if
   "else" @mid.if.1
   (if_statement
-    "if" @mid.if.1)?)
-
-; if
-(block
-  (if_statement
-    "if" @open.if) @scope.if)
+    "if" @mid.if.1)?) @scope.if
 
 ; switch
 (expression_switch_statement
@@ -27,7 +23,7 @@
   (expression_case
     "case" @mid.switch.1)
   (default_case
-    "default" @mid.switch.2)) @scope.switch
+    "default" @mid.switch.2)?) @scope.switch
 
 (_
   "\"" @open.quote_double
