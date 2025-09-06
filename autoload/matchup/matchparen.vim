@@ -833,7 +833,12 @@ function! s:do_offscreen_popup_nvim(offscreen) abort " {{{1
     else
       let l:bufnr = bufnr('%')
     endif
-    silent let s:float_id = nvim_open_win(l:bufnr, v:false, l:win_cfg)
+    try
+      silent let s:float_id = nvim_open_win(l:bufnr, v:false, l:win_cfg)
+    catch /E242:/
+      " Ignore errors when trying to open a window while closing another
+      return
+    endtry
 
     if has_key(g:matchup_matchparen_offscreen, 'highlight')
       call nvim_win_set_option(s:float_id, 'winhighlight',
