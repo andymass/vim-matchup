@@ -508,8 +508,7 @@ endfunction
 
 if has('nvim')
   function s:pumvisible() abort
-    return pumvisible() || luaeval('pcall(require, "cmp")')
-          \ && luaeval('require"cmp".visible()')
+    return pumvisible() || luaeval('(function() local ok, cmp = pcall(require, "cmp") if ok and type(cmp.visible) == "function" then return cmp.visible() else return false end end)()')
   endfunction
 else
   function s:pumvisible() abort
