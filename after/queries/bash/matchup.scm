@@ -20,8 +20,11 @@
   (do_group
     "done" @close.loop)) @scope.loop
 
-((word) @mid.loop.1 (#eq? @mid.loop.1 "break"))
-((word) @mid.loop.2 (#eq? @mid.loop.2 "continue"))
+((word) @mid.loop.1
+  (#eq? @mid.loop.1 "break"))
+
+((word) @mid.loop.2
+  (#eq? @mid.loop.2 "continue"))
 
 (case_statement
   "case" @open.case
@@ -29,5 +32,9 @@
   "esac" @close.case) @scope.case
 
 (heredoc_redirect
-	(heredoc_start) @open.rhrd
- 	(heredoc_end  ) @close.rhrd) @scope.rhrd
+  (heredoc_start) @open.rhrd
+  (heredoc_end) @close.rhrd) @scope.rhrd
+
+(compound_statement
+  "{" @open.block
+  "}" @close.block) @scope.block
