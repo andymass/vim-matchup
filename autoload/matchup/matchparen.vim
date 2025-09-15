@@ -900,7 +900,7 @@ function! s:populate_floating_win(offscreen, text_method) abort " {{{1
       let l:width += wincol()-virtcol('.')
       let l:width = min([l:width, winwidth(0) - 1])
     endif
-    call nvim_win_set_width(s:float_id, l:width + 1)
+    call nvim_win_set_width(s:float_id, l:width + 1 + strlen(line('$')))
 
     if &winminheight != 1
       let l:save_wmh = &winminheight
