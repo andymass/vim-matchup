@@ -508,8 +508,7 @@ endfunction
 
 if has('nvim')
   function s:pumvisible() abort
-    return pumvisible() || luaeval('pcall(require, "cmp")')
-          \ && luaeval('require"cmp".visible()')
+    return pumvisible() || luaeval('(function() local ok, cmp = pcall(require, "cmp") if ok and type(cmp.visible) == "function" then return cmp.visible() else return false end end)()')
   endfunction
 else
   function s:pumvisible() abort
@@ -901,7 +900,7 @@ function! s:populate_floating_win(offscreen, text_method) abort " {{{1
       let l:width += wincol()-virtcol('.')
       let l:width = min([l:width, winwidth(0) - 1])
     endif
-    call nvim_win_set_width(s:float_id, l:width + 1)
+    call nvim_win_set_width(s:float_id, l:width + 1 + strlen(line('$')))
 
     if &winminheight != 1
       let l:save_wmh = &winminheight
