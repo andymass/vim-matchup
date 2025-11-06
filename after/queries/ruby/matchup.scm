@@ -71,6 +71,14 @@
     "else" @mid.case.2)?
   "end" @close.case) @scope.case
 
+(case_match
+  "case" @open.case_match
+  clauses: (in_clause
+    "in" @mid.case_match.1)?
+  else: (else
+    "else" @mid.case_match.2)?
+  "end" @close.case_match) @scope.case_match
+
 (begin
   "begin" @open.begin
   (rescue
