@@ -28,7 +28,7 @@
 
 (case_statement
   "case" @open.case
-  (case_item) @mid.case.1
+  (case_item (")" @mid.case.1))
   "esac" @close.case) @scope.case
 
 (heredoc_redirect
