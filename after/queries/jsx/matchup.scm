@@ -1,12 +1,11 @@
 (jsx_element) @scope.tag
 
 (jsx_opening_element
-  (identifier) @open.tag)
+  name: (_) @open.tag)
 
 (jsx_closing_element
-  (identifier) @close.tag
-  (#offset! @close.tag 0 -1 0 0))
+  name: (_) @close.tag)
 
 (jsx_self_closing_element
-  name: (identifier) @open.selftag
+  name: (_) @open.selftag
   "/>" @close.selftag) @scope.selftag
