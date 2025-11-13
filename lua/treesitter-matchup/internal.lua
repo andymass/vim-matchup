@@ -78,8 +78,7 @@ end
 ---@param lang string
 ---@return matchup.treesitter.Match[]
 local get_memoized_matches = memoize(function(bufnr, root, lang)
-  local query_name = 'matchup'
-  local query = ts.query.get(lang, query_name)
+  local query = ts.query.get(lang, 'matchup')
 
   if not query then
     return {}
@@ -137,28 +136,31 @@ end, buf_root_lang_hash)
 ---@param bufnr integer
 ---@return matchup.treesitter.Match[]
 M.get_matches = function(bufnr)
-  local parser = ts.get_parser(bufnr)
+  local lang_tree = ts.get_parser(bufnr)
   local matches = {} ---@type matchup.treesitter.Match[]
 
-  if parser then
+  if lang_tree then
     -- NOTE: assummes that we are always parsing the current window. May cause
     -- issues if that's not always the case
-    local win = api.nvim_get_current_win()
-    local cur_row = unpack(api.nvim_win_get_cursor(win))
+    local cursor = vim.api.nvim_win_get_cursor(0)
     local stopline = vim.g.matchup_treesitter_stopline ---@type integer
-    local start_row = math.max(cur_row - stopline, 0)
-    local end_row = math.min(cur_row + stopline, api.nvim_buf_line_count(bufnr))
+    local start_row = math.max(cursor[1] - stopline, 0)
+    local end_row = math.min(cursor[1] + stopline, api.nvim_buf_line_count(bufnr))
 
-    parser:parse({start_row, end_row})
-    parser:for_each_tree(function(tree, lang_tree)
-      if not tree or lang_tree:lang() == 'comment' then
-        return
+    lang_tree:parse({ start_row, end_row })
+    ---@type vim.treesitter.LanguageTree?
+    local nested_lang_tree = lang_tree:language_for_range({ cursor[1]-1, cursor[2], cursor[1]-1, cursor[2] })
+    while vim.tbl_isempty(matches) and nested_lang_tree ~= nil do
+      local lang = nested_lang_tree:lang()
+      if lang ~= 'comment' then
+        for _, tree in ipairs(nested_lang_tree:trees()) do
+          local group_results = get_memoized_matches(bufnr, tree:root(), lang)
+          vim.list_extend(matches, group_results)
+        end
       end
 
-      local lang = lang_tree:lang()
-      local group_results = get_memoized_matches(bufnr, tree:root(), lang)
-      vim.list_extend(matches, group_results)
-    end)
+      nested_lang_tree = nested_lang_tree:parent()
+    end
   end
 
   return matches
