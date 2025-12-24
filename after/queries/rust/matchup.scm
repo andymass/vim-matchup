@@ -7,7 +7,7 @@
 
 (type_parameters
   "<" @open.typeparams
-  ">" @open.typeparams) @scope.typeparams
+  ">" @close.typeparams) @scope.typeparams
 
 ; --------------- if/else ---------------
 (block
