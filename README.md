@@ -44,8 +44,8 @@ more information. This plugin:
 - Extends vim's `%` motion to language-specific words. The following vim
   file type plugins currently provide special support for match-up:
 
-  > abaqus, ada, aspvbs, bash, c, cpp, chicken, clojure, cmake, cobol,
-  > context, csc, csh, dtd, dtrace, eiffel, eruby, falcon, fortran,
+  > abaqus, ada, aspvbs, bash, blade, c, cpp, chicken, clojure, cmake,
+  > cobol, context, csc, csh, dtd, dtrace, eiffel, eruby, falcon, fortran,
   > framescript, haml, hamster, hog, html, ishd, j, javascript,
   > javascriptreact, jsp, kconfig, liquid, lua, m3quake, make, matlab, mf,
   > modula2, modula3, mp, nsis, ocaml, pascal, pdf, perl, php, plaintex,
