@@ -40,8 +40,8 @@ function M.lang_skip(lnum, col)
     return false
   end
 
-  local node = vts.get_node({pos = {lnum - 1, col - 1}})
-  if not node then
+  local success, node = pcall(vts.get_node, {pos = {lnum - 1, col - 1}})
+  if not success or not node then
     return false
   end
   ---@diagnostic disable-next-line: missing-fields LuaLS bug
