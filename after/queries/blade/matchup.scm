@@ -10,8 +10,8 @@
   (section)
   (fragment)
   (verbatim)
-] @scope.tag
+] @scope.directive
 (
-  (directive_start) @open.tag
-  (directive_end) @close.tag
+  (directive_start) @open.directive
+  (directive_end) @close.directive
 )
