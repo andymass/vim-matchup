@@ -17,6 +17,16 @@
   (if_statement
     "if" @mid.if.1)?) @scope.if
 
+; loop
+(for_statement
+  "for" @open.loop) @scope.loop
+
+(break_statement
+  "break" @mid.loop.1)
+
+(continue_statement
+  "continue" @mid.loop.2)
+
 ; switch
 (expression_switch_statement
   "switch" @open.switch
