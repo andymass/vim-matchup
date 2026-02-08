@@ -2,6 +2,7 @@ local api = vim.api
 local vts = vim.treesitter
 local hl_info = require'treesitter-matchup.third-party.hl-info'
 local internal = require'treesitter-matchup.internal'
+local unpack = unpack or table.unpack
 
 local M = {}
 
@@ -18,11 +19,11 @@ end
 function M.get_skips(bufnr)
   local matches = internal.get_matches(bufnr)
 
-  local skips = {} ---@type table<string, 1>
-
+  local skips = {} ---@type table<string, true>
   for _, match in ipairs(matches) do
-    if match.skip then
-      skips[internal.range_id(match.skip.info.range)] = 1
+    if match.type == 'skip' then
+      local id = ('range_%d_%d_%d_%d'):format(unpack(match.range))
+      skips[id] = true
     end
   end
 
@@ -44,8 +45,8 @@ function M.lang_skip(lnum, col)
   if not success or not node then
     return false
   end
-  ---@diagnostic disable-next-line: missing-fields LuaLS bug
-  if skips[internal.range_id({node:range()})] then
+  local id = ('range_%d_%d_%d_%d'):format(node:range())
+  if skips[id] then
     return true
   end
 
