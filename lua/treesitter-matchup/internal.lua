@@ -71,8 +71,18 @@ local get_lang_matches = function(bufnr, root, lang, srow, erow)
     return {}
   end
 
+  local last_time = vim.uv.hrtime()
+  local check_interrupt = function()
+    if vim.uv.hrtime() - last_time > 100e6 then
+      local got_int = select(2, vim.wait(1)) == -2
+      if got_int then error('Interrupted') end
+      last_time = vim.uv.hrtime()
+    end
+  end
+
   local out = {} ---@type matchup.treesitter.Match[]
   for _, match, metadata in query:iter_matches(root, bufnr, srow, erow) do
+    check_interrupt()
     for id, nodes in pairs(match) do
       local first = nodes[1]
       local last = nodes[#nodes]

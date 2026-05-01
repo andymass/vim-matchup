@@ -44,9 +44,8 @@ function! s:get_delim_multi(opts) abort " {{{1
   let l:best = {}
   for l:e in get(get(b:, 'matchup_active_engines', {}), a:opts.type, [])
     let l:res = call(s:engines[l:e].get_delim, [a:opts])
-    if empty(l:res)
-      continue
-    endif
+    if l:res is 0 | return | endif
+    if empty(l:res) | continue | endif
     if a:opts.direction ==# 'current'
       return l:res
     elseif a:opts.direction ==# 'next'
