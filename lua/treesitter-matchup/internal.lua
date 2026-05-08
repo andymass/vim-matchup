@@ -74,7 +74,7 @@ local get_lang_matches = function(bufnr, root, lang, srow, erow)
   local last_time = vim.uv.hrtime()
   local check_interrupt = function()
     if vim.uv.hrtime() - last_time > 100e6 then
-      local got_int = select(2, vim.wait(1)) == -2
+      local got_int = select(2, vim.wait(0)) == -2
       if got_int then error('Interrupted') end
       last_time = vim.uv.hrtime()
     end
