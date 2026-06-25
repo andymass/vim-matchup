@@ -60,3 +60,9 @@
   "try" @open.try
   (catch_clause "catch" @mid.try.1)*
   (finally_clause "finally" @mid.try.2)?) @scope.try
+
+(method_declaration
+  "function" @open.function) @scope.function
+
+(return_statement
+  "return" @mid.function.1)
