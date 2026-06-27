@@ -53,6 +53,7 @@ function! matchup#motion#find_matching_pair(visual, down) " {{{1
 
   " get a delim where the cursor is
   let l:delim = matchup#delim#get_current('all', 'both_all')
+  if l:delim is 0 | return | endif
   if empty(l:delim)
     " otherwise search forward
     let l:delim = matchup#delim#get_next('all', 'both_all')

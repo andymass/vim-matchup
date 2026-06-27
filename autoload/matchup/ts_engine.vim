@@ -25,6 +25,7 @@ function! matchup#ts_engine#get_delim(opts) abort
   call matchup#perf#tic('ts_engine.get_delim')
 
   let l:res = s:forward('get_delim', bufnr('%'), a:opts)
+  if l:res is 0 | return | endif
   if empty(l:res)
     call matchup#perf#toc('ts_engine.get_delim', 'fail')
     return {}
