@@ -66,3 +66,6 @@
 
 (return_statement
   "return" @mid.function.1)
+
+(yield_expression
+ "yield" @mid.function.1)
