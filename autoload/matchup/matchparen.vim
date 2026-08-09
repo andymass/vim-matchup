@@ -888,30 +888,10 @@ function! s:populate_floating_win(offscreen, text_method) abort " {{{1
   if exists('*nvim_open_win')
     " neovim floating win
 
-    if get(g:matchup_matchparen_offscreen, 'fullwidth', 0)
-      let l:width = winwidth(0) - 1
-    else
-      let l:width = max(map(copy(l:body), 'strdisplaywidth(v:val)'))
-      if empty(a:offscreen.links.close.match)
-            \ && a:offscreen.lnum > line('.')
-        " include the closing hint
-        let l:width += 3 + len(a:offscreen.links.open.match)
-      endif
-      let l:width += wincol()-virtcol('.')
-      let l:width = min([l:width, winwidth(0) - 1])
-    endif
-    call nvim_win_set_width(s:float_id, l:width + 1 + strlen(line('$')))
 
-    if &winminheight != 1
-      let l:save_wmh = &winminheight
-      let &winminheight = 1
-      call nvim_win_set_height(s:float_id, l:height)
-      let &winminheight = l:save_wmh
-    else
-      call nvim_win_set_height(s:float_id, l:height)
-    endif
 
     call nvim_win_set_option(s:float_id, 'wrap', v:false)
+    call nvim_win_set_option(s:float_id, 'list', v:false)
     silent! call nvim_win_set_option(s:float_id, 'scrolloff', 0)
 
     if a:text_method
@@ -932,6 +912,43 @@ function! s:populate_floating_win(offscreen, text_method) abort " {{{1
       call nvim_win_set_cursor(s:float_id, [l:lnum, 0])
       call nvim_win_set_cursor(s:float_id, [a:offscreen.lnum, 0])
     endif
+
+    if &winminheight != 1
+      let l:save_wmh = &winminheight
+      let &winminheight = 1
+      call nvim_win_set_height(s:float_id, l:height)
+      let &winminheight = l:save_wmh
+    else
+      call nvim_win_set_height(s:float_id, l:height)
+    endif
+
+    " set the width and height after the options for the window is set
+    if get(g:matchup_matchparen_offscreen, 'fullwidth', 0)
+      let l:width = winwidth(0) - 1
+    else
+      let l:width = max(map(copy(l:body), 'strdisplaywidth(v:val)'))
+      if empty(a:offscreen.links.close.match)
+            \ && a:offscreen.lnum > line('.')
+        " include the closing hint
+        let l:width += 3 + len(a:offscreen.links.open.match)
+      endif
+
+      if a:text_method
+        let l:width += wincol()-virtcol('.')
+      else
+        " a robust way to get the width of the line number:
+        " go to the float window (without triggering autocommands) and
+        " do the width computations there
+        let l:curwin = win_getid()
+        noautocmd call win_gotoid(s:float_id)
+        let l:wincol = wincol()
+        let l:virtcol = virtcol('.')
+        noautocmd call win_gotoid(l:curwin)
+        let l:width += l:wincol-l:virtcol
+      endif
+      let l:width = min([l:width, winwidth(0) - 1])
+    endif
+    call nvim_win_set_width(s:float_id, l:width)
   endif
 endfunction
 
