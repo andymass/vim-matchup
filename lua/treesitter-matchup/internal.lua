@@ -11,6 +11,10 @@ local M = {}
 
 local cache = lru.new(150)
 
+-- languages whose matchup query failed to parse (e.g. because the
+-- installed parser does not define a node type used by the query); we
+-- remember this so we don't try (and error) again on every cursor move
+local broken_langs = {} ---@type table<string, boolean>
 
 ---@param lang string
 ---@param bufnr integer
@@ -65,7 +69,18 @@ end
 ---@param erow integer
 ---@return matchup.treesitter.Match[]
 local get_lang_matches = function(bufnr, root, lang, srow, erow)
-  local query = ts.query.get(lang, 'matchup')
+  if broken_langs[lang] then
+    return {}
+  end
+
+  local ok, query = pcall(ts.query.get, lang, 'matchup')
+  if not ok then
+    broken_langs[lang] = true
+    vim.notify_once(
+      string.format('matchup: failed to load treesitter matchup query for %s: %s', lang, query),
+      vim.log.levels.WARN)
+    return {}
+  end
 
   if not query then
     return {}

@@ -1,6 +1,6 @@
 ; PHP tags
 (php_tag) @open.php
-(php_end_tag) @close.php
+"?>" @close.php
 (program) @scope.php
 
 ; if
