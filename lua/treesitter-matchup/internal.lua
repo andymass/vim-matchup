@@ -73,14 +73,15 @@ local get_lang_matches = function(bufnr, root, lang, srow, erow)
     return {}
   end
 
-  local ok, query = pcall(ts.query.get, lang, 'matchup')
+  local ok, query_or_err = pcall(ts.query.get, lang, 'matchup')
   if not ok then
     broken_langs[lang] = true
     vim.notify_once(
-      string.format('matchup: failed to load treesitter matchup query for %s: %s', lang, query),
+      string.format('matchup: failed to load treesitter matchup query for %s: %s', lang, query_or_err),
       vim.log.levels.WARN)
     return {}
   end
+  local query = query_or_err
 
   if not query then
     return {}
