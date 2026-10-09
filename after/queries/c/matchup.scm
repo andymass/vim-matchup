@@ -18,12 +18,17 @@
   "#else" @mid.def.2)
 
 (switch_statement
-  "switch" @open.switch
+  "switch" @open.switch) @scope.switch
+
+(switch_statement
   body: (compound_statement
     (case_statement
-      "case" @mid.switch.1)?
+      "case" @mid.switch.1)))
+
+(switch_statement
+  body: (compound_statement
     (case_statement
-      "default" @mid.switch.2)?)) @scope.switch
+      "default" @mid.switch.2)))
 
 ; 'else' and 'else if'
 (else_clause
