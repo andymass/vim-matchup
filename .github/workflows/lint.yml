@@ -7,7 +7,7 @@ jobs:
     name: Luacheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v7
 
       - name: Prepare
         run: |
@@ -23,10 +23,10 @@ jobs:
     name: Vint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Install python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v7
 
       - name: Install vint
         run: |
