@@ -120,6 +120,17 @@ local get_lang_matches = function(bufnr, root, lang, srow, erow)
   return out
 end
 
+--- The rows around the cursor that are parsed and queried
+---@param bufnr integer
+---@param cursor integer[]
+---@return integer start_row
+---@return integer end_row exclusive
+function M.get_query_range(bufnr, cursor)
+  local stopline = vim.g.matchup_treesitter_stopline ---@type integer
+  return math.max(cursor[1] - stopline, 0),
+    math.min(cursor[1] + stopline, api.nvim_buf_line_count(bufnr))
+end
+
 ---@param bufnr integer
 ---@return matchup.treesitter.Match[]
 M.get_matches = function(bufnr)
@@ -130,9 +141,7 @@ M.get_matches = function(bufnr)
     -- NOTE: assummes that we are always parsing the current window. May cause
     -- issues if that's not always the case
     local cursor = vim.api.nvim_win_get_cursor(0)
-    local stopline = vim.g.matchup_treesitter_stopline ---@type integer
-    local start_row = math.max(cursor[1] - stopline, 0)
-    local end_row = math.min(cursor[1] + stopline, api.nvim_buf_line_count(bufnr))
+    local start_row, end_row = M.get_query_range(bufnr, cursor)
 
     lang_tree:parse({ start_row, end_row })
     ---@type vim.treesitter.LanguageTree?

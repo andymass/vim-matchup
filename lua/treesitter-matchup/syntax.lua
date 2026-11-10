@@ -14,9 +14,9 @@ function M.is_active(bufnr)
     and vim.bo[bufnr].syntax == '')
 end
 
---- Get all nodes that are marked as skip
 ---@param bufnr integer
-function M.get_skips(bufnr)
+---@return table<string, true>
+local function query_skips(bufnr)
   local matches = internal.get_matches(bufnr)
 
   local skips = {} ---@type table<string, true>
@@ -28,6 +28,73 @@ function M.get_skips(bufnr)
   end
 
   return skips
+end
+
+--- The skip nodes found by the last query, with what they depend on
+---@class matchup.treesitter.SkipCache
+---@field bufnr integer
+---@field tick integer
+---@field lang string
+---@field query vim.treesitter.Query?
+---@field start_row integer
+---@field end_row integer
+---@field skips table<string, true>
+local cache ---@type matchup.treesitter.SkipCache?
+
+--- The language, and its query, that get_matches starts from at the cursor
+---@param bufnr integer
+---@param cursor integer[]
+---@return string?
+---@return vim.treesitter.Query?
+local function get_cursor_lang(bufnr, cursor)
+  local lang_tree = vts.get_parser(bufnr, nil, { error = false })
+  if not lang_tree then
+    return nil
+  end
+
+  local row, col = cursor[1] - 1, cursor[2]
+  local lang = lang_tree:language_for_range({ row, col, row, col }):lang()
+  return lang, vts.query.get(lang, 'matchup')
+end
+
+--- Get all nodes that are marked as skip
+---
+--- Searching for a match calls this for every candidate delimiter, with
+--- the cursor on it, so the result is reused as long as the buffer and
+--- query are unchanged and the cursor is still in the rows it was
+--- computed from.
+---@param bufnr integer
+---@return table<string, true>
+function M.get_skips(bufnr)
+  local cursor = api.nvim_win_get_cursor(0)
+  local lang, query = get_cursor_lang(bufnr, cursor)
+  if not lang then
+    return query_skips(bufnr)
+  end
+
+  local tick = api.nvim_buf_get_changedtick(bufnr)
+  local row = cursor[1] - 1
+  if cache
+      and cache.bufnr == bufnr
+      and cache.tick == tick
+      and cache.lang == lang
+      and cache.query == query
+      and row >= cache.start_row
+      and row < cache.end_row then
+    return cache.skips
+  end
+
+  local start_row, end_row = internal.get_query_range(bufnr, cursor)
+  cache = {
+    bufnr = bufnr,
+    tick = tick,
+    lang = lang,
+    query = query,
+    start_row = start_row,
+    end_row = end_row,
+    skips = query_skips(bufnr),
+  }
+  return cache.skips
 end
 
 ---@param lnum integer
